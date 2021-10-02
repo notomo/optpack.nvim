@@ -69,6 +69,14 @@ return "ok"
     assert.is_same("ok", got)
   end)
 
+  it("can disable a plugin with enabled=false", function()
+    optpack.add(plugin)
+    optpack.add(plugin, {enabled = false})
+
+    local got = optpack.list()
+    assert.is_same({}, got)
+  end)
+
 end)
 
 describe("optpack.list()", function()

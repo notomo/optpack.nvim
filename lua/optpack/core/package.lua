@@ -22,7 +22,12 @@ function Packages.state()
 end
 
 function Packages.add(self, name, opts)
-  self._packages[name] = Package.new(name, opts)
+  opts = opts or {}
+  if opts.enabled == nil or opts.enabled then
+    self._packages[name] = Package.new(name, opts)
+  else
+    self._packages[name] = nil
+  end
 end
 
 function Packages.list(self)
@@ -42,10 +47,8 @@ function Packages.update(self)
 end
 
 function Package.new(name, opts)
-  vim.validate({name = {name, "string"}, opts = {opts, "table", true}})
-  opts = opts or {}
+  vim.validate({name = {name, "string"}, opts = {opts, "table"}})
 
-  -- TODO: check enabled
   -- TODO: hook
   Loaders.set(name, opts.load_on or {})
 
