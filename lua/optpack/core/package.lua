@@ -1,4 +1,5 @@
 local Loaders = require("optpack.core.loader").Loaders
+local Option = require("optpack.core.option").Option
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 
 local M = {}
@@ -21,9 +22,9 @@ function Packages.state()
   return packages
 end
 
-function Packages.add(self, name, opts)
-  opts = opts or {}
-  if opts.enabled == nil or opts.enabled then
+function Packages.add(self, name, raw_opts)
+  local opts = Option.new(raw_opts)
+  if opts.enabled then
     self._packages[name] = Package.new(name, opts)
   else
     self._packages[name] = nil
@@ -50,7 +51,7 @@ function Package.new(name, opts)
   vim.validate({name = {name, "string"}, opts = {opts, "table"}})
 
   -- TODO: hook
-  Loaders.set(name, opts.load_on or {})
+  Loaders.set(name, opts.load_on)
 
   local tbl = {name = name}
   return setmetatable(tbl, Package)

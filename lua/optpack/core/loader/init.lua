@@ -21,10 +21,10 @@ function Loaders.set(full_name, load_on)
   local splitted = vim.split(full_name, "/", true)
   local plugin_name = splitted[#splitted]
 
-  OnEvents.set(plugin_name, load_on.events or {})
-  OnFileTypes.set(plugin_name, load_on.filetypes or {})
-  OnCommands.set(plugin_name, load_on.cmds or {})
-  OnModules.set(plugin_name, load_on.modules or {})
+  OnEvents.set(plugin_name, load_on.events)
+  OnFileTypes.set(plugin_name, load_on.filetypes)
+  OnCommands.set(plugin_name, load_on.cmds)
+  OnModules.set(plugin_name, load_on.modules)
 end
 
 return M
