@@ -23,7 +23,7 @@ function Command.new(name, ...)
 end
 
 function Command.add(name, opts)
-  Packages.state():add(name, opts)
+  return Packages.state():add(name, opts)
 end
 
 function Command.list()
@@ -31,11 +31,11 @@ function Command.list()
 end
 
 function Command.update(pattern)
-  Packages.state():update(pattern)
+  return Packages.state():update(pattern)
 end
 
 function Command.load(plugin_name)
-  Packages.state():load(plugin_name)
+  return Packages.state():load(plugin_name)
 end
 
 return M

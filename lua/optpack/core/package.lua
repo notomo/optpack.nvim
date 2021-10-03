@@ -61,10 +61,10 @@ function Package.new(name, opts)
 
   local splitted = vim.split(name, "/", true)
   local plugin_name = splitted[#splitted]
-  local tbl = {name = name, plugin_name = plugin_name, _hooks = opts.hooks}
+  local tbl = {name = name, plugin_name = plugin_name, _hooks = opts.hooks, _loaded = false}
   local self = setmetatable(tbl, Package)
 
-  Loaders.set(self, opts.load_on)
+  self._loader_removers = Loaders.set(self, opts.load_on)
 
   return self
 end
@@ -74,6 +74,12 @@ function Package.update(self)
 end
 
 function Package.load(self)
+  if self._loaded then
+    return
+  end
+  self._loaded = true
+
+  self._loader_removers:execute()
   self._hooks.pre_load()
   vim.cmd("packadd " .. self.plugin_name)
   self._hooks.post_load()

@@ -175,6 +175,22 @@ return "ok"
     assert.is_true(called)
   end)
 
+  it("executes hooks only once", function()
+    local called = 0
+    optpack.add(plugin1, {
+      hooks = {
+        pre_load = function()
+          called = called + 1
+        end,
+      },
+      load_on = {filetypes = {"lua"}, events = {"TabNew"}},
+    })
+    vim.bo.filetype = "lua"
+    vim.cmd("tabedit")
+
+    assert.is_same(1, called)
+  end)
+
 end)
 
 describe("optpack.list()", function()

@@ -9,9 +9,11 @@ OnModules.__index = OnModules
 M.OnModules = OnModules
 
 function OnModules.set(pack, module_names)
+  local removers = {}
   for _, module_name in ipairs(module_names) do
-    OnModule.new(pack, module_name)
+    table.insert(removers, OnModule.new(pack, module_name))
   end
+  return removers
 end
 
 function OnModule.new(pack, module_name)
@@ -22,6 +24,12 @@ function OnModule.new(pack, module_name)
     self:_set(required_name)
   end
   table.insert(package.loaders, 1, self._f)
+
+  return function()
+    vim.schedule(function()
+      self:_remove()
+    end)
+  end
 end
 
 function OnModule._set(self, required_name)
