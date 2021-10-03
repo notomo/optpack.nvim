@@ -74,20 +74,8 @@ function Package.update(self)
 end
 
 function Package.load(self)
-  self:hook_pre_load()
-  self:load_only()
-  self._hooks.post_load()
-end
-
-function Package.hook_pre_load(self)
   self._hooks.pre_load()
-end
-
-function Package.load_only(self)
   vim.cmd("packadd " .. self.plugin_name)
-end
-
-function Package.hook_post_load(self)
   self._hooks.post_load()
 end
 

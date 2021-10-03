@@ -19,38 +19,27 @@ function OnModule.new(pack, module_name)
   local self = setmetatable(tbl, OnModule)
 
   self._f = function(required_name)
-    local ok = self:_set(required_name)
-    self:_hook_post(ok)
+    self:_set(required_name)
   end
   table.insert(package.loaders, 1, self._f)
 end
 
 function OnModule._set(self, required_name)
   if self._loaded then
-    return false
+    return
   end
 
   local name = vim.split(required_name:gsub("/", "."), ".", true)[1]
   if self._module_name ~= name then
-    return false
+    return
   end
   self._loaded = true
 
-  self._pack:hook_pre_load()
-  self._pack:load_only()
+  self._pack:load()
 
   vim.schedule(function()
     self:_remove()
   end)
-
-  return true
-end
-
-function OnModule._hook_post(self, ok)
-  if not ok then
-    return
-  end
-  self._pack:hook_post_load()
 end
 
 function OnModule._remove(self)
