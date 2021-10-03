@@ -1,5 +1,4 @@
 local Option = require("optpack.core.option").Option
-local Hooks = require("optpack.core.hook").Hooks
 local Loaders = require("optpack.core.loader").Loaders
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 
@@ -27,6 +26,7 @@ function Packages.add(self, name, raw_opts)
   local opts = Option.new(raw_opts)
   if opts.enabled then
     self._packages[name] = Package.new(name, opts)
+    opts.hooks.post_add()
   else
     self._packages[name] = nil
   end
@@ -61,7 +61,7 @@ function Package.new(name, opts)
 
   local splitted = vim.split(name, "/", true)
   local plugin_name = splitted[#splitted]
-  local tbl = {name = name, plugin_name = plugin_name, _hooks = Hooks.new(opts.hooks)}
+  local tbl = {name = name, plugin_name = plugin_name, _hooks = opts.hooks}
   local self = setmetatable(tbl, Package)
 
   Loaders.set(self, opts.load_on)

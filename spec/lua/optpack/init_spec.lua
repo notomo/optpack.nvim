@@ -162,6 +162,19 @@ return "ok"
     assert.is_true(called)
   end)
 
+  it("can set a hook post_add", function()
+    local called = false
+    optpack.add(plugin1, {
+      hooks = {
+        post_add = function()
+          called = true
+        end,
+      },
+    })
+
+    assert.is_true(called)
+  end)
+
 end)
 
 describe("optpack.list()", function()
