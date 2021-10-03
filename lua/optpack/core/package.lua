@@ -1,5 +1,6 @@
-local Loaders = require("optpack.core.loader").Loaders
 local Option = require("optpack.core.option").Option
+local Hooks = require("optpack.core.hook").Hooks
+local Loaders = require("optpack.core.loader").Loaders
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 
 local M = {}
@@ -42,23 +43,52 @@ end
 
 function Packages.update(self)
   -- TODO
-  for _, pack in ipairs(self._packages) do
+  for _, pack in self._packages:iter() do
     pack:update()
+  end
+end
+
+function Packages.load(self, plugin_name)
+  for _, pack in self._packages:iter() do
+    if pack.plugin_name == plugin_name then
+      return pack:load()
+    end
   end
 end
 
 function Package.new(name, opts)
   vim.validate({name = {name, "string"}, opts = {opts, "table"}})
 
-  -- TODO: hook
-  Loaders.set(name, opts.load_on)
+  local splitted = vim.split(name, "/", true)
+  local plugin_name = splitted[#splitted]
+  local tbl = {name = name, plugin_name = plugin_name, _hooks = Hooks.new(opts.hooks)}
+  local self = setmetatable(tbl, Package)
 
-  local tbl = {name = name}
-  return setmetatable(tbl, Package)
+  Loaders.set(self, opts.load_on)
+
+  return self
 end
 
 function Package.update(self)
   -- TODO
+end
+
+function Package.load(self)
+  self:hook_pre_load()
+  self:load_only()
+  self._hooks.post_load()
+end
+
+function Package.hook_pre_load(self)
+  self._hooks.pre_load()
+end
+
+function Package.load_only(self)
+  vim.cmd("packadd " .. self.plugin_name)
+end
+
+function Package.hook_post_load(self)
+  self._hooks.post_load()
 end
 
 return M

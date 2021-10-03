@@ -15,16 +15,12 @@ augroup optpack
 augroup END
 ]])
 
-function Loaders.set(full_name, load_on)
-  vim.validate({full_name = {full_name, "string"}, load_on = {load_on, "table"}})
-
-  local splitted = vim.split(full_name, "/", true)
-  local plugin_name = splitted[#splitted]
-
-  OnEvents.set(plugin_name, load_on.events)
-  OnFileTypes.set(plugin_name, load_on.filetypes)
-  OnCommands.set(plugin_name, load_on.cmds)
-  OnModules.set(plugin_name, load_on.modules)
+function Loaders.set(pack, load_on)
+  vim.validate({pack = {pack, "table"}, load_on = {load_on, "table"}})
+  OnEvents.set(pack.plugin_name, load_on.events)
+  OnFileTypes.set(pack.plugin_name, load_on.filetypes)
+  OnCommands.set(pack.plugin_name, load_on.cmds)
+  OnModules.set(pack, load_on.modules)
 end
 
 return M

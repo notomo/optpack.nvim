@@ -34,4 +34,8 @@ function Command.update(pattern)
   Packages.state():update(pattern)
 end
 
+function Command.load(plugin_name)
+  Packages.state():load(plugin_name)
+end
+
 return M

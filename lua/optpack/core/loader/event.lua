@@ -19,7 +19,7 @@ function OnEvents.set(plugin_name, events)
 end
 
 function OnEvents.set_one(plugin_name, event_name, pattern)
-  vim.cmd(([[autocmd optpack %s %s ++once packadd %s]]):format(event_name, pattern, plugin_name))
+  vim.cmd(([[autocmd optpack %s %s ++once lua require("optpack.command").Command.new("load", %q)]]):format(event_name, pattern, plugin_name))
 end
 
 return M

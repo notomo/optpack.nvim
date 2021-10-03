@@ -8,18 +8,19 @@ local OnModules = {}
 OnModules.__index = OnModules
 M.OnModules = OnModules
 
-function OnModules.set(plugin_name, module_names)
+function OnModules.set(pack, module_names)
   for _, module_name in ipairs(module_names) do
-    OnModule.new(plugin_name, module_name)
+    OnModule.new(pack, module_name)
   end
 end
 
-function OnModule.new(plugin_name, module_name)
-  local tbl = {_plugin_name = plugin_name, _module_name = module_name, _loaded = false}
+function OnModule.new(pack, module_name)
+  local tbl = {_pack = pack, _module_name = module_name, _loaded = false}
   local self = setmetatable(tbl, OnModule)
 
   self._f = function(required_name)
-    self:_set(required_name)
+    local ok = self:_set(required_name)
+    self:_hook_post(ok)
   end
   table.insert(package.loaders, 1, self._f)
 end
@@ -34,13 +35,22 @@ function OnModule._set(self, required_name)
     return false
   end
   self._loaded = true
-  vim.cmd("packadd " .. self._plugin_name)
+
+  self._pack:hook_pre_load()
+  self._pack:load_only()
 
   vim.schedule(function()
     self:_remove()
   end)
 
   return true
+end
+
+function OnModule._hook_post(self, ok)
+  if not ok then
+    return
+  end
+  self._pack:hook_post_load()
 end
 
 function OnModule._remove(self)

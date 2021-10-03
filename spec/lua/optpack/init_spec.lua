@@ -9,6 +9,7 @@ describe("optpack.add()", function()
 
   before_each(function()
     helper.before_each()
+    helper.cleanup_loaded_modules(plugin_name)
     vim.o.runtimepath = helper.runtimepath
 
     local opt_dir = packpath_name .. "/pack/optpack/opt"
@@ -75,6 +76,73 @@ return "ok"
 
     local got = optpack.list()
     assert.is_same({}, got)
+  end)
+
+  it("can set a hook pre_load by module loading", function()
+    local called = false
+    optpack.add(plugin, {
+      hooks = {
+        pre_load = function()
+          called = true
+        end,
+      },
+      load_on = {modules = {plugin_name}},
+    })
+    require(plugin_name)
+
+    assert.is_true(called)
+  end)
+
+  it("can set a hook post_load by module loading", function()
+    local called = false
+    optpack.add(plugin, {
+      hooks = {
+        pre_load = function()
+          called = false
+        end,
+        post_load = function()
+          called = true
+          require(plugin_name)
+        end,
+      },
+      load_on = {modules = {plugin_name}},
+    })
+    require(plugin_name)
+
+    assert.is_true(called)
+  end)
+
+  it("can set a hook pre_load by filetype loading", function()
+    local called = false
+    optpack.add(plugin, {
+      hooks = {
+        pre_load = function()
+          called = true
+        end,
+      },
+      load_on = {filetypes = {"lua"}},
+    })
+    vim.bo.filetype = "lua"
+
+    assert.is_true(called)
+  end)
+
+  it("can set a hook post_load by filetype loading", function()
+    local called = false
+    optpack.add(plugin, {
+      hooks = {
+        pre_load = function()
+          called = false
+        end,
+        post_load = function()
+          called = true
+        end,
+      },
+      load_on = {filetypes = {"lua"}},
+    })
+    vim.bo.filetype = "lua"
+
+    assert.is_true(called)
   end)
 
 end)
