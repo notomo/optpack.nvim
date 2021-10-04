@@ -1,34 +1,33 @@
 local helper = require("optpack.lib.testlib.helper")
 local optpack = helper.require("optpack")
 
-describe("optpack.add()", function()
+local packpath_name = "mypackpath"
 
-  local packpath_name = "mypackpath"
+local plugin_name1 = "myplugin_name1"
+local plugin1 = "account_name/" .. plugin_name1
+local plugin_name2 = "myplugin_name2"
+local plugin2 = "account_name/" .. plugin_name2
 
-  local plugin_name1 = "myplugin_name1"
-  local plugin1 = "account_name/" .. plugin_name1
-  local plugin_name2 = "myplugin_name2"
-  local plugin2 = "account_name/" .. plugin_name2
+local create_plugin = function(name)
+  helper.cleanup_loaded_modules(name)
 
-  local create_plugin = function(name)
-    helper.cleanup_loaded_modules(name)
-    vim.o.runtimepath = helper.runtimepath
+  local opt_dir = packpath_name .. "/pack/optpack/opt"
+  local root_dir = ("%s/%s"):format(opt_dir, name)
 
-    local opt_dir = packpath_name .. "/pack/optpack/opt"
-    local root_dir = ("%s/%s"):format(opt_dir, name)
-
-    local plugin_dir = ("%s/plugin/"):format(root_dir)
-    helper.new_directory(plugin_dir)
-    helper.new_file(plugin_dir .. name .. ".vim", [[
+  local plugin_dir = ("%s/plugin/"):format(root_dir)
+  helper.new_directory(plugin_dir)
+  helper.new_file(plugin_dir .. name .. ".vim", [[
 command! MyPluginTest echo ''
 ]])
 
-    local lua_dir = ("%s/lua/%s/"):format(root_dir, name)
-    helper.new_directory(lua_dir)
-    helper.new_file(lua_dir .. "init.lua", [[
+  local lua_dir = ("%s/lua/%s/"):format(root_dir, name)
+  helper.new_directory(lua_dir)
+  helper.new_file(lua_dir .. "init.lua", [[
 return "ok"
 ]])
-  end
+end
+
+describe("optpack.add()", function()
 
   before_each(function()
     helper.before_each()
@@ -217,7 +216,37 @@ describe("optpack.update()", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("TODO", function()
+  it("installs plugins if directories do not exist", function()
+    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+
+    optpack.add("account1/test1", {fetch = {engine = mock}})
+    optpack.add("account2/test2", {fetch = {engine = mock}})
+
+    optpack.update()
+
+    assert.is_same("https://github.com/account1/test1.git", mock.cloned[1].url)
+    assert.is_same("https://github.com/account2/test2.git", mock.cloned[2].url)
+    assert.length(mock.pulled, 2)
+
+    -- TODO: assert view
+  end)
+
+  it("updates plugins if directories exist", function()
+    create_plugin("test1")
+    create_plugin("test2")
+    vim.o.packpath = helper.test_data_dir .. packpath_name
+
+    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+
+    optpack.add("account1/test1", {fetch = {engine = mock}})
+    optpack.add("account2/test2", {fetch = {engine = mock}})
+
+    optpack.update()
+
+    assert.length(mock.cloned, 0)
+    assert.length(mock.pulled, 2)
+
+    -- TODO: assert view
   end)
 
 end)

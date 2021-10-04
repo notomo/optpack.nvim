@@ -3,8 +3,11 @@ local M = require("vusted.helper")
 
 M.root = M.find_plugin_root(plugin_name)
 M.runtimepath = vim.o.runtimepath
+M.packpath = vim.o.packpath
 
 function M.before_each()
+  vim.o.packpath = M.packpath
+  vim.o.runtimepath = M.runtimepath
   vim.cmd("filetype on")
   vim.cmd("syntax enable")
   M.test_data_path = "spec/test_data/" .. math.random(1, 2 ^ 30) .. "/"
@@ -40,6 +43,10 @@ function M.delete(path)
 end
 
 local asserts = require("vusted.assert").asserts
+
+asserts.create("length"):register_eq(function(tbl)
+  return #tbl
+end)
 
 asserts.create("exists_message"):register(function(self)
   return function(_, args)
