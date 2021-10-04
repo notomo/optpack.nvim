@@ -203,10 +203,12 @@ describe("optpack.list()", function()
   end)
 
   it("returns packages", function()
+    vim.o.packpath = helper.test_data_dir .. packpath_name
+
     optpack.add("account/test")
 
     local got = optpack.list()[1]
-    assert.is_same({name = "account/test"}, got)
+    assert.is_same({name = "account/test", directory = vim.o.packpath .. "/pack/optpack/opt/test"}, got)
   end)
 
 end)

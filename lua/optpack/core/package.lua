@@ -35,8 +35,7 @@ end
 function Packages.list(self)
   local values = {}
   for _, pack in self._packages:iter() do
-    -- TODO: dir
-    table.insert(values, {name = pack.name})
+    table.insert(values, {name = pack.name, directory = pack.directory})
   end
   return values
 end
