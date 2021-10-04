@@ -41,8 +41,9 @@ function Packages.list(self)
 end
 
 function Packages.update(self)
-  -- TODO
+  -- TODO: multi job
   for _, pack in self._packages:iter() do
+    -- TODO: show err
     pack:update()
   end
 end
@@ -59,6 +60,7 @@ function Package.new(name, opts)
   vim.validate({name = {name, "string"}, opts = {opts, "table"}})
 
   -- TODO: select packpath option
+  -- TODO: custom package name
   -- TODO: path join
   local opt_path = vim.opt.packpath:get()[1] .. "/pack/optpack/opt/"
 
@@ -95,8 +97,12 @@ function Package._ensure_installed(self)
   if vim.fn.isdirectory(self.directory) ~= 0 then
     return nil
   end
-  -- TODO: mkdir once
-  vim.fn.mkdir(self._opt_path, "p")
+
+  local ok, err = pcall(vim.fn.mkdir, self._opt_path, "p")
+  if not ok then
+    return err
+  end
+
   return self._fetch_engine:clone(self.directory, self._url, self._fetch_depth)
 end
 
