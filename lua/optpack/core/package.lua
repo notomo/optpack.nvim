@@ -40,11 +40,10 @@ function Packages.list(self)
   return values
 end
 
-function Packages.update(self)
-  -- TODO: multi job
+function Packages.update(self, pattern, outputters)
+  -- TODO: limit parallel number
   for _, pack in self._packages:iter() do
-    -- TODO: show err
-    pack:update()
+    pack:update(outputters)
   end
 end
 
@@ -84,26 +83,33 @@ function Package.new(name, opts)
   return self
 end
 
-function Package.update(self)
-  -- TODO: open view
-  local err = self:_ensure_installed()
+function Package.update(self, outputters)
+  outputters = outputters:with({name = self.name})
+
+  local installed_now, err = self:_ensure_installed(outputters)
   if err then
-    return err
+    return outputters:with({even_name = "prepare_install"}):error(err)
   end
-  return self._fetch_engine:pull(self.directory)
+  if installed_now then
+    return nil
+  end
+
+  return self._fetch_engine:pull(outputters, self.directory)
 end
 
-function Package._ensure_installed(self)
+function Package._ensure_installed(self, outputters)
   if vim.fn.isdirectory(self.directory) ~= 0 then
-    return nil
+    return false, nil
   end
 
   local ok, err = pcall(vim.fn.mkdir, self._opt_path, "p")
   if not ok then
-    return err
+    return false, err
   end
 
-  return self._fetch_engine:clone(self.directory, self._url, self._fetch_depth)
+  self._fetch_engine:clone(outputters, self.directory, self._url, self._fetch_depth)
+
+  return true, nil
 end
 
 function Package.load(self)

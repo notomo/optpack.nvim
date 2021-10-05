@@ -9,12 +9,16 @@ function Git.new()
   return setmetatable(tbl, Git)
 end
 
-function Git.clone(self, directory, url, depth)
-  table.insert(self.cloned, {url = url, directory = directory, depth = depth})
+function Git.clone(self, outputters, directory, url, depth)
+  local ctx = {event_name = "clone", url = url, directory = directory, depth = depth}
+  table.insert(self.cloned, ctx)
+  outputters:info("ok")
 end
 
-function Git.pull(self, directory)
-  table.insert(self.pulled, {directory = directory})
+function Git.pull(self, outputters, directory)
+  local ctx = {event_name = "pull", directory = directory}
+  table.insert(self.pulled, ctx)
+  outputters:info("ok")
 end
 
 return M

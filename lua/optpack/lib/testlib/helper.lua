@@ -48,6 +48,10 @@ asserts.create("length"):register_eq(function(tbl)
   return #tbl
 end)
 
+asserts.create("window_count"):register_eq(function()
+  return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
+end)
+
 asserts.create("exists_message"):register(function(self)
   return function(_, args)
     local expected = args[1]

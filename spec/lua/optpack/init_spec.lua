@@ -228,8 +228,9 @@ describe("optpack.update()", function()
 
     assert.is_same("https://github.com/account1/test1.git", mock.cloned[1].url)
     assert.is_same("https://github.com/account2/test2.git", mock.cloned[2].url)
-    assert.length(mock.pulled, 2)
+    assert.length(mock.pulled, 0)
 
+    assert.window_count(2)
     -- TODO: assert view
   end)
 

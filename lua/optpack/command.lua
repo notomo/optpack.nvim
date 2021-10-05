@@ -1,4 +1,5 @@
 local Packages = require("optpack.core.package").Packages
+local Outputters = require("optpack.view.outputter").Outputters
 local messagelib = require("optpack.lib.message")
 
 local M = {}
@@ -31,7 +32,12 @@ function Command.list()
 end
 
 function Command.update(pattern)
-  return Packages.state():update(pattern)
+  -- TODO: custom outputter types
+  local outputters, err = Outputters.from({"buffer"})
+  if err then
+    return err
+  end
+  return Packages.state():update(pattern, outputters)
 end
 
 function Command.load(plugin_name)
