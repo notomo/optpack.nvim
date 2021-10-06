@@ -1,4 +1,4 @@
-local Packages = require("optpack.core.package").Packages
+local Plugins = require("optpack.core.plugin").Plugins
 local Outputters = require("optpack.view.outputter").Outputters
 local messagelib = require("optpack.lib.message")
 
@@ -24,11 +24,11 @@ function Command.new(name, ...)
 end
 
 function Command.add(name, opts)
-  return Packages.state():add(name, opts)
+  return Plugins.state():add(name, opts)
 end
 
 function Command.list()
-  return Packages.state():list()
+  return Plugins.state():list()
 end
 
 function Command.update(pattern)
@@ -37,11 +37,11 @@ function Command.update(pattern)
   if err then
     return err
   end
-  return Packages.state():update(pattern, outputters)
+  return Plugins.state():update(pattern, outputters)
 end
 
 function Command.load(plugin_name)
-  return Packages.state():load(plugin_name)
+  return Plugins.state():load(plugin_name)
 end
 
 return M

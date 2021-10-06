@@ -8,16 +8,16 @@ local OnModules = {}
 OnModules.__index = OnModules
 M.OnModules = OnModules
 
-function OnModules.set(pack, module_names)
+function OnModules.set(plugin, module_names)
   local removers = {}
   for _, module_name in ipairs(module_names) do
-    table.insert(removers, OnModule.new(pack, module_name))
+    table.insert(removers, OnModule.new(plugin, module_name))
   end
   return removers
 end
 
-function OnModule.new(pack, module_name)
-  local tbl = {_pack = pack, _module_name = module_name, _loaded = false}
+function OnModule.new(plugin, module_name)
+  local tbl = {_plugin = plugin, _module_name = module_name, _loaded = false}
   local self = setmetatable(tbl, OnModule)
 
   self._f = function(required_name)
@@ -43,7 +43,7 @@ function OnModule._set(self, required_name)
   end
   self._loaded = true
 
-  self._pack:load()
+  self._plugin:load()
 
   vim.schedule(function()
     self:_remove()

@@ -197,12 +197,12 @@ describe("optpack.list()", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("returns empty table if there is no packages", function()
+  it("returns empty table if there is no plugins", function()
     local got = optpack.list()
     assert.is_same({}, got)
   end)
 
-  it("returns packages", function()
+  it("returns plugins", function()
     vim.o.packpath = helper.test_data_dir .. packpath_name
 
     optpack.add("account/test")
