@@ -23,8 +23,8 @@ function Command.new(name, ...)
   return result
 end
 
-function Command.add(name, opts)
-  return Plugins.state():add(name, opts)
+function Command.add(full_name, opts)
+  return Plugins.state():add(full_name, opts)
 end
 
 function Command.list()

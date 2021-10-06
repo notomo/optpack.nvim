@@ -24,20 +24,41 @@ function Plugins.state()
   return plugins
 end
 
-function Plugins.add(self, name, raw_opts)
+function Plugins.add(self, full_name, raw_opts)
   local opts = Option.new(raw_opts)
+
   if opts.enabled then
-    self._plugins[name] = Plugin.new(name, opts)
+    local plugin = Plugin.new(full_name, opts)
+    self._plugins[plugin.name] = plugin
     opts.hooks.post_add()
-  else
-    self._plugins[name] = nil
+    return
   end
+
+  local plugin = self:find(function(p)
+    return p.full_name == full_name
+  end)
+  if plugin then
+    self._plugins[plugin.name] = nil
+  end
+end
+
+function Plugins.find(self, f)
+  for _, plugin in self._plugins:iter() do
+    if f(plugin) then
+      return plugin
+    end
+  end
+  return nil
 end
 
 function Plugins.list(self)
   local values = {}
   for _, plugin in self._plugins:iter() do
-    table.insert(values, {name = plugin.full_name, directory = plugin.directory})
+    table.insert(values, {
+      full_name = plugin.full_name,
+      name = plugin.name,
+      directory = plugin.directory,
+    })
   end
   return values
 end

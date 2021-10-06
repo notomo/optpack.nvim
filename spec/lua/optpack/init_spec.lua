@@ -190,6 +190,14 @@ describe("optpack.add()", function()
     assert.is_same(1, called)
   end)
 
+  it("overwrites the same name plugin", function()
+    optpack.add("account1/test")
+    optpack.add("account2/test")
+
+    local got = optpack.list()[1]
+    assert.is_same("account2/test", got.full_name)
+  end)
+
 end)
 
 describe("optpack.list()", function()
@@ -208,7 +216,11 @@ describe("optpack.list()", function()
     optpack.add("account/test")
 
     local got = optpack.list()[1]
-    assert.is_same({name = "account/test", directory = vim.o.packpath .. "/pack/optpack/opt/test"}, got)
+    assert.is_same({
+      full_name = "account/test",
+      name = "test",
+      directory = vim.o.packpath .. "/pack/optpack/opt/test",
+    }, got)
   end)
 
 end)

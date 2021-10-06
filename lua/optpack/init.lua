@@ -2,8 +2,8 @@ local Command = require("optpack.command").Command
 
 local M = {}
 
-function M.add(name, opts)
-  Command.new("add", name, opts)
+function M.add(full_name, opts)
+  Command.new("add", full_name, opts)
 end
 
 function M.list()
