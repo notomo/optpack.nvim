@@ -1,5 +1,7 @@
 local Option = require("optpack.core.option").Option
 local Loaders = require("optpack.core.loader").Loaders
+local Updater = require("optpack.core.updater").Updater
+local Installer = require("optpack.core.installer").Installer
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 
 local M = {}
@@ -65,16 +67,19 @@ function Package.new(name, opts)
 
   local splitted = vim.split(name, "/", true)
   local plugin_name = splitted[#splitted]
+  local directory = opt_path .. plugin_name
+
+  local url = ("%s%s.git"):format(opts.fetch.base_url, name)
+  local installer = Installer.new(opts.fetch.engine, opt_path, directory, url, opts.fetch.depth)
+
   local tbl = {
     name = name,
     plugin_name = plugin_name,
-    directory = opt_path .. plugin_name,
+    directory = directory,
     _opt_path = opt_path,
     _hooks = opts.hooks,
     _loaded = false,
-    _fetch_engine = opts.fetch.engine,
-    _fetch_depth = opts.fetch.depth,
-    _url = ("%s%s.git"):format(opts.fetch.base_url, name),
+    _updater = Updater.new(opts.fetch.engine, installer, directory),
   }
   local self = setmetatable(tbl, Package)
 
@@ -84,32 +89,7 @@ function Package.new(name, opts)
 end
 
 function Package.update(self, outputters)
-  outputters = outputters:with({name = self.name})
-
-  local installed_now, err = self:_ensure_installed(outputters)
-  if err then
-    return outputters:with({even_name = "prepare_install"}):error(err)
-  end
-  if installed_now then
-    return nil
-  end
-
-  return self._fetch_engine:pull(outputters, self.directory)
-end
-
-function Package._ensure_installed(self, outputters)
-  if vim.fn.isdirectory(self.directory) ~= 0 then
-    return false, nil
-  end
-
-  local ok, err = pcall(vim.fn.mkdir, self._opt_path, "p")
-  if not ok then
-    return false, err
-  end
-
-  self._fetch_engine:clone(outputters, self.directory, self._url, self._fetch_depth)
-
-  return true, nil
+  return self._updater:start(outputters:with({name = self.name}))
 end
 
 function Package.load(self)
