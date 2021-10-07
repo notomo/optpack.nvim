@@ -16,45 +16,33 @@ function Loader.new(plugin_name, load_on, pre_load_hook, post_load_hook)
     pre_load_hook = {pre_load_hook, "function"},
     post_load_hook = {post_load_hook, "function"},
   })
-  local tbl = {
-    _plugin_name = plugin_name,
-    _load_on = load_on,
-    _pre_load_hook = pre_load_hook,
-    _post_load_hook = post_load_hook,
 
-    _removers = {},
-    _loaded = false,
-  }
-  return setmetatable(tbl, Loader)
-end
-
-function Loader.enable(self)
-  local group_name = "optpack_" .. self._plugin_name
-
+  local group_name = "optpack_" .. plugin_name
   vim.cmd(([[
 augroup %s
   autocmd!
 augroup END
 ]]):format(group_name))
 
-  OnEvents.set(self._plugin_name, group_name, self._load_on.events)
-  OnFileTypes.set(self._plugin_name, group_name, self._load_on.filetypes)
-  OnCommands.set(self._plugin_name, group_name, self._load_on.cmds)
+  OnEvents.set(plugin_name, group_name, load_on.events)
+  OnFileTypes.set(plugin_name, group_name, load_on.filetypes)
+  OnCommands.set(plugin_name, group_name, load_on.cmds)
   local autocmd_remover = function()
     vim.cmd("autocmd! " .. group_name)
   end
+  local lua_loader_removers = OnModules.set(plugin_name, load_on.modules)
 
-  local lua_loader_removers = OnModules.set(self._plugin_name, self._load_on.modules)
-
-  vim.list_extend(self._removers, {autocmd_remover, unpack(lua_loader_removers)})
+  local tbl = {
+    _plugin_name = plugin_name,
+    _load_on = load_on,
+    _pre_load_hook = pre_load_hook,
+    _post_load_hook = post_load_hook,
+    _removers = {autocmd_remover, unpack(lua_loader_removers)},
+  }
+  return setmetatable(tbl, Loader)
 end
 
 function Loader.load(self)
-  if self._loaded then
-    return
-  end
-  self._loaded = true
-
   for _, remover in ipairs(self._removers) do
     remover()
   end

@@ -15,7 +15,7 @@ Plugins.__index = Plugins
 M.Plugins = Plugins
 
 function Plugins.new()
-  local tbl = {_plugins = OrderedDict.new()}
+  local tbl = {_plugins = OrderedDict.new(), _loaders = {}}
   return setmetatable(tbl, Plugins)
 end
 
@@ -29,11 +29,12 @@ function Plugins.add(self, full_name, raw_opts)
   local plugin = Plugin.new(full_name, opts)
 
   if opts.enabled then
-    plugin:enable_loader()
     self._plugins[plugin.name] = plugin
+    self._loaders[plugin.name] = Loader.new(plugin.name, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
     opts.hooks.post_add()
   else
     self._plugins[plugin.name] = nil
+    self._loaders[plugin.name] = nil
   end
 end
 
@@ -57,9 +58,20 @@ function Plugins.update(self, pattern, outputters)
 end
 
 function Plugins.load(self, plugin_name)
+  local plugin = self:find(function(p)
+    return p.name == plugin_name
+  end)
+  local loader = self._loaders[plugin.name]
+  if loader then
+    self._loaders[plugin.name] = nil
+    return loader:load()
+  end
+end
+
+function Plugins.find(self, f)
   for _, plugin in self._plugins:iter() do
-    if plugin.name == plugin_name then
-      return plugin:load()
+    if f(plugin) then
+      return plugin
     end
   end
 end
@@ -84,21 +96,12 @@ function Plugin.new(full_name, opts)
     full_name = full_name,
     directory = directory,
     _updater = Updater.new(opts.fetch.engine, installer, directory),
-    _loader = Loader.new(name, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load),
   }
   return setmetatable(tbl, Plugin)
 end
 
 function Plugin.update(self, outputters)
   return self._updater:start(outputters:with({name = self.name}))
-end
-
-function Plugin.enable_loader(self)
-  self._loader:enable()
-end
-
-function Plugin.load(self)
-  self._loader:load()
 end
 
 return M
