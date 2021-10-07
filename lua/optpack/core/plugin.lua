@@ -93,9 +93,8 @@ function Plugin.new(full_name, opts)
   vim.validate({name = {full_name, "string"}, opts = {opts, "table"}})
 
   -- TODO: select packpath option
-  -- TODO: custom plugin name
   -- TODO: path join
-  local opt_path = vim.opt.packpath:get()[1] .. "/pack/optpack/opt/"
+  local opt_path = ("%s/pack/%s/opt/"):format(vim.opt.packpath:get()[1], opts.package_name)
 
   local splitted = vim.split(full_name, "/", true)
   local name = splitted[#splitted]
@@ -103,12 +102,13 @@ function Plugin.new(full_name, opts)
 
   local url = ("%s%s.git"):format(opts.fetch.base_url, full_name)
   local installer = Installer.new(opts.fetch.engine, opt_path, directory, url, opts.fetch.depth)
+  local updater = Updater.new(opts.fetch.engine, installer, directory)
 
   local tbl = {
     name = name,
     full_name = full_name,
     directory = directory,
-    _updater = Updater.new(opts.fetch.engine, installer, directory),
+    _updater = updater,
     _install = installer,
   }
   return setmetatable(tbl, Plugin)

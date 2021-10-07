@@ -16,6 +16,7 @@ Option.default = {
   },
   -- TODO: base_url to format_url()?
   fetch = {engine = "git", depth = 1, base_url = "https://github.com/"},
+  package_name = "optpack",
   enabled = true,
 }
 
