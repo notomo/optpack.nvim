@@ -27,6 +27,10 @@ function Installer.already(self)
 end
 
 function Installer.start(self, outputters)
+  if self:already() then
+    return nil
+  end
+
   local ok, err = pcall(vim.fn.mkdir, self._opt_path, "p")
   if not ok then
     return outputters:with({event_name = "prepare_install"}):error(err)

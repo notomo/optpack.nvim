@@ -57,15 +57,28 @@ function Plugins.update(self, pattern, outputters)
   end
 end
 
+function Plugins.install(self, pattern, outputters)
+  -- TODO: limit parallel number
+  for _, plugin in self._plugins:iter() do
+    plugin:install(outputters)
+  end
+end
+
 function Plugins.load(self, plugin_name)
   local plugin = self:find(function(p)
     return p.name == plugin_name
   end)
-  local loader = self._loaders[plugin.name]
-  if loader then
-    self._loaders[plugin.name] = nil
-    return loader:load()
+  if not plugin then
+    return
   end
+
+  local loader = self._loaders[plugin.name]
+  if not loader then
+    return
+  end
+
+  self._loaders[plugin.name] = nil
+  return loader:load()
 end
 
 function Plugins.find(self, f)
@@ -96,12 +109,17 @@ function Plugin.new(full_name, opts)
     full_name = full_name,
     directory = directory,
     _updater = Updater.new(opts.fetch.engine, installer, directory),
+    _install = installer,
   }
   return setmetatable(tbl, Plugin)
 end
 
 function Plugin.update(self, outputters)
   return self._updater:start(outputters:with({name = self.name}))
+end
+
+function Plugin.install(self, outputters)
+  return self._install:start(outputters:with({name = self.name}))
 end
 
 return M

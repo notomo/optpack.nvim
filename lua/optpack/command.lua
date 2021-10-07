@@ -40,6 +40,15 @@ function Command.update(pattern)
   return Plugins.state():update(pattern, outputters)
 end
 
+function Command.install(pattern)
+  -- TODO: custom outputter types
+  local outputters, err = Outputters.from({"buffer"})
+  if err then
+    return err
+  end
+  return Plugins.state():install(pattern, outputters)
+end
+
 function Command.load(plugin_name)
   return Plugins.state():load(plugin_name)
 end

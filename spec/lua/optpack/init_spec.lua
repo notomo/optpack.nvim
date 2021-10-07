@@ -266,6 +266,47 @@ describe("optpack.update()", function()
 
 end)
 
+describe("optpack.install()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("installs plugins if directories do not exist", function()
+    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+
+    optpack.add("account1/test1", {fetch = {engine = mock}})
+    optpack.add("account2/test2", {fetch = {engine = mock}})
+
+    optpack.install()
+
+    assert.is_same("https://github.com/account1/test1.git", mock.cloned[1].url)
+    assert.is_same("https://github.com/account2/test2.git", mock.cloned[2].url)
+    assert.length(mock.pulled, 0)
+
+    assert.window_count(2)
+    -- TODO: assert view
+  end)
+
+  it("does nothing if directories exist", function()
+    create_plugin("test1")
+    create_plugin("test2")
+    vim.o.packpath = helper.test_data_dir .. packpath_name
+
+    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+
+    optpack.add("account1/test1", {fetch = {engine = mock}})
+    optpack.add("account2/test2", {fetch = {engine = mock}})
+
+    optpack.install()
+
+    assert.length(mock.cloned, 0)
+    assert.length(mock.pulled, 0)
+
+    -- TODO: assert view
+  end)
+
+end)
+
 describe("optpack.load()", function()
 
   before_each(function()
