@@ -14,4 +14,8 @@ function M.update(pattern)
   Command.new("update", pattern)
 end
 
+function M.load(plugin_name)
+  Command.new("load", plugin_name)
+end
+
 return M

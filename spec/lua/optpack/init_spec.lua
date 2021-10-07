@@ -265,3 +265,32 @@ describe("optpack.update()", function()
   end)
 
 end)
+
+describe("optpack.load()", function()
+
+  before_each(function()
+    helper.before_each()
+    create_plugin(plugin_name1)
+
+    vim.o.packpath = helper.test_data_dir .. packpath_name
+  end)
+  after_each(helper.after_each)
+
+  it("loads a plugin with hook", function()
+    local called = false
+    optpack.add(plugin1, {
+      hooks = {
+        pre_load = function()
+          called = true
+        end,
+      },
+    })
+
+    optpack.load(plugin_name1)
+
+    local got = require(plugin_name1)
+    assert.is_same("ok", got)
+    assert.is_true(called)
+  end)
+
+end)
