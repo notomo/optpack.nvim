@@ -1,5 +1,5 @@
 local Option = require("optpack.core.option").Option
-local Loaders = require("optpack.core.loader").Loaders
+local Loader = require("optpack.core.loader").Loader
 local Updater = require("optpack.core.updater").Updater
 local Installer = require("optpack.core.installer").Installer
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
@@ -26,29 +26,15 @@ end
 
 function Plugins.add(self, full_name, raw_opts)
   local opts = Option.new(raw_opts)
+  local plugin = Plugin.new(full_name, opts)
 
   if opts.enabled then
-    local plugin = Plugin.new(full_name, opts)
+    plugin:enable_loader()
     self._plugins[plugin.name] = plugin
     opts.hooks.post_add()
-    return
-  end
-
-  local plugin = self:find(function(p)
-    return p.full_name == full_name
-  end)
-  if plugin then
+  else
     self._plugins[plugin.name] = nil
   end
-end
-
-function Plugins.find(self, f)
-  for _, plugin in self._plugins:iter() do
-    if f(plugin) then
-      return plugin
-    end
-  end
-  return nil
 end
 
 function Plugins.list(self)
@@ -97,32 +83,22 @@ function Plugin.new(full_name, opts)
     name = name,
     full_name = full_name,
     directory = directory,
-    _opt_path = opt_path,
-    _hooks = opts.hooks,
-    _loaded = false,
     _updater = Updater.new(opts.fetch.engine, installer, directory),
+    _loader = Loader.new(name, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load),
   }
-  local self = setmetatable(tbl, Plugin)
-
-  self._loader_removers = Loaders.set(self, opts.load_on)
-
-  return self
+  return setmetatable(tbl, Plugin)
 end
 
 function Plugin.update(self, outputters)
   return self._updater:start(outputters:with({name = self.name}))
 end
 
-function Plugin.load(self)
-  if self._loaded then
-    return
-  end
-  self._loaded = true
+function Plugin.enable_loader(self)
+  self._loader:enable()
+end
 
-  self._loader_removers:execute()
-  self._hooks.pre_load()
-  vim.cmd("packadd " .. self.name)
-  self._hooks.post_load()
+function Plugin.load(self)
+  self._loader:load()
 end
 
 return M

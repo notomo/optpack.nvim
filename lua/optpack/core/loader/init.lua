@@ -5,43 +5,63 @@ local OnModules = require("optpack.core.loader.module").OnModules
 
 local M = {}
 
-local Loaders = {}
-Loaders.__index = Loaders
-M.Loaders = Loaders
+local Loader = {}
+Loader.__index = Loader
+M.Loader = Loader
 
-local LoaderRemovers = {}
-LoaderRemovers.__index = LoaderRemovers
-M.LoaderRemovers = LoaderRemovers
+function Loader.new(plugin_name, load_on, pre_load_hook, post_load_hook)
+  vim.validate({
+    plugin_name = {plugin_name, "string"},
+    load_on = {load_on, "table"},
+    pre_load_hook = {pre_load_hook, "function"},
+    post_load_hook = {post_load_hook, "function"},
+  })
+  local tbl = {
+    _plugin_name = plugin_name,
+    _load_on = load_on,
+    _pre_load_hook = pre_load_hook,
+    _post_load_hook = post_load_hook,
 
-function Loaders.set(plugin, load_on)
-  vim.validate({plugin = {plugin, "table"}, load_on = {load_on, "table"}})
+    _removers = {},
+    _loaded = false,
+  }
+  return setmetatable(tbl, Loader)
+end
 
-  local group_name = "optpack_" .. plugin.name
+function Loader.enable(self)
+  local group_name = "optpack_" .. self._plugin_name
+
   vim.cmd(([[
 augroup %s
   autocmd!
 augroup END
 ]]):format(group_name))
 
-  OnEvents.set(plugin.name, group_name, load_on.events)
-  OnFileTypes.set(plugin.name, group_name, load_on.filetypes)
-  OnCommands.set(plugin.name, group_name, load_on.cmds)
+  OnEvents.set(self._plugin_name, group_name, self._load_on.events)
+  OnFileTypes.set(self._plugin_name, group_name, self._load_on.filetypes)
+  OnCommands.set(self._plugin_name, group_name, self._load_on.cmds)
   local autocmd_remover = function()
     vim.cmd("autocmd! " .. group_name)
   end
-  local lua_loader_removers = OnModules.set(plugin, load_on.modules)
-  return LoaderRemovers.new({autocmd_remover, unpack(lua_loader_removers)})
+
+  local lua_loader_removers = OnModules.set(self._plugin_name, self._load_on.modules)
+
+  vim.list_extend(self._removers, {autocmd_remover, unpack(lua_loader_removers)})
 end
 
-function LoaderRemovers.new(raw_removers)
-  local tbl = {_removers = raw_removers}
-  return setmetatable(tbl, LoaderRemovers)
-end
+function Loader.load(self)
+  if self._loaded then
+    return
+  end
+  self._loaded = true
 
-function LoaderRemovers.execute(self)
   for _, remover in ipairs(self._removers) do
     remover()
   end
+
+  self._pre_load_hook()
+  vim.cmd("packadd " .. self._plugin_name)
+  self._post_load_hook()
 end
 
 return M
