@@ -17,7 +17,7 @@ function Outputter.new(typ)
 end
 
 function Outputter.__index(self, k)
-  return rawget(Outputter, k) or self._outputter[k] or self._fields
+  return rawget(Outputter, k) or self._outputter[k] or self._fields[k]
 end
 
 local Outputters = {}
