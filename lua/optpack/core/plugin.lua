@@ -3,6 +3,7 @@ local Loader = require("optpack.core.loader").Loader
 local Updater = require("optpack.core.updater").Updater
 local Installer = require("optpack.core.installer").Installer
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
+local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
 
 local M = {}
 
@@ -50,18 +51,34 @@ function Plugins.list(self)
   return values
 end
 
-function Plugins.update(self, pattern, outputters)
-  -- TODO: limit parallel number
+function Plugins.update(self, pattern, outputters, on_finished)
+  outputters:info("start")
+  -- TODO: custom limit
+  local parallel = ParallelLimitter.new(8)
   for _, plugin in self._plugins:iter() do
-    plugin:update(outputters)
+    parallel:add(function()
+      return plugin:update(outputters)
+    end)
   end
+  return parallel:start(function()
+    outputters:info("finished")
+    on_finished()
+  end)
 end
 
-function Plugins.install(self, pattern, outputters)
-  -- TODO: limit parallel number
+function Plugins.install(self, pattern, outputters, on_finished)
+  outputters:info("start")
+  -- TODO: custom limit
+  local parallel = ParallelLimitter.new(8)
   for _, plugin in self._plugins:iter() do
-    plugin:install(outputters)
+    parallel:add(function()
+      return plugin:install(outputters)
+    end)
   end
+  return parallel:start(function()
+    outputters:info("finished")
+    on_finished()
+  end)
 end
 
 function Plugins.load(self, plugin_name)

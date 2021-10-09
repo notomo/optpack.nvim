@@ -236,7 +236,15 @@ describe("optpack.update()", function()
     optpack.add("account1/test1", {fetch = {engine = mock}})
     optpack.add("account2/test2", {fetch = {engine = mock}})
 
-    optpack.update()
+    local finished = false
+    local on_finished = function()
+      finished = true
+    end
+    optpack.update(nil, on_finished)
+
+    vim.wait(1000, function()
+      return finished
+    end, 10, false)
 
     assert.is_same("https://github.com/account1/test1.git", mock.cloned[1].url)
     assert.is_same("https://github.com/account2/test2.git", mock.cloned[2].url)
@@ -256,7 +264,15 @@ describe("optpack.update()", function()
     optpack.add("account1/test1", {fetch = {engine = mock}})
     optpack.add("account2/test2", {fetch = {engine = mock}})
 
-    optpack.update()
+    local finished = false
+    local on_finished = function()
+      finished = true
+    end
+    optpack.update(nil, on_finished)
+
+    vim.wait(1000, function()
+      return finished
+    end, 10, false)
 
     assert.length(mock.cloned, 0)
     assert.length(mock.pulled, 2)
@@ -277,8 +293,17 @@ describe("optpack.install()", function()
     optpack.add("account1/test1", {fetch = {engine = mock}})
     optpack.add("account2/test2", {fetch = {engine = mock}})
 
-    optpack.install()
+    local finished = false
+    local on_finished = function()
+      finished = true
+    end
+    optpack.install(nil, on_finished)
 
+    vim.wait(1000, function()
+      return finished
+    end, 10, false)
+
+    assert.length(mock.cloned, 2)
     assert.is_same("https://github.com/account1/test1.git", mock.cloned[1].url)
     assert.is_same("https://github.com/account2/test2.git", mock.cloned[2].url)
     assert.length(mock.pulled, 0)
@@ -297,7 +322,15 @@ describe("optpack.install()", function()
     optpack.add("account1/test1", {fetch = {engine = mock}})
     optpack.add("account2/test2", {fetch = {engine = mock}})
 
-    optpack.install()
+    local finished = false
+    local on_finished = function()
+      finished = true
+    end
+    optpack.install(nil, on_finished)
+
+    vim.wait(1000, function()
+      return finished
+    end, 10, false)
 
     assert.length(mock.cloned, 0)
     assert.length(mock.pulled, 0)

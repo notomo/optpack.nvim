@@ -19,12 +19,10 @@ function Git.clone(_, outputters, directory, url, depth)
   vim.list_extend(cmd, {"--", url, directory})
 
   outputters = outputters:with({event_name = "clone"})
-  vim.fn.jobstart(cmd, {
+  local id = vim.fn.jobstart(cmd, {
     on_exit = function(_, code)
       outputters = outputters:with({event_name = "cloned"})
-      if code == 0 then
-        outputters:info("ok")
-      else
+      if code ~= 0 then
         outputters:error("ng")
       end
     end,
@@ -47,18 +45,21 @@ function Git.clone(_, outputters, directory, url, depth)
     stderr_buffered = true,
     stdout_buffered = true,
   })
+
+  local is_running = function()
+    return vim.fn.jobwait({id}, 0)[1] == -1
+  end
+  return is_running
 end
 
 function Git.pull(_, outputters, directory)
   local cmd = {"git", "pull", "--ff-only", "--rebase=false"}
 
   outputters = outputters:with({event_name = "clone"})
-  vim.fn.jobstart(cmd, {
+  local id = vim.fn.jobstart(cmd, {
     on_exit = function(_, code)
       outputters = outputters:with({event_name = "cloned"})
-      if code == 0 then
-        outputters:info("ok")
-      else
+      if code ~= 0 then
         outputters:error("ng")
       end
     end,
@@ -82,6 +83,11 @@ function Git.pull(_, outputters, directory)
     stdout_buffered = true,
     cwd = directory,
   })
+
+  local is_running = function()
+    return vim.fn.jobwait({id}, 0)[1] == -1
+  end
+  return is_running
 end
 
 return M

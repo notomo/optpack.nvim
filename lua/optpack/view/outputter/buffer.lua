@@ -10,12 +10,18 @@ function M.init()
 end
 
 function M.info(self, ctx, msg)
-  local prefix = ("[%s] "):format(ctx.name)
+  if not vim.api.nvim_buf_is_valid(self.bufnr) then
+    return
+  end
+  local prefix = (ctx.name and ("[%s] "):format(ctx.name)) or ""
   vim.api.nvim_buf_set_lines(self.bufnr, -1, -1, false, {prefix .. msg})
 end
 
 function M.error(self, ctx, msg)
-  local prefix = ("[%s] "):format(ctx.name)
+  if not vim.api.nvim_buf_is_valid(self.bufnr) then
+    return
+  end
+  local prefix = (ctx.name and ("[%s] "):format(ctx.name)) or ""
   vim.api.nvim_buf_set_lines(self.bufnr, -1, -1, false, {prefix .. msg})
   local count = vim.api.nvim_buf_line_count(self.bufnr)
   vim.api.nvim_buf_set_extmark(self.bufnr, self.ns, count - 1, 0, {

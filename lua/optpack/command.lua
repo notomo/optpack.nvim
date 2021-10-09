@@ -31,22 +31,32 @@ function Command.list()
   return Plugins.state():list()
 end
 
-function Command.update(pattern)
+-- TODO: as update opts
+function Command.update(pattern, on_finished)
+  vim.validate({on_finished = {on_finished, "function", true}})
+  on_finished = on_finished or function()
+  end
+
   -- TODO: custom outputter types
   local outputters, err = Outputters.from({"buffer"})
   if err then
     return err
   end
-  return Plugins.state():update(pattern, outputters)
+  return Plugins.state():update(pattern, outputters, on_finished)
 end
 
-function Command.install(pattern)
+-- TODO: as install opts
+function Command.install(pattern, on_finished)
+  vim.validate({on_finished = {on_finished, "function", true}})
+  on_finished = on_finished or function()
+  end
+
   -- TODO: custom outputter types
   local outputters, err = Outputters.from({"buffer"})
   if err then
     return err
   end
-  return Plugins.state():install(pattern, outputters)
+  return Plugins.state():install(pattern, outputters, on_finished)
 end
 
 function Command.load(plugin_name)
