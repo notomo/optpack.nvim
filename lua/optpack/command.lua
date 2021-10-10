@@ -41,7 +41,7 @@ function Command.update(raw_opts)
     return err
   end
 
-  return Plugins.state():update(opts.pattern, outputters, opts.on_finished, opts.parallel_limit)
+  return Plugins.state():update(outputters, opts.pattern, opts.parallel_limit, opts.on_finished)
 end
 
 function Command.install(raw_opts)
@@ -52,7 +52,7 @@ function Command.install(raw_opts)
     return err
   end
 
-  return Plugins.state():install(opts.pattern, outputters, opts.on_finished, opts.parallel_limit)
+  return Plugins.state():install(outputters, opts.pattern, opts.parallel_limit, opts.on_finished)
 end
 
 function Command.load(plugin_name)

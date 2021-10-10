@@ -51,10 +51,10 @@ function Plugins.list(self)
   return values
 end
 
-function Plugins.update(self, pattern, outputters, on_finished, parallel_limit)
+function Plugins.update(self, outputters, pattern, parallel_limit, on_finished)
   outputters:info("start")
   local parallel = ParallelLimitter.new(parallel_limit)
-  for _, plugin in self._plugins:iter() do
+  for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
       return plugin:update(outputters)
     end)
@@ -65,10 +65,10 @@ function Plugins.update(self, pattern, outputters, on_finished, parallel_limit)
   end)
 end
 
-function Plugins.install(self, pattern, outputters, on_finished, parallel_limit)
+function Plugins.install(self, outputters, pattern, parallel_limit, on_finished)
   outputters:info("start")
   local parallel = ParallelLimitter.new(parallel_limit)
-  for _, plugin in self._plugins:iter() do
+  for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
       return plugin:install(outputters)
     end)
@@ -102,6 +102,17 @@ function Plugins.find(self, f)
       return plugin
     end
   end
+end
+
+function Plugins._collect(self, pattern)
+  local raw_plugins = {}
+  local regex = vim.regex(pattern)
+  for _, plugin in self._plugins:iter() do
+    if regex:match_str(plugin.name) then
+      table.insert(raw_plugins, plugin)
+    end
+  end
+  return raw_plugins
 end
 
 function Plugin.new(full_name, opts)

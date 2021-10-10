@@ -268,6 +268,27 @@ describe("optpack.update()", function()
     -- TODO: assert view
   end)
 
+  it("can update plugins that are matched with pattern", function()
+    create_plugin("test1")
+    create_plugin("test2")
+    vim.o.packpath = helper.test_data_dir .. packpath_name
+
+    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+
+    optpack.add("account1/test1", {fetch = {engine = mock}})
+    optpack.add("account2/test2", {fetch = {engine = mock}})
+
+    local on_finished = helper.on_finished()
+    optpack.update({on_finished = on_finished, pattern = "test2"})
+    on_finished:wait()
+
+    assert.length(mock.cloned, 0)
+    assert.length(mock.pulled, 1)
+    assert.is_same(helper.test_data_dir .. packpath_name .. "/pack/optpack/opt/test2", mock.pulled[1].directory)
+
+    -- TODO: assert view
+  end)
+
 end)
 
 describe("optpack.install()", function()
@@ -309,6 +330,23 @@ describe("optpack.install()", function()
     on_finished:wait()
 
     assert.length(mock.cloned, 0)
+    assert.length(mock.pulled, 0)
+
+    -- TODO: assert view
+  end)
+
+  it("can install plugins that are matched with pattern", function()
+    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+
+    optpack.add("account1/test1", {fetch = {engine = mock}})
+    optpack.add("account2/test2", {fetch = {engine = mock}})
+
+    local on_finished = helper.on_finished()
+    optpack.install({on_finished = on_finished, pattern = "test2"})
+    on_finished:wait()
+
+    assert.length(mock.cloned, 1)
+    assert.is_same("https://github.com/account2/test2.git", mock.cloned[1].url)
     assert.length(mock.pulled, 0)
 
     -- TODO: assert view
