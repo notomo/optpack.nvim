@@ -10,12 +10,12 @@ function M.list()
   return Command.new("list")
 end
 
-function M.update(pattern, on_finished)
-  Command.new("update", pattern, on_finished)
+function M.update(opts)
+  Command.new("update", opts)
 end
 
-function M.install(pattern, on_finished)
-  Command.new("install", pattern, on_finished)
+function M.install(opts)
+  Command.new("install", opts)
 end
 
 function M.load(plugin_name)

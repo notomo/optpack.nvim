@@ -51,10 +51,9 @@ function Plugins.list(self)
   return values
 end
 
-function Plugins.update(self, pattern, outputters, on_finished)
+function Plugins.update(self, pattern, outputters, on_finished, parallel_limit)
   outputters:info("start")
-  -- TODO: custom limit
-  local parallel = ParallelLimitter.new(8)
+  local parallel = ParallelLimitter.new(parallel_limit)
   for _, plugin in self._plugins:iter() do
     parallel:add(function()
       return plugin:update(outputters)
@@ -66,10 +65,9 @@ function Plugins.update(self, pattern, outputters, on_finished)
   end)
 end
 
-function Plugins.install(self, pattern, outputters, on_finished)
+function Plugins.install(self, pattern, outputters, on_finished, parallel_limit)
   outputters:info("start")
-  -- TODO: custom limit
-  local parallel = ParallelLimitter.new(8)
+  local parallel = ParallelLimitter.new(parallel_limit)
   for _, plugin in self._plugins:iter() do
     parallel:add(function()
       return plugin:install(outputters)

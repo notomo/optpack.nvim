@@ -42,6 +42,24 @@ function M.delete(path)
   vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
+function M.on_finished()
+  local finished = false
+  return setmetatable({
+    wait = function()
+      local ok = vim.wait(1000, function()
+        return finished
+      end, 10, false)
+      if not ok then
+        error("wait timeout")
+      end
+    end,
+  }, {
+    __call = function()
+      finished = true
+    end,
+  })
+end
+
 local asserts = require("vusted.assert").asserts
 
 asserts.create("length"):register_eq(function(tbl)

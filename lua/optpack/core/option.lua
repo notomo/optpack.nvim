@@ -33,4 +33,34 @@ function Option.new(raw_opts)
   return opts
 end
 
+local UpdateOption = {}
+UpdateOption.__index = UpdateOption
+M.UpdateOption = UpdateOption
+
+UpdateOption.default = {
+  on_finished = function()
+  end,
+  pattern = ".*",
+  output_types = {"buffer"},
+  parallel_limit = 8,
+}
+
+function UpdateOption.new(raw_opts)
+  vim.validate({raw_opts = {raw_opts, "table", true}})
+  raw_opts = raw_opts or {}
+  return vim.tbl_deep_extend("force", UpdateOption.default, raw_opts)
+end
+
+local InstallOption = {}
+InstallOption.__index = InstallOption
+M.InstallOption = InstallOption
+
+InstallOption.default = vim.deepcopy(UpdateOption.default)
+
+function InstallOption.new(raw_opts)
+  vim.validate({raw_opts = {raw_opts, "table", true}})
+  raw_opts = raw_opts or {}
+  return vim.tbl_deep_extend("force", InstallOption.default, raw_opts)
+end
+
 return M

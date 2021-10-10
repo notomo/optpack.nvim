@@ -1,3 +1,5 @@
+local UpdateOption = require("optpack.core.option").UpdateOption
+local InstallOption = require("optpack.core.option").InstallOption
 local Plugins = require("optpack.core.plugin").Plugins
 local Outputters = require("optpack.view.outputter").Outputters
 local messagelib = require("optpack.lib.message")
@@ -23,40 +25,34 @@ function Command.new(name, ...)
   return result
 end
 
-function Command.add(full_name, opts)
-  return Plugins.state():add(full_name, opts)
+function Command.add(full_name, raw_opts)
+  return Plugins.state():add(full_name, raw_opts)
 end
 
 function Command.list()
   return Plugins.state():list()
 end
 
--- TODO: as update opts
-function Command.update(pattern, on_finished)
-  vim.validate({on_finished = {on_finished, "function", true}})
-  on_finished = on_finished or function()
-  end
+function Command.update(raw_opts)
+  local opts = UpdateOption.new(raw_opts)
 
-  -- TODO: custom outputter types
-  local outputters, err = Outputters.from({"buffer"})
+  local outputters, err = Outputters.from(opts.output_types)
   if err then
     return err
   end
-  return Plugins.state():update(pattern, outputters, on_finished)
+
+  return Plugins.state():update(opts.pattern, outputters, opts.on_finished, opts.parallel_limit)
 end
 
--- TODO: as install opts
-function Command.install(pattern, on_finished)
-  vim.validate({on_finished = {on_finished, "function", true}})
-  on_finished = on_finished or function()
-  end
+function Command.install(raw_opts)
+  local opts = InstallOption.new(raw_opts)
 
-  -- TODO: custom outputter types
-  local outputters, err = Outputters.from({"buffer"})
+  local outputters, err = Outputters.from(opts.output_types)
   if err then
     return err
   end
-  return Plugins.state():install(pattern, outputters, on_finished)
+
+  return Plugins.state():install(opts.pattern, outputters, opts.on_finished, opts.parallel_limit)
 end
 
 function Command.load(plugin_name)
