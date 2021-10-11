@@ -118,9 +118,8 @@ end
 function Plugin.new(full_name, opts)
   vim.validate({name = {full_name, "string"}, opts = {opts, "table"}})
 
-  -- TODO: select packpath option
   -- TODO: path join
-  local opt_path = ("%s/pack/%s/opt/"):format(vim.opt.packpath:get()[1], opts.package_name)
+  local opt_path = ("%s/pack/%s/opt/"):format(opts.select_packpath(), opts.package_name)
 
   local splitted = vim.split(full_name, "/", true)
   local name = splitted[#splitted]
