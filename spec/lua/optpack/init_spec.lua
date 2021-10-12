@@ -1,6 +1,9 @@
 local helper = require("optpack.lib.testlib.helper")
 local optpack = helper.require("optpack")
 
+-- small for test speed
+local parallel_interval = 3
+
 local packpath_name = "mypackpath"
 
 local plugin_name1 = "myplugin_name1"
@@ -220,6 +223,7 @@ describe("optpack.list()", function()
       full_name = "account/test",
       name = "test",
       directory = vim.o.packpath .. "/pack/optpack/opt/test",
+      url = "https://github.com/account/test",
     }, got)
   end)
 
@@ -231,18 +235,14 @@ describe("optpack.update()", function()
   after_each(helper.after_each)
 
   it("installs plugins if directories do not exist", function()
-    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+    local job_factory = helper.job_factory()
 
-    optpack.add("account1/test1", {fetch = {engine = mock}})
-    optpack.add("account2/test2", {fetch = {engine = mock}})
+    optpack.add("account1/test1", {fetch = {job_factory = job_factory}})
+    optpack.add("account2/test2", {fetch = {job_factory = job_factory}})
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished})
+    optpack.update({on_finished = on_finished, parallel_interval = parallel_interval})
     on_finished:wait()
-
-    assert.is_same("https://github.com/account1/test1.git", mock.cloned[1].url)
-    assert.is_same("https://github.com/account2/test2.git", mock.cloned[2].url)
-    assert.length(mock.pulled, 0)
 
     assert.window_count(2)
     -- TODO: assert view
@@ -253,17 +253,14 @@ describe("optpack.update()", function()
     create_plugin("test2")
     vim.o.packpath = helper.test_data_dir .. packpath_name
 
-    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+    local job_factory = helper.job_factory()
 
-    optpack.add("account1/test1", {fetch = {engine = mock}})
-    optpack.add("account2/test2", {fetch = {engine = mock}})
+    optpack.add("account1/test1", {fetch = {job_factory = job_factory}})
+    optpack.add("account2/test2", {fetch = {job_factory = job_factory}})
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished})
+    optpack.update({on_finished = on_finished, parallel_interval = parallel_interval})
     on_finished:wait()
-
-    assert.length(mock.cloned, 0)
-    assert.length(mock.pulled, 2)
 
     -- TODO: assert view
   end)
@@ -273,18 +270,18 @@ describe("optpack.update()", function()
     create_plugin("test2")
     vim.o.packpath = helper.test_data_dir .. packpath_name
 
-    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+    local job_factory = helper.job_factory()
 
-    optpack.add("account1/test1", {fetch = {engine = mock}})
-    optpack.add("account2/test2", {fetch = {engine = mock}})
+    optpack.add("account1/test1", {fetch = {job_factory = job_factory}})
+    optpack.add("account2/test2", {fetch = {job_factory = job_factory}})
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished, pattern = "test2"})
+    optpack.update({
+      on_finished = on_finished,
+      parallel_interval = parallel_interval,
+      pattern = "test2",
+    })
     on_finished:wait()
-
-    assert.length(mock.cloned, 0)
-    assert.length(mock.pulled, 1)
-    assert.is_same(helper.test_data_dir .. packpath_name .. "/pack/optpack/opt/test2", mock.pulled[1].directory)
 
     -- TODO: assert view
   end)
@@ -297,19 +294,14 @@ describe("optpack.install()", function()
   after_each(helper.after_each)
 
   it("installs plugins if directories do not exist", function()
-    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+    local job_factory = helper.job_factory()
 
-    optpack.add("account1/test1", {fetch = {engine = mock}})
-    optpack.add("account2/test2", {fetch = {engine = mock}})
+    optpack.add("account1/test1", {fetch = {job_factory = job_factory}})
+    optpack.add("account2/test2", {fetch = {job_factory = job_factory}})
 
     local on_finished = helper.on_finished()
-    optpack.install({on_finished = on_finished})
+    optpack.install({on_finished = on_finished, parallel_interval = parallel_interval})
     on_finished:wait()
-
-    assert.length(mock.cloned, 2)
-    assert.is_same("https://github.com/account1/test1.git", mock.cloned[1].url)
-    assert.is_same("https://github.com/account2/test2.git", mock.cloned[2].url)
-    assert.length(mock.pulled, 0)
 
     assert.window_count(2)
     -- TODO: assert view
@@ -320,34 +312,31 @@ describe("optpack.install()", function()
     create_plugin("test2")
     vim.o.packpath = helper.test_data_dir .. packpath_name
 
-    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+    local job_factory = helper.job_factory()
 
-    optpack.add("account1/test1", {fetch = {engine = mock}})
-    optpack.add("account2/test2", {fetch = {engine = mock}})
+    optpack.add("account1/test1", {fetch = {job_factory = job_factory}})
+    optpack.add("account2/test2", {fetch = {job_factory = job_factory}})
 
     local on_finished = helper.on_finished()
-    optpack.install({on_finished = on_finished})
+    optpack.install({on_finished = on_finished, parallel_interval = parallel_interval})
     on_finished:wait()
-
-    assert.length(mock.cloned, 0)
-    assert.length(mock.pulled, 0)
 
     -- TODO: assert view
   end)
 
   it("can install plugins that are matched with pattern", function()
-    local mock = helper.require("optpack.lib.testlib.git_mock").Git.new()
+    local job_factory = helper.job_factory()
 
-    optpack.add("account1/test1", {fetch = {engine = mock}})
-    optpack.add("account2/test2", {fetch = {engine = mock}})
+    optpack.add("account1/test1", {fetch = {job_factory = job_factory}})
+    optpack.add("account2/test2", {fetch = {job_factory = job_factory}})
 
     local on_finished = helper.on_finished()
-    optpack.install({on_finished = on_finished, pattern = "test2"})
+    optpack.install({
+      on_finished = on_finished,
+      parallel_interval = parallel_interval,
+      pattern = "test2",
+    })
     on_finished:wait()
-
-    assert.length(mock.cloned, 1)
-    assert.is_same("https://github.com/account2/test2.git", mock.cloned[1].url)
-    assert.length(mock.pulled, 0)
 
     -- TODO: assert view
   end)

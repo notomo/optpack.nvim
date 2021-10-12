@@ -1,3 +1,5 @@
+local JobFactory = require("optpack.lib.job_factory").JobFactory
+
 local M = {}
 
 local Option = {}
@@ -14,8 +16,7 @@ Option.default = {
     post_load = function()
     end,
   },
-  -- TODO: base_url to format_url()?
-  fetch = {engine = "git", depth = 1, base_url = "https://github.com/"},
+  fetch = {job_factory = "default", depth = 1, base_url = "https://github.com/"},
   package_name = "optpack",
   select_packpath = function()
     return vim.opt.packpath:get()[1]
@@ -27,12 +28,10 @@ function Option.new(raw_opts)
   vim.validate({raw_opts = {raw_opts, "table", true}})
   raw_opts = raw_opts or {}
   local opts = vim.tbl_deep_extend("force", Option.default, raw_opts)
-
-  if type(opts.fetch.engine) == "string" then
-    opts.fetch.engine = require("optpack.lib.git").Git.new()
+  if opts.fetch.job_factory == "default" then
+    opts.fetch.job_factory = JobFactory.new()
   end
-  vim.validate({["opts.fetch.engine"] = {opts.fetch.engine, "table"}})
-
+  opts.fetch.engine = require("optpack.lib.git").Git.new(opts.fetch.job_factory)
   return opts
 end
 
@@ -46,6 +45,7 @@ UpdateOption.default = {
   pattern = ".*",
   output_types = {"buffer"},
   parallel_limit = 8,
+  parallel_interval = 500,
 }
 
 function UpdateOption.new(raw_opts)

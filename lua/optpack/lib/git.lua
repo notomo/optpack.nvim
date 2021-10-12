@@ -4,22 +4,23 @@ local Git = {}
 Git.__index = Git
 M.Git = Git
 
-function Git.new()
-  local tbl = {}
+function Git.new(job_factory)
+  vim.validate({job_factory = {job_factory, "table"}})
+  local tbl = {_job_factory = job_factory}
   return setmetatable(tbl, Git)
 end
 
 -- TODO: refactor
 
-function Git.clone(_, outputters, directory, url, depth)
+function Git.clone(self, outputters, directory, url, depth)
   local cmd = {"git", "clone"}
   if depth > 0 then
     vim.list_extend(cmd, {"--depth", depth})
   end
-  vim.list_extend(cmd, {"--", url, directory})
+  vim.list_extend(cmd, {"--", url .. ".git", directory})
 
   outputters = outputters:with({event_name = "clone"})
-  local id = vim.fn.jobstart(cmd, {
+  local job, err = self._job_factory:create(cmd, {
     on_exit = function(_, code)
       outputters = outputters:with({event_name = "cloned"})
       if code ~= 0 then
@@ -45,18 +46,20 @@ function Git.clone(_, outputters, directory, url, depth)
     stderr_buffered = true,
     stdout_buffered = true,
   })
-
-  local is_running = function()
-    return vim.fn.jobwait({id}, 0)[1] == -1
+  if err then
+    return outputters:error(err)
   end
-  return is_running
+
+  return function()
+    return job:is_running()
+  end
 end
 
-function Git.pull(_, outputters, directory)
+function Git.pull(self, outputters, directory)
   local cmd = {"git", "pull", "--ff-only", "--rebase=false"}
 
   outputters = outputters:with({event_name = "clone"})
-  local id = vim.fn.jobstart(cmd, {
+  local job, err = self._job_factory:create(cmd, {
     on_exit = function(_, code)
       outputters = outputters:with({event_name = "cloned"})
       if code ~= 0 then
@@ -83,11 +86,13 @@ function Git.pull(_, outputters, directory)
     stdout_buffered = true,
     cwd = directory,
   })
-
-  local is_running = function()
-    return vim.fn.jobwait({id}, 0)[1] == -1
+  if err then
+    return outputters:error(err)
   end
-  return is_running
+
+  return function()
+    return job:is_running()
+  end
 end
 
 return M

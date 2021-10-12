@@ -42,6 +42,23 @@ function M.delete(path)
   vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
+function M.job_factory()
+  local cmd_handler = function(cmd)
+    local new_cmd = {"echo"}
+    vim.list_extend(new_cmd, cmd)
+    return new_cmd
+  end
+  local opts_handler = function(opts)
+    return opts
+  end
+  return require("optpack.lib.testlib.job_factory").TestJobFactory.new(cmd_handler, opts_handler)
+end
+
+function M.print_buffer()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  print(table.concat(lines, "\n"))
+end
+
 function M.on_finished()
   local finished = false
   return setmetatable({
@@ -82,6 +99,17 @@ asserts.create("exists_message"):register(function(self)
       end
     end
     return false
+  end
+end)
+
+asserts.create("exists_pattern"):register(function(self)
+  return function(_, args)
+    local pattern = args[1]
+    pattern = pattern:gsub("\n", "\\n")
+    local result = vim.fn.search(pattern, "n")
+    self:set_positive(("`%s` not found"):format(pattern))
+    self:set_negative(("`%s` found"):format(pattern))
+    return result ~= 0
   end
 end)
 

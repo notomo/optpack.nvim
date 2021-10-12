@@ -20,9 +20,9 @@ function Plugins.new()
   return setmetatable(tbl, Plugins)
 end
 
-local plugins = Plugins.new()
+local _plugins = Plugins.new()
 function Plugins.state()
-  return plugins
+  return _plugins
 end
 
 function Plugins.add(self, full_name, raw_opts)
@@ -46,14 +46,15 @@ function Plugins.list(self)
       full_name = plugin.full_name,
       name = plugin.name,
       directory = plugin.directory,
+      url = plugin.url,
     })
   end
   return values
 end
 
-function Plugins.update(self, outputters, pattern, parallel_limit, on_finished)
+function Plugins.update(self, outputters, pattern, parallel_limit, parallel_interval, on_finished)
   outputters:info("start")
-  local parallel = ParallelLimitter.new(parallel_limit)
+  local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
       return plugin:update(outputters)
@@ -65,9 +66,9 @@ function Plugins.update(self, outputters, pattern, parallel_limit, on_finished)
   end)
 end
 
-function Plugins.install(self, outputters, pattern, parallel_limit, on_finished)
+function Plugins.install(self, outputters, pattern, parallel_limit, parallel_interval, on_finished)
   outputters:info("start")
-  local parallel = ParallelLimitter.new(parallel_limit)
+  local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
       return plugin:install(outputters)
@@ -125,7 +126,8 @@ function Plugin.new(full_name, opts)
   local name = splitted[#splitted]
   local directory = opt_path .. name
 
-  local url = ("%s%s.git"):format(opts.fetch.base_url, full_name)
+  -- TODO: path join
+  local url = opts.fetch.base_url .. full_name
   local installer = Installer.new(opts.fetch.engine, opt_path, directory, url, opts.fetch.depth)
   local updater = Updater.new(opts.fetch.engine, installer, directory)
 
@@ -133,6 +135,7 @@ function Plugin.new(full_name, opts)
     name = name,
     full_name = full_name,
     directory = directory,
+    url = url,
     _updater = updater,
     _install = installer,
   }
