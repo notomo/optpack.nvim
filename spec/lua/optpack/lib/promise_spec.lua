@@ -1,0 +1,184 @@
+local helper = require("optpack.lib.testlib.helper")
+local Promise = helper.require("optpack.lib.promise").Promise
+
+describe("promise:next()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can chain with non-promise", function()
+    local want = "ok"
+    local got
+    Promise.new(function(resolve)
+      resolve(want)
+    end):next(function(v)
+      return v
+    end):next(function(v)
+      got = v
+    end)
+
+    assert.equal(want, got)
+  end)
+
+  it("skips catch()", function()
+    local want = "ok"
+    local got
+    local called = false
+    Promise.new(function(resolve)
+      resolve(want)
+    end):catch(function()
+      called = true
+    end):next(function(v)
+      got = v
+    end)
+
+    assert.is_false(called)
+    assert.equal(want, got)
+  end)
+
+  it("can chain with promise", function()
+    local want = "ok"
+    local got
+    Promise.new(function(resolve)
+      resolve(want)
+    end):next(function(v)
+      return Promise.new(function(resolve)
+        resolve(v)
+      end)
+    end):next(function(v)
+      got = v
+    end)
+
+    assert.equal(want, got)
+  end)
+
+  it("can chain to promises", function()
+    local want = "ok"
+
+    local promise = Promise.new(function(resolve)
+      resolve(want)
+    end)
+
+    local got1, got2
+    promise:next(function(v)
+      got1 = v
+    end)
+    promise:next(function(v)
+      got2 = v
+    end)
+
+    assert.equal(want, got1)
+    assert.equal(want, got2)
+  end)
+
+  it("can chain with timered promise", function()
+    local want = "ok"
+    local got
+    local on_finished = helper.on_finished()
+    Promise.new(function(resolve)
+      vim.defer_fn(function()
+        resolve(want)
+      end, 25)
+    end):next(function(v)
+      return Promise.new(function(resolve)
+        vim.defer_fn(function()
+          local want2 = v .. "2"
+          resolve(want2)
+        end, 25)
+      end)
+    end):next(function(v)
+      got = v
+      on_finished()
+    end)
+    on_finished.wait()
+
+    assert.equal(want .. "2", got)
+  end)
+
+end)
+
+describe("promise:catch()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can chain with non-promise", function()
+    local want = "error"
+    local got
+    Promise.new(function(_, reject)
+      reject(want)
+    end):catch(function(err)
+      got = err
+    end)
+
+    assert.equal(want, got)
+  end)
+
+  it("skips next()", function()
+    local want = "error"
+    local got
+    local called = false
+    Promise.new(function(_, reject)
+      reject(want)
+    end):next(function()
+      called = true
+    end):catch(function(err)
+      got = err
+    end)
+
+    assert.is_false(called)
+    assert.equal(want, got)
+  end)
+
+  it("can chain with promise", function()
+    local want = "error"
+    local got
+    Promise.new(function(_, reject)
+      reject(want)
+    end):catch(function(v)
+      return Promise.new(function(_, reject)
+        reject(v)
+      end)
+    end):catch(function(v)
+      got = v
+    end)
+
+    assert.equal(want, got)
+  end)
+
+  it("can chain to promises", function()
+    local want = "error"
+
+    local promise = Promise.new(function(_, reject)
+      reject(want)
+    end)
+
+    local got1, got2
+    promise:catch(function(v)
+      got1 = v
+    end)
+    promise:catch(function(v)
+      got2 = v
+    end)
+
+    assert.equal(want, got1)
+    assert.equal(want, got2)
+  end)
+
+  it("catches error() in next()", function()
+    local want = "error"
+    local got
+    Promise.new(function(resolve)
+      resolve(want)
+    end):next(function(v)
+      error(v, 0) -- 0 not to add error position to message
+    end):catch(function(err)
+      got = err
+    end)
+
+    assert.equal(want, got)
+  end)
+
+end)
+
+-- TODO test

@@ -1,3 +1,5 @@
+local Promise = require("optpack.lib.promise").Promise
+
 local M = {}
 
 local Installer = {}
@@ -28,14 +30,19 @@ end
 
 function Installer.start(self, outputters)
   if self:already() then
-    return nil
+    return Promise.resolve()
   end
 
   local ok, err = pcall(vim.fn.mkdir, self._opt_path, "p")
   if not ok then
-    return outputters:with({event_name = "prepare_install"}):error(err)
+    return Promise.reject(err)
   end
-  return self._engine:clone(outputters, self._directory, self._url, self._depth)
+  return self._engine:clone(self._directory, self._url, self._depth):next(function(lines)
+    outputters:with({speaker = "git"}):info("clone", lines)
+    outputters:info("installed")
+  end):catch(function(lines)
+    outputters:error("error", lines)
+  end)
 end
 
 return M

@@ -1,3 +1,5 @@
+local Promise = require("optpack.lib.promise").Promise
+
 local vim = vim
 
 local M = {}
@@ -19,20 +21,20 @@ function ParallelLimitter.add(self, f)
   table.insert(self._queued, f)
 end
 
-function ParallelLimitter.start(self, on_finished, next_time_ms)
-  vim.validate({
-    on_finished = {on_finished, "function"},
-    next_time_ms = {next_time_ms, "number", true},
-  })
-  next_time_ms = next_time_ms or 0
+function ParallelLimitter.start(self)
+  return Promise.new(function(resolve)
+    self:_start(resolve, 0)
+  end)
+end
 
+function ParallelLimitter._start(self, resolve, next_time_ms)
   vim.loop.new_timer():start(next_time_ms, 0, vim.schedule_wrap(function()
     self:_remove_finished()
     self:_consume_queued(self._limit - #self._running)
     if #self._queued == 0 and #self._running == 0 then
-      on_finished()
+      resolve()
     else
-      self:start(on_finished, self._interval)
+      self:_start(resolve, self._interval)
     end
   end))
 end
@@ -53,10 +55,10 @@ function ParallelLimitter._consume_queued(self, count)
   local funcs = vim.list_slice(self._queued, 0, count)
   self._queued = vim.list_slice(self._queued, count + 1)
   for _, f in ipairs(funcs) do
-    local is_running = f()
-    if type(is_running) == "function" then
-      table.insert(self._running, is_running)
-    end
+    local promise = f()
+    table.insert(self._running, function()
+      return promise:is_pending()
+    end)
   end
 end
 

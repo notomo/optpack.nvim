@@ -26,7 +26,7 @@ function Command.new(name, ...)
 end
 
 function Command.add(full_name, raw_opts)
-  return Plugins.state():add(full_name, raw_opts)
+  return nil, Plugins.state():add(full_name, raw_opts)
 end
 
 function Command.list()
@@ -38,10 +38,10 @@ function Command.update(raw_opts)
 
   local outputters, err = Outputters.from(opts.output_types)
   if err then
-    return err
+    return nil, err
   end
 
-  return Plugins.state():update(outputters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
+  return nil, Plugins.state():update(outputters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
 end
 
 function Command.install(raw_opts)
@@ -49,14 +49,14 @@ function Command.install(raw_opts)
 
   local outputters, err = Outputters.from(opts.output_types)
   if err then
-    return err
+    return nil, err
   end
 
-  return Plugins.state():install(outputters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
+  return nil, Plugins.state():install(outputters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
 end
 
 function Command.load(plugin_name)
-  return Plugins.state():load(plugin_name)
+  return nil, Plugins.state():load(plugin_name)
 end
 
 return M

@@ -54,13 +54,19 @@ end
 
 function Plugins.update(self, outputters, pattern, parallel_limit, parallel_interval, on_finished)
   outputters:info("start")
+
   local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
       return plugin:update(outputters)
     end)
   end
-  return parallel:start(function()
+
+  -- TODO finally
+  parallel:start():next(function()
+    outputters:info("finished")
+    on_finished()
+  end):catch(function()
     outputters:info("finished")
     on_finished()
   end)
@@ -68,13 +74,19 @@ end
 
 function Plugins.install(self, outputters, pattern, parallel_limit, parallel_interval, on_finished)
   outputters:info("start")
+
   local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
       return plugin:install(outputters)
     end)
   end
-  return parallel:start(function()
+
+  -- TODO finally
+  parallel:start():next(function()
+    outputters:info("finished")
+    on_finished()
+  end):catch(function()
     outputters:info("finished")
     on_finished()
   end)
@@ -143,11 +155,15 @@ function Plugin.new(full_name, opts)
 end
 
 function Plugin.update(self, outputters)
-  return self._updater:start(outputters:with({name = self.name}))
+  return self._updater:start(outputters:with({name = self.name})):catch(function(err)
+    outputters:error("error", {err})
+  end)
 end
 
 function Plugin.install(self, outputters)
-  return self._install:start(outputters:with({name = self.name}))
+  return self._install:start(outputters:with({name = self.name})):catch(function(err)
+    outputters:error("error", {err})
+  end)
 end
 
 return M

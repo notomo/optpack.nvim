@@ -49,15 +49,15 @@ function Outputters.from(types)
   return Outputters.new(outputters, {})
 end
 
-function Outputters.info(self, msg)
+function Outputters.info(self, event_name, ...)
   for _, outputter in ipairs(self._outputters) do
-    outputter:info(self._ctx, msg)
+    outputter:info(event_name, self._ctx, ...)
   end
 end
 
-function Outputters.error(self, err)
+function Outputters.error(self, event_name, ...)
   for _, outputter in ipairs(self._outputters) do
-    outputter:error(self._ctx, err)
+    outputter:error(event_name, self._ctx, ...)
   end
 end
 
