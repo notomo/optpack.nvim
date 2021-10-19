@@ -105,6 +105,10 @@ function Plugins.load(self, plugin_name)
     return
   end
 
+  if not plugin:installed() then
+    return ("`%s` has not installed yet"):format(plugin.name)
+  end
+
   self._loaders[plugin.name] = nil
   return loader:load()
 end
@@ -164,6 +168,10 @@ function Plugin.install(self, outputters)
   return self._install:start(outputters:with({name = self.name})):catch(function(err)
     outputters:error("error", {err})
   end)
+end
+
+function Plugin.installed(self)
+  return vim.fn.isdirectory(self.directory) == 1
 end
 
 return M

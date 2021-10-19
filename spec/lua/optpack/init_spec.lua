@@ -193,6 +193,21 @@ describe("optpack.add()", function()
     assert.is_same(1, called)
   end)
 
+  it("does not execute hooks if plugin does not exist", function()
+    local called = false
+    optpack.add("account1/not_exist", {
+      hooks = {
+        pre_load = function()
+          called = true
+        end,
+      },
+    })
+    optpack.load("not_exist")
+
+    assert.is_false(called)
+    assert.exists_message([[`not_exist` has not installed yet]])
+  end)
+
   it("overwrites the same name plugin", function()
     optpack.add("account1/test")
     optpack.add("account2/test")
