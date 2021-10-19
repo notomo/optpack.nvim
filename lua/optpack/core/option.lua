@@ -45,7 +45,7 @@ UpdateOption.default = {
   pattern = ".*",
   output_types = {"buffer"},
   parallel_limit = 8,
-  parallel_interval = 500,
+  parallel_interval = 250,
 }
 
 function UpdateOption.new(raw_opts)
