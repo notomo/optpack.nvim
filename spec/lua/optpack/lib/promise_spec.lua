@@ -181,4 +181,69 @@ describe("promise:catch()", function()
 
 end)
 
+describe("promise:finally()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("continues from next()", function()
+    local called = false
+    Promise.new(function(resolve)
+      resolve("ok")
+    end):next(function(v)
+      return v
+    end):finally(function()
+      called = true
+    end)
+
+    assert.is_true(called)
+  end)
+
+  it("passes value to next()", function()
+    local want = "ok"
+    local got
+    Promise.new(function(resolve)
+      resolve(want)
+    end):next(function(v)
+      return v
+    end):finally(function()
+      -- noop
+    end):next(function(v)
+      got = v
+    end)
+
+    assert.is_same(want, got)
+  end)
+
+  it("continues from catch()", function()
+    local called = false
+    Promise.new(function(_, reject)
+      reject("error")
+    end):catch(function(err)
+      error(err)
+    end):finally(function()
+      called = true
+    end)
+
+    assert.is_true(called)
+  end)
+
+  it("passes err to catch()", function()
+    local want = "error"
+    local got
+    Promise.new(function(_, reject)
+      reject(want)
+    end):catch(function(err)
+      error(err, 0)
+    end):finally(function()
+      -- noop
+    end):catch(function(err)
+      got = err
+    end)
+
+    assert.is_same(want, got)
+  end)
+
+end)
+
 -- TODO test

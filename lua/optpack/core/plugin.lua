@@ -62,11 +62,7 @@ function Plugins.update(self, outputters, pattern, parallel_limit, parallel_inte
     end)
   end
 
-  -- TODO finally
-  parallel:start():next(function()
-    outputters:info("finished")
-    on_finished()
-  end):catch(function()
+  parallel:start():finally(function()
     outputters:info("finished")
     on_finished()
   end)
@@ -82,11 +78,7 @@ function Plugins.install(self, outputters, pattern, parallel_limit, parallel_int
     end)
   end
 
-  -- TODO finally
-  parallel:start():next(function()
-    outputters:info("finished")
-    on_finished()
-  end):catch(function()
+  parallel:start():finally(function()
     outputters:info("finished")
     on_finished()
   end)
