@@ -205,7 +205,6 @@ describe("optpack.add()", function()
     optpack.load("not_exist")
 
     assert.is_false(called)
-    assert.exists_message([[`not_exist` has not installed yet]])
   end)
 
   it("overwrites the same name plugin", function()

@@ -30,7 +30,7 @@ end
 
 function Installer.start(self, outputters)
   if self:already() then
-    return Promise.resolve()
+    return Promise.resolve(false)
   end
 
   local ok, err = pcall(vim.fn.mkdir, self._opt_path, "p")
@@ -40,6 +40,7 @@ function Installer.start(self, outputters)
   return self._engine:clone(self._directory, self._url, self._depth):next(function(lines)
     outputters:with({speaker = "git"}):info("clone", lines)
     outputters:info("installed")
+    return true
   end):catch(function(lines)
     outputters:error("error", lines)
   end)

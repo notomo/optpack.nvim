@@ -16,7 +16,7 @@ Plugins.__index = Plugins
 M.Plugins = Plugins
 
 function Plugins.new()
-  local tbl = {_plugins = OrderedDict.new(), _loaders = {}}
+  local tbl = {_plugins = OrderedDict.new(), _loaders = {}, _load_on_installed = {}}
   return setmetatable(tbl, Plugins)
 end
 
@@ -36,6 +36,7 @@ function Plugins.add(self, full_name, raw_opts)
   else
     self._plugins[plugin.name] = nil
     self._loaders[plugin.name] = nil
+    self._load_on_installed[plugin.name] = nil
   end
 end
 
@@ -72,14 +73,27 @@ function Plugins.install(self, outputters, pattern, parallel_limit, parallel_int
   outputters:info("start")
 
   local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
+  local installed_nows = {}
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
-      return plugin:install(outputters)
+      return plugin:install(outputters):next(function(installed_now)
+        if installed_now then
+          table.insert(installed_nows, plugin.name)
+        end
+      end)
     end)
   end
 
   parallel:start():finally(function()
+    local plugin_names = vim.tbl_filter(function(name)
+      return self._load_on_installed[name]
+    end, installed_nows)
+    for _, plugin_name in ipairs(plugin_names) do
+      self:load(plugin_name)
+    end
+
     outputters:info("finished")
+
     on_finished()
   end)
 end
@@ -98,10 +112,13 @@ function Plugins.load(self, plugin_name)
   end
 
   if not plugin:installed() then
-    return ("`%s` has not installed yet"):format(plugin.name)
+    self._load_on_installed[plugin.name] = true
+    return
   end
 
   self._loaders[plugin.name] = nil
+  self._load_on_installed[plugin.name] = nil
+
   return loader:load()
 end
 
