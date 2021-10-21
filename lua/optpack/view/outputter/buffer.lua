@@ -28,8 +28,11 @@ local handlers = {
   ["finished"] = function()
     return {"Finished."}
   end,
-  ["error"] = function(lines)
-    return lines
+  ["error"] = function(msg)
+    if type(msg) == "table" then
+      return msg
+    end
+    return {msg}
   end,
 }
 

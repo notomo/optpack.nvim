@@ -22,7 +22,6 @@ function Updater.start(self, outputters)
   local before_revision, pull_lines
   return self._engine:get_revision(self._directory):next(function(revision)
     before_revision = revision
-  end):next(function()
     return self._engine:pull(self._directory)
   end):next(function(lines)
     pull_lines = lines

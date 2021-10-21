@@ -152,13 +152,13 @@ end
 
 function Plugin.update(self, outputters)
   return self._updater:start(outputters:with({name = self.name})):catch(function(err)
-    outputters:error("error", {err})
+    outputters:error("error", err)
   end)
 end
 
 function Plugin.install(self, outputters)
   return self._install:start(outputters:with({name = self.name})):catch(function(err)
-    outputters:error("error", {err})
+    outputters:error("error", err)
   end)
 end
 

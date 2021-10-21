@@ -34,7 +34,6 @@ augroup END
 
   local tbl = {
     _plugin_name = plugin_name,
-    _load_on = load_on,
     _pre_load_hook = pre_load_hook,
     _post_load_hook = post_load_hook,
     _removers = {autocmd_remover, unpack(lua_loader_removers)},
