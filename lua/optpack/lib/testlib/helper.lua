@@ -42,16 +42,11 @@ function M.delete(path)
   vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
-function M.job_factory()
-  local cmd_handler = function(cmd)
-    local new_cmd = {"echo"}
-    vim.list_extend(new_cmd, cmd)
-    return new_cmd
-  end
-  local opts_handler = function(opts)
-    return opts
-  end
-  return require("optpack.lib.testlib.job_factory").TestJobFactory.new(cmd_handler, opts_handler)
+function M.git_server()
+  local cgi_root_dir = M.root .. "/spec/lua/optpack"
+  local git_root_dir = M.test_data_dir .. "git"
+  local tmp_dir = M.test_data_dir .. "tmp/"
+  return require("optpack.lib.testlib.git_server").GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
 end
 
 function M.print_buffer()
@@ -99,6 +94,15 @@ asserts.create("exists_message"):register(function(self)
       end
     end
     return false
+  end
+end)
+
+asserts.create("exists_dir"):register(function(self)
+  return function(_, args)
+    local path = M.test_data_dir .. args[1]
+    self:set_positive(("`%s` not found dir"):format(path))
+    self:set_negative(("`%s` found dir"):format(path))
+    return vim.fn.isdirectory(path) == 1
   end
 end)
 
