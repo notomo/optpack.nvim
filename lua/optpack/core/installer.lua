@@ -6,21 +6,15 @@ local Installer = {}
 Installer.__index = Installer
 M.Installer = Installer
 
-function Installer.new(engine, opt_path, directory, url, depth)
+function Installer.new(git, opt_path, directory, url, depth)
   vim.validate({
-    engine = {engine, "table"},
+    git = {git, "table"},
     opt_path = {opt_path, "string"},
     directory = {directory, "string"},
     url = {url, "string"},
     depth = {depth, "number"},
   })
-  local tbl = {
-    _engine = engine,
-    _opt_path = opt_path,
-    _directory = directory,
-    _url = url,
-    _depth = depth,
-  }
+  local tbl = {_git = git, _opt_path = opt_path, _directory = directory, _url = url, _depth = depth}
   return setmetatable(tbl, Installer)
 end
 
@@ -37,7 +31,7 @@ function Installer.start(self, outputters)
   if not ok then
     return Promise.reject(err)
   end
-  return self._engine:clone(self._directory, self._url, self._depth):next(function(lines)
+  return self._git:clone(self._directory, self._url, self._depth):next(function(lines)
     outputters:with({speaker = "git"}):info("clone", lines)
     outputters:info("installed")
     return true

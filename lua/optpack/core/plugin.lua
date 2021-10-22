@@ -4,6 +4,8 @@ local Updater = require("optpack.core.updater").Updater
 local Installer = require("optpack.core.installer").Installer
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
+local JobFactory = require("optpack.lib.job_factory").JobFactory
+local Git = require("optpack.lib.git").Git
 
 local M = {}
 
@@ -153,8 +155,9 @@ function Plugin.new(full_name, opts)
 
   -- TODO: path join
   local url = opts.fetch.base_url .. full_name
-  local installer = Installer.new(opts.fetch.engine, opt_path, directory, url, opts.fetch.depth)
-  local updater = Updater.new(opts.fetch.engine, installer, directory)
+  local git = Git.new(JobFactory.new())
+  local installer = Installer.new(git, opt_path, directory, url, opts.fetch.depth)
+  local updater = Updater.new(git, installer, directory)
 
   local tbl = {
     name = name,

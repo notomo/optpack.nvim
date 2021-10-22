@@ -4,13 +4,13 @@ local Updater = {}
 Updater.__index = Updater
 M.Updater = Updater
 
-function Updater.new(engine, installer, directory)
+function Updater.new(git, installer, directory)
   vim.validate({
-    engine = {engine, "table"},
+    git = {git, "table"},
     installer = {installer, "table"},
     directory = {directory, "string"},
   })
-  local tbl = {_engine = engine, _installer = installer, _directory = directory}
+  local tbl = {_git = git, _installer = installer, _directory = directory}
   return setmetatable(tbl, Updater)
 end
 
@@ -20,12 +20,12 @@ function Updater.start(self, outputters)
   end
 
   local before_revision, pull_lines
-  return self._engine:get_revision(self._directory):next(function(revision)
+  return self._git:get_revision(self._directory):next(function(revision)
     before_revision = revision
-    return self._engine:pull(self._directory)
+    return self._git:pull(self._directory)
   end):next(function(lines)
     pull_lines = lines
-    return self._engine:get_revision(self._directory)
+    return self._git:get_revision(self._directory)
   end):next(function(revision)
     if before_revision ~= revision then
       outputters:with({speaker = "git"}):info("pull", pull_lines)
