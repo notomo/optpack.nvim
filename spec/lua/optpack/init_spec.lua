@@ -247,21 +247,20 @@ describe("optpack.update()", function()
 
   local git_server
 
-  before_each(helper.before_each)
-  after_each(function()
-    helper.after_each()
-    if git_server then
-      git_server:teardown()
-      git_server = nil
-    end
-  end)
-
-  it("installs plugins if directories do not exist", function()
-    vim.o.packpath = helper.test_data_dir .. packpath_name
-
+  setup(function()
     git_server = helper.git_server()
     git_server:create_repository("account1/test1")
     git_server:create_repository("account2/test2")
+  end)
+  teardown(function()
+    git_server:teardown()
+  end)
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("installs plugins if directories do not exist", function()
+    vim.o.packpath = helper.test_data_dir .. packpath_name
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
@@ -283,8 +282,6 @@ describe("optpack.update()", function()
     create_plugin("test2")
     vim.o.packpath = helper.test_data_dir .. packpath_name
 
-    git_server = helper.git_server()
-
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
 
@@ -299,8 +296,6 @@ describe("optpack.update()", function()
     create_plugin("test1")
     create_plugin("test2")
     vim.o.packpath = helper.test_data_dir .. packpath_name
-
-    git_server = helper.git_server()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
@@ -322,21 +317,20 @@ describe("optpack.install()", function()
 
   local git_server
 
-  before_each(helper.before_each)
-  after_each(function()
-    helper.after_each()
-    if git_server then
-      git_server:teardown()
-      git_server = nil
-    end
-  end)
-
-  it("installs plugins if directories do not exist", function()
-    vim.o.packpath = helper.test_data_dir .. packpath_name
-
+  setup(function()
     git_server = helper.git_server()
     git_server:create_repository("account1/test1")
     git_server:create_repository("account2/test2")
+  end)
+  teardown(function()
+    git_server:teardown()
+  end)
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("installs plugins if directories do not exist", function()
+    vim.o.packpath = helper.test_data_dir .. packpath_name
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
@@ -358,8 +352,6 @@ describe("optpack.install()", function()
     create_plugin("test2")
     vim.o.packpath = helper.test_data_dir .. packpath_name
 
-    git_server = helper.git_server()
-
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
 
@@ -373,9 +365,6 @@ describe("optpack.install()", function()
 
   it("can install plugins that are matched with pattern", function()
     vim.o.packpath = helper.test_data_dir .. packpath_name
-
-    git_server = helper.git_server()
-    git_server:create_repository("account2/test2")
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
