@@ -74,12 +74,30 @@ describe("optpack.add()", function()
     assert.is_same("ok", got)
   end)
 
-  it("can set a plugin that is loaded by event", function()
+  it("can set a plugin that is loaded by event only", function()
     optpack.add(plugin1, {load_on = {events = {"TabNew"}}})
     vim.cmd("tabedit")
 
     local got = require(plugin_name1)
     assert.is_same("ok", got)
+  end)
+
+  it("can set a plugin that is loaded by event with pattern", function()
+    local called = false
+    optpack.add(plugin1, {
+      hooks = {
+        post_load = function()
+          called = true
+        end,
+      },
+      load_on = {events = {{"BufNewFile", "*.txt"}}},
+    })
+
+    vim.cmd("edit test")
+    assert.is_false(called)
+
+    vim.cmd("edit test.txt")
+    assert.is_true(called)
   end)
 
   it("can set a plugin that is loaded by requiring module", function()
