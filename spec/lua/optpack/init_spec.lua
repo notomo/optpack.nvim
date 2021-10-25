@@ -265,12 +265,12 @@ describe("optpack.update()", function()
 
   local git_server
 
-  setup(function()
+  lazy_setup(function()
     git_server = helper.git_server()
     git_server:create_repository("account1/test1")
     git_server:create_repository("account2/test2")
   end)
-  teardown(function()
+  lazy_teardown(function()
     git_server:teardown()
   end)
 
@@ -335,12 +335,12 @@ describe("optpack.install()", function()
 
   local git_server
 
-  setup(function()
+  lazy_setup(function()
     git_server = helper.git_server()
     git_server:create_repository("account1/test1")
     git_server:create_repository("account2/test2")
   end)
-  teardown(function()
+  lazy_teardown(function()
     git_server:teardown()
   end)
 
