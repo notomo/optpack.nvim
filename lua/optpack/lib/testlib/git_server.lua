@@ -1,4 +1,5 @@
 local Output = require("optpack.lib.output").Output
+local pathlib = require("optpack.lib.path")
 
 local M = {}
 
@@ -22,9 +23,9 @@ function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   vim.fn.mkdir(git_root_dir, "p")
   vim.fn.mkdir(tmp_dir, "p")
 
-  local cgi_url = ("http://127.0.0.1:%d/cgi-bin/"):format(port)
+  local cgi_url = ("http://127.0.0.1:%d/cgi-bin"):format(port)
   local tbl = {
-    url = cgi_url .. "git-http-backend/git/",
+    url = pathlib.join(cgi_url, "git-http-backend/git"),
     _cgi_url = cgi_url,
     _job_id = job_id,
     _tmp_dir = tmp_dir,
@@ -36,12 +37,12 @@ function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
 end
 
 function GitServer.create_repository(self, full_name)
-  local tmp_path = self._tmp_dir .. full_name
+  local tmp_path = pathlib.join(self._tmp_dir, full_name)
   vim.fn.mkdir(tmp_path, "p")
 
   self:_git({"init"}, {cwd = tmp_path})
 
-  local readme = tmp_path .. "/README.md"
+  local readme = pathlib.join(tmp_path, "README.md")
   io.open(readme, "w"):close()
   self:_git({"add", "."}, {cwd = tmp_path})
   self:_git({"commit", "-m", "Init"}, {cwd = tmp_path})
@@ -83,7 +84,7 @@ end
 function GitServer._health_check(self)
   local ok = vim.wait(1000, function()
     local exit_code
-    local job_id = vim.fn.jobstart({"curl", self._cgi_url .. "ready.py"}, {
+    local job_id = vim.fn.jobstart({"curl", pathlib.join(self._cgi_url, "ready.py")}, {
       on_exit = function(_, code)
         exit_code = code
       end,

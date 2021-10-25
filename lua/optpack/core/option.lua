@@ -14,7 +14,7 @@ Option.default = {
     post_load = function()
     end,
   },
-  fetch = {depth = 1, base_url = "https://github.com/"},
+  fetch = {depth = 1, base_url = "https://github.com"},
   package_name = "optpack",
   select_packpath = function()
     return vim.opt.packpath:get()[1]

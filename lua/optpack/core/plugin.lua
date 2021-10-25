@@ -6,6 +6,7 @@ local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
 local JobFactory = require("optpack.lib.job_factory").JobFactory
 local Git = require("optpack.lib.git").Git
+local pathlib = require("optpack.lib.path")
 
 local M = {}
 
@@ -146,15 +147,12 @@ end
 function Plugin.new(full_name, opts)
   vim.validate({name = {full_name, "string"}, opts = {opts, "table"}})
 
-  -- TODO: path join
-  local opt_path = ("%s/pack/%s/opt/"):format(opts.select_packpath(), opts.package_name)
+  local opt_path = pathlib.join(opts.select_packpath(), "pack", opts.package_name, "opt")
 
-  local splitted = vim.split(full_name, "/", true)
-  local name = splitted[#splitted]
-  local directory = opt_path .. name
+  local name = pathlib.tail(full_name)
+  local directory = pathlib.join(opt_path, name)
 
-  -- TODO: path join
-  local url = opts.fetch.base_url .. full_name
+  local url = pathlib.join(opts.fetch.base_url, full_name)
   local git = Git.new(JobFactory.new())
   local installer = Installer.new(git, opt_path, directory, url, opts.fetch.depth)
   local updater = Updater.new(git, installer, directory)
