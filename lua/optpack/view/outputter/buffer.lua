@@ -1,15 +1,16 @@
 local Event = require("optpack.core.event").Event
 
 local M = {}
+M.__index = M
 
-function M.init()
+function M.new()
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "optpack"
   vim.bo[bufnr].modifiable = false
-  vim.cmd("botright split")
-  vim.cmd("buffer " .. bufnr)
-  return {bufnr = bufnr, ns = vim.api.nvim_create_namespace("optpack")}, nil
+  vim.cmd("botright split | buffer" .. bufnr)
+  local tbl = {bufnr = bufnr, ns = vim.api.nvim_create_namespace("optpack")}
+  return setmetatable(tbl, M), nil
 end
 
 local handlers = {
