@@ -2,6 +2,7 @@ local UpdateOption = require("optpack.core.option").UpdateOption
 local InstallOption = require("optpack.core.option").InstallOption
 local Plugins = require("optpack.core.plugin").Plugins
 local Outputters = require("optpack.view.outputter").Outputters
+local EventEmitters = require("optpack.lib.event_emitter").EventEmitters
 local messagelib = require("optpack.lib.message")
 
 local M = {}
@@ -40,8 +41,9 @@ function Command.update(raw_opts)
   if err then
     return nil, err
   end
+  local emitters = EventEmitters.new(outputters)
 
-  return nil, Plugins.state():update(outputters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
+  return nil, Plugins.state():update(emitters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
 end
 
 function Command.install(raw_opts)
@@ -51,8 +53,9 @@ function Command.install(raw_opts)
   if err then
     return nil, err
   end
+  local emitters = EventEmitters.new(outputters)
 
-  return nil, Plugins.state():install(outputters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
+  return nil, Plugins.state():install(emitters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
 end
 
 function Command.load(plugin_name)

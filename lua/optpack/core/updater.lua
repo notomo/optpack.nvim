@@ -1,3 +1,5 @@
+local Event = require("optpack.core.event").Event
+
 local M = {}
 
 local Updater = {}
@@ -14,25 +16,25 @@ function Updater.new(git, installer, directory)
   return setmetatable(tbl, Updater)
 end
 
-function Updater.start(self, outputters)
+function Updater.start(self, emitters)
   if not self._installer:already() then
-    return self._installer:start(outputters)
+    return self._installer:start(emitters)
   end
 
-  local before_revision, pull_lines
+  local before_revision, pull_output
   return self._git:get_revision(self._directory):next(function(revision)
     before_revision = revision
     return self._git:pull(self._directory)
-  end):next(function(lines)
-    pull_lines = lines
+  end):next(function(output)
+    pull_output = output
     return self._git:get_revision(self._directory)
   end):next(function(revision)
     if before_revision ~= revision then
-      outputters:with({speaker = "git"}):info("pull", pull_lines)
-      outputters:info("updated")
+      emitters:emit(Event.GitPulled, pull_output)
+      emitters:emit(Event.Updated)
     end
-  end):catch(function(lines)
-    outputters:error("error", lines)
+  end):catch(function(err)
+    emitters:emit(Event.Error, err)
   end)
 end
 

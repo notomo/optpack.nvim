@@ -2,6 +2,7 @@ local Option = require("optpack.core.option").Option
 local Loader = require("optpack.core.loader").Loader
 local Updater = require("optpack.core.updater").Updater
 local Installer = require("optpack.core.installer").Installer
+local Event = require("optpack.core.event").Event
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
 local JobFactory = require("optpack.lib.job_factory").JobFactory
@@ -56,30 +57,30 @@ function Plugins.list(self)
   return values
 end
 
-function Plugins.update(self, outputters, pattern, parallel_limit, parallel_interval, on_finished)
-  outputters:info("start")
+function Plugins.update(self, emitters, pattern, parallel_limit, parallel_interval, on_finished)
+  emitters:emit(Event.StartUpdate)
 
   local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
-      return plugin:update(outputters)
+      return plugin:update(emitters)
     end)
   end
 
   parallel:start():finally(function()
-    outputters:info("finished")
+    emitters:emit(Event.FinishedUpdate)
     on_finished()
   end)
 end
 
-function Plugins.install(self, outputters, pattern, parallel_limit, parallel_interval, on_finished)
-  outputters:info("start")
+function Plugins.install(self, emitters, pattern, parallel_limit, parallel_interval, on_finished)
+  emitters:emit(Event.StartInstall)
 
   local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
   local installed_nows = {}
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
-      return plugin:install(outputters):next(function(installed_now)
+      return plugin:install(emitters):next(function(installed_now)
         if installed_now then
           table.insert(installed_nows, plugin.name)
         end
@@ -95,7 +96,7 @@ function Plugins.install(self, outputters, pattern, parallel_limit, parallel_int
       self:load(plugin_name)
     end
 
-    outputters:info("finished")
+    emitters:emit(Event.FinishedInstall)
 
     on_finished()
   end)
@@ -168,15 +169,15 @@ function Plugin.new(full_name, opts)
   return setmetatable(tbl, Plugin)
 end
 
-function Plugin.update(self, outputters)
-  return self._updater:start(outputters:with({name = self.name})):catch(function(err)
-    outputters:error("error", err)
+function Plugin.update(self, emitters)
+  return self._updater:start(emitters:with({name = self.name})):catch(function(err)
+    emitters:emit(Event.Error, err)
   end)
 end
 
-function Plugin.install(self, outputters)
-  return self._install:start(outputters:with({name = self.name})):catch(function(err)
-    outputters:error("error", err)
+function Plugin.install(self, emitters)
+  return self._install:start(emitters:with({name = self.name})):catch(function(err)
+    emitters:emit(Event.Error, err)
   end)
 end
 

@@ -1,3 +1,4 @@
+local Event = require("optpack.core.event").Event
 local Promise = require("optpack.lib.promise").Promise
 
 local M = {}
@@ -22,21 +23,22 @@ function Installer.already(self)
   return vim.fn.isdirectory(self._directory) ~= 0
 end
 
-function Installer.start(self, outputters)
+function Installer.start(self, emitters)
   if self:already() then
     return Promise.resolve(false)
   end
 
-  local ok, err = pcall(vim.fn.mkdir, self._opt_path, "p")
+  local ok, mkdir_err = pcall(vim.fn.mkdir, self._opt_path, "p")
   if not ok then
-    return Promise.reject(err)
+    return Promise.reject(mkdir_err)
   end
-  return self._git:clone(self._directory, self._url, self._depth):next(function(lines)
-    outputters:with({speaker = "git"}):info("clone", lines)
-    outputters:info("installed")
+
+  return self._git:clone(self._directory, self._url, self._depth):next(function(output)
+    emitters:emit(Event.GitCloned, output)
+    emitters:emit(Event.Installed)
     return true
-  end):catch(function(lines)
-    outputters:error("error", lines)
+  end):catch(function(err)
+    emitters:emit(Event.Error, err)
   end)
 end
 
