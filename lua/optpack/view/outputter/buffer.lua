@@ -6,6 +6,7 @@ function M.init()
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "optpack"
+  vim.bo[bufnr].modifiable = false
   vim.cmd("botright split")
   vim.cmd("buffer " .. bufnr)
   return {bufnr = bufnr, ns = vim.api.nvim_create_namespace("optpack")}, nil
@@ -60,7 +61,10 @@ function M.emit(self, event_name, ctx, ...)
   lines = vim.tbl_map(function(line)
     return self:_format(ctx, line)
   end, lines)
+
+  vim.bo[self.bufnr].modifiable = true
   vim.api.nvim_buf_set_lines(self.bufnr, -1, -1, false, lines)
+  vim.bo[self.bufnr].modifiable = false
 
   if not hl_group then
     return
