@@ -37,8 +37,6 @@ function Installer.start(self, emitters)
     emitters:emit(Event.GitCloned, output)
     emitters:emit(Event.Installed)
     return true
-  end):catch(function(err)
-    emitters:emit(Event.Error, err)
   end)
 end
 

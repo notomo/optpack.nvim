@@ -9,6 +9,7 @@ M.Event = {
   StartUpdate = "StartUpdate",
   GitPulled = "GitPulled",
   Updated = "Updated",
+  GitCommitLog = "GitCommitLog",
   FinishedUpdate = "FinishedUpdate",
 
   Error = "Error",

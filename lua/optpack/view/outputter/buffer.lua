@@ -37,11 +37,14 @@ local handlers = {
   [Event.StartUpdate] = function()
     return {"Start."}
   end,
-  [Event.GitPulled] = function(output)
-    return output
+  [Event.GitPulled] = function(_)
+    return {}
   end,
   [Event.Updated] = function()
     return {"Updated."}
+  end,
+  [Event.GitCommitLog] = function(output)
+    return output, "Comment"
   end,
   [Event.FinishedUpdate] = function()
     return {"Finished."}
@@ -80,7 +83,7 @@ function M.emit(self, event_name, ctx, ...)
   end
 
   local count = vim.api.nvim_buf_line_count(self._bufnr)
-  vim.api.nvim_buf_set_extmark(self._bufnr, self._ns, count - 1, 0, {
+  vim.api.nvim_buf_set_extmark(self._bufnr, self._ns, count - #lines, 0, {
     end_line = count,
     hl_group = hl_group,
   })

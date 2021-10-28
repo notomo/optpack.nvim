@@ -29,12 +29,17 @@ function Updater.start(self, emitters)
     pull_output = output
     return self._git:get_revision(self._directory)
   end):next(function(revision)
-    if before_revision ~= revision then
-      emitters:emit(Event.GitPulled, pull_output)
-      emitters:emit(Event.Updated)
+    if before_revision == revision then
+      return
     end
-  end):catch(function(err)
-    emitters:emit(Event.Error, err)
+    emitters:emit(Event.GitPulled, pull_output)
+    emitters:emit(Event.Updated)
+    return self._git:log_between(self._directory, before_revision, revision)
+  end):next(function(output)
+    if not output then
+      return
+    end
+    emitters:emit(Event.GitCommitLog, output)
   end)
 end
 
