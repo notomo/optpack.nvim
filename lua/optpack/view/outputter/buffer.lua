@@ -1,4 +1,5 @@
 local Event = require("optpack.core.event").Event
+local Once = require("optpack.lib.once").Once
 
 local M = {}
 M.__index = M
@@ -9,7 +10,13 @@ function M.new()
   vim.bo[bufnr].filetype = "optpack"
   vim.bo[bufnr].modifiable = false
   vim.cmd("botright split | buffer" .. bufnr)
-  local tbl = {bufnr = bufnr, ns = vim.api.nvim_create_namespace("optpack")}
+  local tbl = {
+    _bufnr = bufnr,
+    _ns = vim.api.nvim_create_namespace("optpack"),
+    _delete_first_line = Once.new(function()
+      vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, {})
+    end),
+  }
   return setmetatable(tbl, M), nil
 end
 
@@ -49,7 +56,7 @@ local handlers = {
 }
 
 function M.emit(self, event_name, ctx, ...)
-  if not vim.api.nvim_buf_is_valid(self.bufnr) then
+  if not vim.api.nvim_buf_is_valid(self._bufnr) then
     return
   end
 
@@ -63,16 +70,17 @@ function M.emit(self, event_name, ctx, ...)
     return self:_format(ctx, line)
   end, lines)
 
-  vim.bo[self.bufnr].modifiable = true
-  vim.api.nvim_buf_set_lines(self.bufnr, -1, -1, false, lines)
-  vim.bo[self.bufnr].modifiable = false
+  vim.bo[self._bufnr].modifiable = true
+  vim.api.nvim_buf_set_lines(self._bufnr, -1, -1, false, lines)
+  self._delete_first_line()
+  vim.bo[self._bufnr].modifiable = false
 
   if not hl_group then
     return
   end
 
-  local count = vim.api.nvim_buf_line_count(self.bufnr)
-  vim.api.nvim_buf_set_extmark(self.bufnr, self.ns, count - 1, 0, {
+  local count = vim.api.nvim_buf_line_count(self._bufnr)
+  vim.api.nvim_buf_set_extmark(self._bufnr, self._ns, count - 1, 0, {
     end_line = count,
     hl_group = hl_group,
   })
