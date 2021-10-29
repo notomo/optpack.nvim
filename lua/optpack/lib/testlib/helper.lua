@@ -72,6 +72,34 @@ function M.on_finished()
   })
 end
 
+-- small for test speed
+M.parallel_interval = 3
+
+M.packpath_name = "mypackpath"
+
+function M.create_plugin_dir(name)
+  M.cleanup_loaded_modules(name)
+
+  local opt_dir = M.packpath_name .. "/pack/optpack/opt"
+  local root_dir = ("%s/%s"):format(opt_dir, name)
+
+  local plugin_dir = ("%s/plugin/"):format(root_dir)
+  M.new_directory(plugin_dir)
+  M.new_file(plugin_dir .. name .. ".vim", [[
+command! MyPluginTest echo ''
+]])
+
+  local lua_dir = ("%s/lua/%s/"):format(root_dir, name)
+  M.new_directory(lua_dir)
+  M.new_file(lua_dir .. "init.lua", [[
+return "ok"
+]])
+end
+
+function M.set_packpath()
+  vim.o.packpath = M.test_data_dir .. M.packpath_name
+end
+
 local asserts = require("vusted.assert").asserts
 
 asserts.create("length"):register_eq(function(tbl)

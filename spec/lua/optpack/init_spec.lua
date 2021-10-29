@@ -1,43 +1,19 @@
 local helper = require("optpack.lib.testlib.helper")
 local optpack = helper.require("optpack")
 
--- small for test speed
-local parallel_interval = 3
-
-local packpath_name = "mypackpath"
-
-local plugin_name1 = "myplugin_name1"
-local plugin1 = "account_name/" .. plugin_name1
-local plugin_name2 = "myplugin_name2"
-local plugin2 = "account_name/" .. plugin_name2
-
-local create_plugin = function(name)
-  helper.cleanup_loaded_modules(name)
-
-  local opt_dir = packpath_name .. "/pack/optpack/opt"
-  local root_dir = ("%s/%s"):format(opt_dir, name)
-
-  local plugin_dir = ("%s/plugin/"):format(root_dir)
-  helper.new_directory(plugin_dir)
-  helper.new_file(plugin_dir .. name .. ".vim", [[
-command! MyPluginTest echo ''
-]])
-
-  local lua_dir = ("%s/lua/%s/"):format(root_dir, name)
-  helper.new_directory(lua_dir)
-  helper.new_file(lua_dir .. "init.lua", [[
-return "ok"
-]])
-end
-
 describe("optpack.add()", function()
+
+  local plugin_name1 = "myplugin_name1"
+  local plugin1 = "account_name/" .. plugin_name1
+
+  local plugin_name2 = "myplugin_name2"
+  local plugin2 = "account_name/" .. plugin_name2
 
   before_each(function()
     helper.before_each()
-    create_plugin(plugin_name1)
-    create_plugin(plugin_name2)
-
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.create_plugin_dir(plugin_name1)
+    helper.create_plugin_dir(plugin_name2)
+    helper.set_packpath()
   end)
   after_each(helper.after_each)
 
@@ -246,7 +222,7 @@ describe("optpack.list()", function()
   end)
 
   it("returns plugins", function()
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.set_packpath()
 
     optpack.add("account/test")
 
@@ -278,17 +254,17 @@ describe("optpack.update()", function()
   after_each(helper.after_each)
 
   it("installs plugins if directories do not exist", function()
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.set_packpath()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished, parallel_interval = parallel_interval})
+    optpack.update({on_finished = on_finished, parallel_interval = helper.parallel_interval})
     on_finished:wait()
 
-    assert.exists_dir(packpath_name .. "/pack/optpack/opt/test1")
-    assert.exists_dir(packpath_name .. "/pack/optpack/opt/test2")
+    assert.exists_dir(helper.packpath_name .. "/pack/optpack/opt/test1")
+    assert.exists_dir(helper.packpath_name .. "/pack/optpack/opt/test2")
 
     assert.window_count(2)
     assert.exists_pattern([[test1 > Installed.]])
@@ -296,24 +272,24 @@ describe("optpack.update()", function()
   end)
 
   it("updates plugins if directories exist", function()
-    create_plugin("test1")
-    create_plugin("test2")
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.create_plugin_dir("test1")
+    helper.create_plugin_dir("test2")
+    helper.set_packpath()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished, parallel_interval = parallel_interval})
+    optpack.update({on_finished = on_finished, parallel_interval = helper.parallel_interval})
     on_finished:wait()
 
     -- TODO: assert view
   end)
 
   it("can update plugins that are matched with pattern", function()
-    create_plugin("test1")
-    create_plugin("test2")
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.create_plugin_dir("test1")
+    helper.create_plugin_dir("test2")
+    helper.set_packpath()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
@@ -321,7 +297,7 @@ describe("optpack.update()", function()
     local on_finished = helper.on_finished()
     optpack.update({
       on_finished = on_finished,
-      parallel_interval = parallel_interval,
+      parallel_interval = helper.parallel_interval,
       pattern = "test2",
     })
     on_finished:wait()
@@ -348,17 +324,17 @@ describe("optpack.install()", function()
   after_each(helper.after_each)
 
   it("installs plugins if directories do not exist", function()
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.set_packpath()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
 
     local on_finished = helper.on_finished()
-    optpack.install({on_finished = on_finished, parallel_interval = parallel_interval})
+    optpack.install({on_finished = on_finished, parallel_interval = helper.parallel_interval})
     on_finished:wait()
 
-    assert.exists_dir(packpath_name .. "/pack/optpack/opt/test1")
-    assert.exists_dir(packpath_name .. "/pack/optpack/opt/test2")
+    assert.exists_dir(helper.packpath_name .. "/pack/optpack/opt/test1")
+    assert.exists_dir(helper.packpath_name .. "/pack/optpack/opt/test2")
 
     assert.window_count(2)
     assert.exists_pattern([[test1 > Installed.]])
@@ -366,15 +342,15 @@ describe("optpack.install()", function()
   end)
 
   it("does nothing if directories exist", function()
-    create_plugin("test1")
-    create_plugin("test2")
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.create_plugin_dir("test1")
+    helper.create_plugin_dir("test2")
+    helper.set_packpath()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
 
     local on_finished = helper.on_finished()
-    optpack.install({on_finished = on_finished, parallel_interval = parallel_interval})
+    optpack.install({on_finished = on_finished, parallel_interval = helper.parallel_interval})
     on_finished:wait()
 
     assert.no.exists_pattern([[test1 > Installed.]])
@@ -382,7 +358,7 @@ describe("optpack.install()", function()
   end)
 
   it("can install plugins that are matched with pattern", function()
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.set_packpath()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
@@ -390,12 +366,12 @@ describe("optpack.install()", function()
     local on_finished = helper.on_finished()
     optpack.install({
       on_finished = on_finished,
-      parallel_interval = parallel_interval,
+      parallel_interval = helper.parallel_interval,
       pattern = "test2",
     })
     on_finished:wait()
 
-    assert.exists_dir(packpath_name .. "/pack/optpack/opt/test2")
+    assert.exists_dir(helper.packpath_name .. "/pack/optpack/opt/test2")
 
     assert.no.exists_pattern([[test1 > Installed.]])
     assert.exists_pattern([[test2 > Installed.]])
@@ -405,11 +381,13 @@ end)
 
 describe("optpack.load()", function()
 
+  local plugin_name1 = "myplugin_name1"
+  local plugin1 = "account_name/" .. plugin_name1
+
   before_each(function()
     helper.before_each()
-    create_plugin(plugin_name1)
-
-    vim.o.packpath = helper.test_data_dir .. packpath_name
+    helper.create_plugin_dir(plugin_name1)
+    helper.set_packpath()
   end)
   after_each(helper.after_each)
 
