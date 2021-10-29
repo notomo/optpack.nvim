@@ -11,7 +11,11 @@ describe("optpack.add()", function()
 
   before_each(function()
     helper.before_each()
-    helper.create_plugin_dir(plugin_name1)
+    helper.create_plugin_dir(plugin_name1, {
+      plugin_vim_content = [[
+command! MyPluginTest echo ''
+]],
+    })
     helper.create_plugin_dir(plugin_name2)
     helper.set_packpath()
   end)
@@ -21,16 +25,14 @@ describe("optpack.add()", function()
     optpack.add(plugin1)
     vim.cmd("packadd " .. plugin_name1)
 
-    local got = require(plugin_name1)
-    assert.is_same("ok", got)
+    assert.can_require(plugin_name1)
   end)
 
   it("can set a plugin that is loaded by filetype", function()
     optpack.add(plugin1, {load_on = {filetypes = {"lua"}}})
     vim.bo.filetype = "lua"
 
-    local got = require(plugin_name1)
-    assert.is_same("ok", got)
+    assert.can_require(plugin_name1)
   end)
 
   it("can set plugins that is loaded by filetype", function()
@@ -38,24 +40,22 @@ describe("optpack.add()", function()
     optpack.add(plugin2, {load_on = {filetypes = {"lua"}}})
     vim.bo.filetype = "lua"
 
-    assert.is_same("ok", require(plugin_name1))
-    assert.is_same("ok", require(plugin_name2))
+    assert.can_require(plugin_name1)
+    assert.can_require(plugin_name2)
   end)
 
   it("can set a plugin that is loaded by command", function()
     optpack.add(plugin1, {load_on = {cmds = {"MyPlugin*"}}})
     vim.cmd("MyPluginTest")
 
-    local got = require(plugin_name1)
-    assert.is_same("ok", got)
+    assert.can_require(plugin_name1)
   end)
 
   it("can set a plugin that is loaded by event only", function()
     optpack.add(plugin1, {load_on = {events = {"TabNew"}}})
     vim.cmd("tabedit")
 
-    local got = require(plugin_name1)
-    assert.is_same("ok", got)
+    assert.can_require(plugin_name1)
   end)
 
   it("can set a plugin that is loaded by event with pattern", function()
@@ -79,8 +79,7 @@ describe("optpack.add()", function()
   it("can set a plugin that is loaded by requiring module", function()
     optpack.add(plugin1, {load_on = {modules = {plugin_name1}}})
 
-    local got = require(plugin_name1)
-    assert.is_same("ok", got)
+    assert.can_require(plugin_name1)
   end)
 
   it("can disable a plugin with enabled=false", function()
@@ -403,8 +402,7 @@ describe("optpack.load()", function()
 
     optpack.load(plugin_name1)
 
-    local got = require(plugin_name1)
-    assert.is_same("ok", got)
+    assert.can_require(plugin_name1)
     assert.is_true(called)
   end)
 

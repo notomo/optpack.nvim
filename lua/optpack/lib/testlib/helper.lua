@@ -77,7 +77,8 @@ M.parallel_interval = 3
 
 M.packpath_name = "mypackpath"
 
-function M.create_plugin_dir(name)
+function M.create_plugin_dir(name, opts)
+  opts = opts or {}
   M.cleanup_loaded_modules(name)
 
   local opt_dir = M.packpath_name .. "/pack/optpack/opt"
@@ -85,15 +86,12 @@ function M.create_plugin_dir(name)
 
   local plugin_dir = ("%s/plugin/"):format(root_dir)
   M.new_directory(plugin_dir)
-  M.new_file(plugin_dir .. name .. ".vim", [[
-command! MyPluginTest echo ''
-]])
+  opts.plugin_vim_content = opts.plugin_vim_content or ""
+  M.new_file(plugin_dir .. name .. ".vim", opts.plugin_vim_content)
 
   local lua_dir = ("%s/lua/%s/"):format(root_dir, name)
   M.new_directory(lua_dir)
-  M.new_file(lua_dir .. "init.lua", [[
-return "ok"
-]])
+  M.new_file(lua_dir .. "init.lua")
 end
 
 function M.set_packpath()
@@ -142,6 +140,16 @@ asserts.create("exists_pattern"):register(function(self)
     self:set_positive(("`%s` not found"):format(pattern))
     self:set_negative(("`%s` found"):format(pattern))
     return result ~= 0
+  end
+end)
+
+asserts.create("can_require"):register(function(self)
+  return function(_, args)
+    local path = args[1]
+    local ok, result = pcall(require, path)
+    self:set_positive(("cannot require `%s`: %s"):format(path, result))
+    self:set_negative(("can require `%s`"):format(path))
+    return ok
   end
 end)
 
