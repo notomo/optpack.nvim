@@ -76,13 +76,17 @@ end
 M.parallel_interval = 3
 
 M.packpath_name = "mypackpath"
+M.opt_path = M.packpath_name .. "/pack/optpack/opt/"
+
+function M.plugin_dir(name)
+  return M.test_data_dir .. M.opt_path .. name
+end
 
 function M.create_plugin_dir(name, opts)
   opts = opts or {}
   M.cleanup_loaded_modules(name)
 
-  local opt_dir = M.packpath_name .. "/pack/optpack/opt"
-  local root_dir = ("%s/%s"):format(opt_dir, name)
+  local root_dir = M.opt_path .. name
 
   local plugin_dir = ("%s/plugin/"):format(root_dir)
   M.new_directory(plugin_dir)

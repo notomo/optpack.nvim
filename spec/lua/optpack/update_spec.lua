@@ -7,8 +7,8 @@ describe("optpack.update()", function()
 
   lazy_setup(function()
     git_server = helper.git_server()
-    git_server:create_repository("account1/test1")
-    git_server:create_repository("account2/test2")
+    git_server:create_repository("account1/test1", {"commit1", "commit2"})
+    git_server:create_repository("account2/test2", {"commit3", "commit4"})
   end)
   lazy_teardown(function()
     git_server:teardown()
@@ -36,9 +36,10 @@ describe("optpack.update()", function()
   end)
 
   it("updates plugins if directories exist", function()
-    -- TODO: fix url
-    helper.create_plugin_dir("test1")
-    helper.create_plugin_dir("test2")
+    git_server.client:clone("account1/test1", helper.plugin_dir("test1"))
+    git_server.client:reset_hard("HEAD~~", helper.plugin_dir("test1"))
+    git_server.client:clone("account2/test2", helper.plugin_dir("test2"))
+
     helper.set_packpath()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
@@ -48,13 +49,16 @@ describe("optpack.update()", function()
     optpack.update({on_finished = on_finished, parallel_interval = helper.parallel_interval})
     on_finished:wait()
 
-    -- TODO: assert view
+    assert.exists_pattern([[test1 > Updated.]])
+    assert.no.exists_pattern([[test2 > Updated.]])
   end)
 
   it("can update plugins that are matched with pattern", function()
-    -- TODO: fix url
-    helper.create_plugin_dir("test1")
-    helper.create_plugin_dir("test2")
+    git_server.client:clone("account1/test1", helper.plugin_dir("test1"))
+    git_server.client:reset_hard("HEAD~~", helper.plugin_dir("test1"))
+    git_server.client:clone("account2/test2", helper.plugin_dir("test2"))
+    git_server.client:reset_hard("HEAD~~", helper.plugin_dir("test2"))
+
     helper.set_packpath()
 
     optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
@@ -68,7 +72,8 @@ describe("optpack.update()", function()
     })
     on_finished:wait()
 
-    -- TODO: assert view
+    assert.no.exists_pattern([[test1 > Updated.]])
+    assert.exists_pattern([[test2 > Updated.]])
   end)
 
 end)
