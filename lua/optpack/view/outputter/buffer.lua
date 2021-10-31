@@ -4,12 +4,12 @@ local Once = require("optpack.lib.once").Once
 local M = {}
 M.__index = M
 
-function M.new()
+function M.new(opts)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "optpack"
   vim.bo[bufnr].modifiable = false
-  vim.cmd("botright split | buffer" .. bufnr)
+  opts.open(bufnr)
   local tbl = {
     _bufnr = bufnr,
     _ns = vim.api.nvim_create_namespace("optpack"),

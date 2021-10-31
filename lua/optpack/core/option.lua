@@ -36,7 +36,16 @@ UpdateOption.default = {
   on_finished = function()
   end,
   pattern = ".*",
-  output_types = {"buffer"},
+  outputs = {
+    {
+      type = "buffer",
+      opts = {
+        open = function(bufnr)
+          vim.cmd("botright split | buffer" .. bufnr)
+        end,
+      },
+    },
+  },
   parallel_limit = 8,
   parallel_interval = 250,
 }
