@@ -24,4 +24,11 @@ function M.tail(path)
   return splitted[#splitted]
 end
 
+function M.dir(path)
+  if vim.endswith(path, "/") then
+    return path
+  end
+  return vim.fn.fnamemodify(path, ":h")
+end
+
 return M

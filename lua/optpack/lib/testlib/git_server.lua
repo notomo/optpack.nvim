@@ -1,5 +1,6 @@
 local GitClient = require("optpack.lib.testlib.git_client").GitClient
 local pathlib = require("optpack.lib.path")
+local logger = require("optpack.lib.testlib.logger"):add_prefix("[git_server]")
 
 local M = {}
 
@@ -10,11 +11,17 @@ M.GitServer = GitServer
 function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   local port = 8888
   local job_id = vim.fn.jobstart({"python", "-m", "http.server", port, "--cgi"}, {
-    on_stdout = function()
-      -- TODO log
+    on_stdout = function(_, data)
+      local msg = table.concat(data, "")
+      if msg ~= "" then
+        logger:info(msg)
+      end
     end,
-    on_stderr = function()
-      -- TODO log
+    on_stderr = function(_, data)
+      local msg = table.concat(data, "")
+      if msg ~= "" then
+        logger:warn(msg)
+      end
     end,
     env = {GIT_PROJECT_ROOT = git_root_dir, GIT_HTTP_EXPORT_ALL = "true"},
     cwd = cgi_root_dir,
@@ -53,7 +60,7 @@ function GitServer.create_repository(self, full_name, commits)
   local account_name = vim.split(full_name, "/", true)[1]
   local path = pathlib.join(self._git_root_dir, account_name)
   vim.fn.mkdir(path, "p")
-  self.client:execute({"clone", "--bare", "--shared", "--local", tmp_path}, {cwd = path})
+  self.client:execute({"clone", "--bare", "--local", tmp_path}, {cwd = path})
 end
 
 function GitServer._add_commit(self, tmp_path, msg)

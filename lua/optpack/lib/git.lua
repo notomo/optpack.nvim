@@ -75,7 +75,7 @@ function Git.get_revision(self, directory)
         if code ~= 0 then
           return reject(stderr:lines())
         end
-        local revision = table.concat(stdout:lines(), "")
+        local revision = stdout:str()
         return resolve(revision)
       end,
       on_stdout = stdout:collector(),

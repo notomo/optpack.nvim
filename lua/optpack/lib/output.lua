@@ -23,4 +23,8 @@ function Output.lines(self)
   return vim.list_slice(self._lines, 1, #self._lines - 1)
 end
 
+function Output.str(self)
+  return table.concat(self:lines(), "")
+end
+
 return M
