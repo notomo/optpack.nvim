@@ -6,13 +6,13 @@ local Outputters = {}
 Outputters.__index = Outputters
 M.Outputters = Outputters
 
-function Outputters.from(outputs)
-  vim.validate({outputs = {outputs, "table"}})
+function Outputters.from(raw_outputters)
+  vim.validate({raw_outputters = {raw_outputters, "table"}})
 
   local outputters = {}
   local errs = {}
-  for _, output in ipairs(outputs) do
-    local outputter, err = Outputters._create_one(output.type, output.opts)
+  for _, raw_outputter in ipairs(raw_outputters) do
+    local outputter, err = Outputters._create_one(raw_outputter.type, raw_outputter.opts)
     if err then
       table.insert(errs, err)
     else

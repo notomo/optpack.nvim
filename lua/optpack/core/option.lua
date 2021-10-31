@@ -36,7 +36,7 @@ UpdateOption.default = {
   on_finished = function()
   end,
   pattern = ".*",
-  outputs = {
+  outputters = {
     {
       type = "buffer",
       opts = {
