@@ -66,7 +66,7 @@ function Git.pull(self, directory)
 end
 
 function Git.get_revision(self, directory)
-  local cmd = {"git", "rev-parse", "HEAD"}
+  local cmd = {"git", "rev-parse", "--short", "HEAD"}
   local stdout = Output.new()
   local stderr = Output.new()
   return Promise.new(function(resolve, reject)
@@ -90,8 +90,8 @@ function Git.get_revision(self, directory)
   end)
 end
 
-function Git.log_between(self, directory, before_revision, after_revision)
-  local cmd = {"git", "log", [[--pretty=format:%h %s]], before_revision .. "..." .. after_revision}
+function Git.log(self, directory, revision)
+  local cmd = {"git", "log", [[--pretty=format:%h %s]], revision}
   local stdout = Output.new()
   local stderr = Output.new()
   return Promise.new(function(resolve, reject)

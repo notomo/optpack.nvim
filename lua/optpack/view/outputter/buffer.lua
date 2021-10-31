@@ -22,7 +22,7 @@ end
 
 local handlers = {
   [Event.StartInstall] = function()
-    return {"Start."}
+    return {"Start installing."}
   end,
   [Event.GitCloned] = function(output)
     return output
@@ -31,23 +31,24 @@ local handlers = {
     return {"Installed."}
   end,
   [Event.FinishedInstall] = function()
-    return {"Finished."}
+    return {"Finished installing."}
   end,
 
   [Event.StartUpdate] = function()
-    return {"Start."}
+    return {"Start updating."}
   end,
   [Event.GitPulled] = function(_)
     return {}
   end,
-  [Event.Updated] = function()
-    return {"Updated."}
+  [Event.Updated] = function(reivision_diff)
+    local msg = ("Updated. (%s)"):format(reivision_diff)
+    return {msg}
   end,
   [Event.GitCommitLog] = function(output)
     return output, "Comment"
   end,
   [Event.FinishedUpdate] = function()
-    return {"Finished."}
+    return {"Finished updating."}
   end,
 
   [Event.Error] = function(err)

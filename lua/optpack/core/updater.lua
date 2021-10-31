@@ -33,8 +33,9 @@ function Updater.start(self, emitters)
       return
     end
     emitters:emit(Event.GitPulled, pull_output)
-    emitters:emit(Event.Updated)
-    return self._git:log_between(self._directory, before_revision, revision)
+    local revision_diff = before_revision .. "..." .. revision
+    emitters:emit(Event.Updated, revision_diff)
+    return self._git:log(self._directory, revision_diff)
   end):next(function(output)
     if not output then
       return
