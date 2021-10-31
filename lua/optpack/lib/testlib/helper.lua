@@ -108,6 +108,10 @@ asserts.create("length"):register_eq(function(tbl)
   return #tbl
 end)
 
+asserts.create("buffer_name"):register_eq(function()
+  return vim.fn.bufname("%")
+end)
+
 asserts.create("window_count"):register_eq(function()
   return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
 end)

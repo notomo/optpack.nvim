@@ -71,5 +71,18 @@ describe("optpack.install()", function()
     assert.exists_pattern([[test2 > Installed.]])
   end)
 
-end)
+  it("does not raise an error event if output buffer already exists", function()
+    do
+      local on_finished = helper.on_finished()
+      optpack.install({on_finished = on_finished, parallel_interval = helper.parallel_interval})
+      on_finished:wait()
+    end
+    do
+      local on_finished = helper.on_finished()
+      optpack.install({on_finished = on_finished, parallel_interval = helper.parallel_interval})
+      on_finished:wait()
+    end
+    assert.buffer_name("optpack://optpack-install")
+  end)
 
+end)

@@ -4,11 +4,17 @@ local Once = require("optpack.lib.once").Once
 local M = {}
 M.__index = M
 
-function M.new(opts)
+function M.new(cmd_type, opts)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "optpack"
   vim.bo[bufnr].modifiable = false
+  local name = "optpack://optpack-" .. cmd_type
+  local old = vim.fn.bufnr(("^%s$"):format(name))
+  if old ~= -1 then
+    vim.api.nvim_buf_delete(old, {force = true})
+  end
+  vim.api.nvim_buf_set_name(bufnr, name)
   opts.open(bufnr)
   local tbl = {
     _bufnr = bufnr,

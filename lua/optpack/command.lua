@@ -37,7 +37,7 @@ end
 function Command.update(raw_opts)
   local opts = UpdateOption.new(raw_opts)
 
-  local outputters, err = Outputters.from(opts.outputters)
+  local outputters, err = Outputters.from("update", opts.outputters)
   if err then
     return nil, err
   end
@@ -49,7 +49,7 @@ end
 function Command.install(raw_opts)
   local opts = InstallOption.new(raw_opts)
 
-  local outputters, err = Outputters.from(opts.outputters)
+  local outputters, err = Outputters.from("install", opts.outputters)
   if err then
     return nil, err
   end

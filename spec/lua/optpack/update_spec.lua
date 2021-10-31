@@ -76,5 +76,19 @@ describe("optpack.update()", function()
     assert.exists_pattern([[test2 > Updated.]])
   end)
 
+  it("does not raise an error event if output buffer already exists", function()
+    do
+      local on_finished = helper.on_finished()
+      optpack.update({on_finished = on_finished, parallel_interval = helper.parallel_interval})
+      on_finished:wait()
+    end
+    do
+      local on_finished = helper.on_finished()
+      optpack.update({on_finished = on_finished, parallel_interval = helper.parallel_interval})
+      on_finished:wait()
+    end
+    assert.buffer_name("optpack://optpack-update")
+  end)
+
 end)
 
