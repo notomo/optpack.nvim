@@ -1,5 +1,6 @@
 local Event = require("optpack.core.event").Event
 local Once = require("optpack.lib.once").Once
+local bufferlib = require("optpack.lib.buffer")
 
 local M = {}
 M.__index = M
@@ -9,12 +10,7 @@ function M.new(cmd_type, opts)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "optpack"
   vim.bo[bufnr].modifiable = false
-  local name = "optpack://optpack-" .. cmd_type
-  local old = vim.fn.bufnr(("^%s$"):format(name))
-  if old ~= -1 then
-    vim.api.nvim_buf_delete(old, {force = true})
-  end
-  vim.api.nvim_buf_set_name(bufnr, name)
+  bufferlib.set_name_by_force(bufnr, "optpack://optpack-" .. cmd_type)
   opts.open(bufnr)
   local tbl = {
     _bufnr = bufnr,

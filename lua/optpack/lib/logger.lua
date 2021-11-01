@@ -59,8 +59,7 @@ end
 
 function Logger.add_prefix(self, prefix)
   vim.validate({prefix = {prefix, "string"}})
-  local new_prefix = table.concat({self._prefix, prefix}, "")
-  return Logger.new(self._output, {level = self._level, prefix = new_prefix})
+  return Logger.new(self._output, {level = self._level, prefix = self._prefix .. prefix})
 end
 
 return M
