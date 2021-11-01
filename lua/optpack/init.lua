@@ -22,4 +22,8 @@ function M.load(plugin_name)
   Command.new("load", plugin_name)
 end
 
+function M.set_default(setting)
+  Command.new("set_default", setting)
+end
+
 return M

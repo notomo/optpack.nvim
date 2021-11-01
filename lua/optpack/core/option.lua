@@ -1,5 +1,10 @@
 local M = {}
 
+M.user_default = {add = {}, install_or_update = {}}
+function M.set_default(setting)
+  M.user_default = vim.tbl_deep_extend("force", M.user_default, setting)
+end
+
 local Option = {}
 Option.__index = Option
 M.Option = Option
@@ -25,7 +30,7 @@ Option.default = {
 function Option.new(raw_opts)
   vim.validate({raw_opts = {raw_opts, "table", true}})
   raw_opts = raw_opts or {}
-  return vim.tbl_deep_extend("force", Option.default, raw_opts)
+  return vim.tbl_deep_extend("force", Option.default, M.user_default.add, raw_opts)
 end
 
 local UpdateOption = {}
@@ -46,14 +51,13 @@ UpdateOption.default = {
       },
     },
   },
-  parallel_limit = 8,
-  parallel_interval = 250,
+  parallel = {limit = 8, interval = 250},
 }
 
 function UpdateOption.new(raw_opts)
   vim.validate({raw_opts = {raw_opts, "table", true}})
   raw_opts = raw_opts or {}
-  return vim.tbl_deep_extend("force", UpdateOption.default, raw_opts)
+  return vim.tbl_deep_extend("force", UpdateOption.default, M.user_default.install_or_update, raw_opts)
 end
 
 local InstallOption = {}
@@ -65,7 +69,7 @@ InstallOption.default = vim.deepcopy(UpdateOption.default)
 function InstallOption.new(raw_opts)
   vim.validate({raw_opts = {raw_opts, "table", true}})
   raw_opts = raw_opts or {}
-  return vim.tbl_deep_extend("force", InstallOption.default, raw_opts)
+  return vim.tbl_deep_extend("force", InstallOption.default, M.user_default.install_or_update, raw_opts)
 end
 
 return M

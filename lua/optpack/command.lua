@@ -43,7 +43,7 @@ function Command.update(raw_opts)
   end
   local emitters = EventEmitters.new(outputters)
 
-  return nil, Plugins.state():update(emitters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
+  return nil, Plugins.state():update(emitters, opts.pattern, opts.parallel, opts.on_finished)
 end
 
 function Command.install(raw_opts)
@@ -55,11 +55,15 @@ function Command.install(raw_opts)
   end
   local emitters = EventEmitters.new(outputters)
 
-  return nil, Plugins.state():install(emitters, opts.pattern, opts.parallel_limit, opts.parallel_interval, opts.on_finished)
+  return nil, Plugins.state():install(emitters, opts.pattern, opts.parallel, opts.on_finished)
 end
 
 function Command.load(plugin_name)
   return nil, Plugins.state():load(plugin_name)
+end
+
+function Command.set_default(setting)
+  return nil, require("optpack.core.option").set_default(setting)
 end
 
 return M

@@ -208,6 +208,23 @@ command! MyPluginTest echo ''
     assert.is_same("account2/test", got.full_name)
   end)
 
+  it("can set default option by optpack.set_default()", function()
+    local called = false
+    optpack.set_default({
+      add = {
+        hooks = {
+          post_add = function()
+            called = true
+          end,
+        },
+      },
+    })
+
+    optpack.add("account1/test1")
+
+    assert.is_true(called)
+  end)
+
 end)
 
 describe("optpack.list()", function()

@@ -57,10 +57,10 @@ function Plugins.list(self)
   return values
 end
 
-function Plugins.update(self, emitters, pattern, parallel_limit, parallel_interval, on_finished)
+function Plugins.update(self, emitters, pattern, parallel_opts, on_finished)
   emitters:emit(Event.StartUpdate)
 
-  local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
+  local parallel = ParallelLimitter.new(parallel_opts.limit, parallel_opts.interval)
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
       return plugin:update(emitters)
@@ -73,10 +73,10 @@ function Plugins.update(self, emitters, pattern, parallel_limit, parallel_interv
   end)
 end
 
-function Plugins.install(self, emitters, pattern, parallel_limit, parallel_interval, on_finished)
+function Plugins.install(self, emitters, pattern, parallel_opts, on_finished)
   emitters:emit(Event.StartInstall)
 
-  local parallel = ParallelLimitter.new(parallel_limit, parallel_interval)
+  local parallel = ParallelLimitter.new(parallel_opts.limit, parallel_opts.interval)
   local installed_nows = {}
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
