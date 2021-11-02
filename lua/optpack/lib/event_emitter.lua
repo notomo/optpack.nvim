@@ -1,24 +1,24 @@
 local M = {}
 
-local EventEmitters = {}
-EventEmitters.__index = EventEmitters
-M.EventEmitters = EventEmitters
+local EventEmitter = {}
+EventEmitter.__index = EventEmitter
+M.EventEmitter = EventEmitter
 
-function EventEmitters.new(emitters, ctx)
-  vim.validate({emitters = {emitters, "table"}, ctx = {ctx, "table", true}})
-  local tbl = {_emitters = emitters, _ctx = ctx or {}}
-  return setmetatable(tbl, EventEmitters)
+function EventEmitter.new(handlers, ctx)
+  vim.validate({handlers = {handlers, "table"}, ctx = {ctx, "table", true}})
+  local tbl = {_handlers = handlers, _ctx = ctx or {}}
+  return setmetatable(tbl, EventEmitter)
 end
 
-function EventEmitters.emit(self, event_name, ...)
-  for _, emitter in ipairs(self._emitters) do
-    emitter:emit(event_name, self._ctx, ...)
+function EventEmitter.emit(self, event_name, ...)
+  for _, handler in ipairs(self._handlers) do
+    handler:handle(event_name, self._ctx, ...)
   end
 end
 
-function EventEmitters.with(self, ctx)
+function EventEmitter.with(self, ctx)
   ctx = vim.tbl_extend("force", self._ctx, ctx)
-  return EventEmitters.new(self._emitters, ctx)
+  return EventEmitter.new(self._handlers, ctx)
 end
 
 return M

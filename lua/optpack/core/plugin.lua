@@ -57,30 +57,30 @@ function Plugins.list(self)
   return values
 end
 
-function Plugins.update(self, emitters, pattern, parallel_opts, on_finished)
-  emitters:emit(Event.StartUpdate)
+function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
+  emitter:emit(Event.StartUpdate)
 
   local parallel = ParallelLimitter.new(parallel_opts.limit, parallel_opts.interval)
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
-      return plugin:update(emitters)
+      return plugin:update(emitter)
     end)
   end
 
   parallel:start():finally(function()
-    emitters:emit(Event.FinishedUpdate)
+    emitter:emit(Event.FinishedUpdate)
     on_finished()
   end)
 end
 
-function Plugins.install(self, emitters, pattern, parallel_opts, on_finished)
-  emitters:emit(Event.StartInstall)
+function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
+  emitter:emit(Event.StartInstall)
 
   local parallel = ParallelLimitter.new(parallel_opts.limit, parallel_opts.interval)
   local installed_nows = {}
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
-      return plugin:install(emitters):next(function(installed_now)
+      return plugin:install(emitter):next(function(installed_now)
         if installed_now then
           table.insert(installed_nows, plugin.name)
         end
@@ -96,7 +96,7 @@ function Plugins.install(self, emitters, pattern, parallel_opts, on_finished)
       self:load(plugin_name)
     end
 
-    emitters:emit(Event.FinishedInstall)
+    emitter:emit(Event.FinishedInstall)
 
     on_finished()
   end)
@@ -166,15 +166,15 @@ function Plugin.new(full_name, opts)
   return setmetatable(tbl, Plugin)
 end
 
-function Plugin.update(self, emitters)
-  return self._updater:start(emitters:with({name = self.name})):catch(function(err)
-    emitters:emit(Event.Error, err)
+function Plugin.update(self, emitter)
+  return self._updater:start(emitter:with({name = self.name})):catch(function(err)
+    emitter:emit(Event.Error, err)
   end)
 end
 
-function Plugin.install(self, emitters)
-  return self._installer:start(emitters:with({name = self.name})):catch(function(err)
-    emitters:emit(Event.Error, err)
+function Plugin.install(self, emitter)
+  return self._installer:start(emitter:with({name = self.name})):catch(function(err)
+    emitter:emit(Event.Error, err)
   end)
 end
 

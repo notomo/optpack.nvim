@@ -22,14 +22,14 @@ function Installer.already(self)
   return vim.fn.isdirectory(self._directory) ~= 0
 end
 
-function Installer.start(self, emitters)
+function Installer.start(self, emitter)
   if self:already() then
     return Promise.resolve(false)
   end
 
   return self._git:clone(self._directory, self._url, self._depth):next(function(output)
-    emitters:emit(Event.GitCloned, output)
-    emitters:emit(Event.Installed)
+    emitter:emit(Event.GitCloned, output)
+    emitter:emit(Event.Installed)
     return true
   end)
 end

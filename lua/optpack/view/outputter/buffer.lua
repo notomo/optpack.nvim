@@ -22,7 +22,7 @@ function M.new(cmd_type, opts)
   return setmetatable(tbl, M), nil
 end
 
-local handlers = {
+local message_handlers = {
   [Event.StartInstall] = function()
     return {"Start installing."}
   end,
@@ -61,12 +61,12 @@ local handlers = {
   end,
 }
 
-function M.emit(self, event_name, ctx, ...)
+function M.handle(self, event_name, ctx, ...)
   if not vim.api.nvim_buf_is_valid(self._bufnr) then
     return
   end
 
-  local handler = handlers[event_name]
+  local handler = message_handlers[event_name]
   if not handler then
     return
   end

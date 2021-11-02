@@ -16,9 +16,9 @@ function Updater.new(git, installer, directory)
   return setmetatable(tbl, Updater)
 end
 
-function Updater.start(self, emitters)
+function Updater.start(self, emitter)
   if not self._installer:already() then
-    return self._installer:start(emitters)
+    return self._installer:start(emitter)
   end
 
   local before_revision, pull_output
@@ -32,15 +32,15 @@ function Updater.start(self, emitters)
     if before_revision == revision then
       return
     end
-    emitters:emit(Event.GitPulled, pull_output)
+    emitter:emit(Event.GitPulled, pull_output)
     local revision_diff = before_revision .. "..." .. revision
-    emitters:emit(Event.Updated, revision_diff)
+    emitter:emit(Event.Updated, revision_diff)
     return self._git:log(self._directory, revision_diff)
   end):next(function(output)
     if not output then
       return
     end
-    emitters:emit(Event.GitCommitLog, output)
+    emitter:emit(Event.GitCommitLog, output)
   end)
 end
 
