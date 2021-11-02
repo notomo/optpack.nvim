@@ -148,14 +148,11 @@ end
 function Plugin.new(full_name, opts)
   vim.validate({name = {full_name, "string"}, opts = {opts, "table"}})
 
-  local opt_path = pathlib.join(opts.select_packpath(), "pack", opts.package_name, "opt")
-
   local name = pathlib.tail(full_name)
-  local directory = pathlib.join(opt_path, name)
-
-  local url = pathlib.join(opts.fetch.base_url, full_name)
+  local directory = pathlib.join(opts.select_packpath(), "pack", opts.package_name, "opt", name)
   local git = Git.new(JobFactory.new())
-  local installer = Installer.new(git, opt_path, directory, url, opts.fetch.depth)
+  local url = pathlib.join(opts.fetch.base_url, full_name)
+  local installer = Installer.new(git, directory, url, opts.fetch.depth)
   local updater = Updater.new(git, installer, directory)
 
   local tbl = {
@@ -164,7 +161,7 @@ function Plugin.new(full_name, opts)
     directory = directory,
     url = url,
     _updater = updater,
-    _install = installer,
+    _installer = installer,
   }
   return setmetatable(tbl, Plugin)
 end
@@ -176,13 +173,13 @@ function Plugin.update(self, emitters)
 end
 
 function Plugin.install(self, emitters)
-  return self._install:start(emitters:with({name = self.name})):catch(function(err)
+  return self._installer:start(emitters:with({name = self.name})):catch(function(err)
     emitters:emit(Event.Error, err)
   end)
 end
 
 function Plugin.installed(self)
-  return vim.fn.isdirectory(self.directory) == 1
+  return self._installer:already()
 end
 
 return M
