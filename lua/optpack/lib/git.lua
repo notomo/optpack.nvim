@@ -14,7 +14,7 @@ function Git.new(job_factory)
 end
 
 function Git.clone(self, directory, url, depth)
-  local cmd = {"git", "clone"}
+  local cmd = {"git", "clone", "--no-single-branch"}
   if depth > 0 then
     vim.list_extend(cmd, {"--depth", depth})
   end
