@@ -101,4 +101,24 @@ describe("optpack.install()", function()
     assert.no.exists_pattern([[test1 > Installed.]])
   end)
 
+  it("exexutes post_install hook", function()
+    helper.set_packpath()
+
+    local called = false
+    optpack.add("account1/test1", {
+      fetch = {base_url = git_server.url},
+      hooks = {
+        post_install = function()
+          called = true
+        end,
+      },
+    })
+
+    local on_finished = helper.on_finished()
+    optpack.install({on_finished = on_finished})
+    on_finished:wait()
+
+    assert.is_true(called)
+  end)
+
 end)

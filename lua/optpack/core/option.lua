@@ -18,6 +18,10 @@ Option.default = {
     end,
     post_load = function()
     end,
+    post_install = function()
+    end,
+    post_update = function()
+    end,
   },
   fetch = {depth = 1, base_url = "https://github.com"},
   package_name = "optpack",

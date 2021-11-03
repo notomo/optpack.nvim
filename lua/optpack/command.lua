@@ -34,18 +34,6 @@ function Command.list()
   return Plugins.state():list()
 end
 
-function Command.update(raw_opts)
-  local opts = UpdateOption.new(raw_opts)
-
-  local outputters, err = Outputters.new("update", opts.outputters)
-  if err then
-    return nil, err
-  end
-  local emitter = EventEmitter.new(outputters)
-
-  return nil, Plugins.state():update(emitter, opts.pattern, opts.parallel, opts.on_finished)
-end
-
 function Command.install(raw_opts)
   local opts = InstallOption.new(raw_opts)
 
@@ -56,6 +44,18 @@ function Command.install(raw_opts)
   local emitter = EventEmitter.new(outputters)
 
   return nil, Plugins.state():install(emitter, opts.pattern, opts.parallel, opts.on_finished)
+end
+
+function Command.update(raw_opts)
+  local opts = UpdateOption.new(raw_opts)
+
+  local outputters, err = Outputters.new("update", opts.outputters)
+  if err then
+    return nil, err
+  end
+  local emitter = EventEmitter.new(outputters)
+
+  return nil, Plugins.state():update(emitter, opts.pattern, opts.parallel, opts.on_finished)
 end
 
 function Command.load(plugin_name)

@@ -106,5 +106,28 @@ describe("optpack.update()", function()
     assert.no.exists_pattern([[test1 > Installed.]])
   end)
 
+  it("exexutes post_update hook", function()
+    git_server.client:clone("account1/test1", helper.plugin_dir("test1"))
+    git_server.client:reset_hard("HEAD~~", helper.plugin_dir("test1"))
+
+    helper.set_packpath()
+
+    local called = false
+    optpack.add("account1/test1", {
+      fetch = {base_url = git_server.url},
+      hooks = {
+        post_update = function()
+          called = true
+        end,
+      },
+    })
+
+    local on_finished = helper.on_finished()
+    optpack.update({on_finished = on_finished})
+    on_finished:wait()
+
+    assert.is_true(called)
+  end)
+
 end)
 

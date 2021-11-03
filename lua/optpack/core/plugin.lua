@@ -61,14 +61,20 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
   emitter:emit(Event.StartUpdate)
 
   local parallel = ParallelLimitter.new(parallel_opts.limit, parallel_opts.interval)
+  local names = {}
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
-      return plugin:update(emitter)
+      return plugin:install_or_update(emitter):next(function(installed_now)
+        if installed_now then
+          table.insert(names, plugin.name)
+        end
+      end)
     end)
   end
 
   parallel:start():finally(function()
-    emitter:emit(Event.FinishedUpdate)
+    self:_load_installed(names)
+    emitter:emit(Event.FinishedUpdated)
     on_finished()
   end)
 end
@@ -77,27 +83,20 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
   emitter:emit(Event.StartInstall)
 
   local parallel = ParallelLimitter.new(parallel_opts.limit, parallel_opts.interval)
-  local installed_nows = {}
+  local names = {}
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
       return plugin:install(emitter):next(function(installed_now)
         if installed_now then
-          table.insert(installed_nows, plugin.name)
+          table.insert(names, plugin.name)
         end
       end)
     end)
   end
 
   parallel:start():finally(function()
-    local plugin_names = vim.tbl_filter(function(name)
-      return self._load_on_installed[name]
-    end, installed_nows)
-    for _, plugin_name in ipairs(plugin_names) do
-      self:load(plugin_name)
-    end
-
+    self:_load_installed(names)
     emitter:emit(Event.FinishedInstall)
-
     on_finished()
   end)
 end
@@ -145,6 +144,15 @@ function Plugins._collect(self, pattern)
   return raw_plugins
 end
 
+function Plugins._load_installed(self, installed_plugin_names)
+  local plugin_names = vim.tbl_filter(function(name)
+    return self._load_on_installed[name]
+  end, installed_plugin_names)
+  for _, plugin_name in ipairs(plugin_names) do
+    self:load(plugin_name)
+  end
+end
+
 function Plugin.new(full_name, opts)
   vim.validate({name = {full_name, "string"}, opts = {opts, "table"}})
 
@@ -152,28 +160,47 @@ function Plugin.new(full_name, opts)
   local directory = pathlib.join(opts.select_packpath(), "pack", opts.package_name, "opt", name)
   local git = Git.new(JobFactory.new())
   local url = pathlib.join(opts.fetch.base_url, full_name)
-  local installer = Installer.new(git, directory, url, opts.fetch.depth)
-  local updater = Updater.new(git, installer, directory)
 
   local tbl = {
     name = name,
     full_name = full_name,
     directory = directory,
     url = url,
-    _updater = updater,
-    _installer = installer,
+    _installer = Installer.new(git, directory, url, opts.fetch.depth),
+    _post_install_hook = opts.hooks.post_install,
+    _updater = Updater.new(git, directory),
+    _post_update_hook = opts.hooks.post_update,
   }
   return setmetatable(tbl, Plugin)
 end
 
+function Plugin.install_or_update(self, emitter)
+  if not self:installed() then
+    return self:install(emitter)
+  end
+  return self:update(emitter):next(function()
+    return false
+  end)
+end
+
 function Plugin.update(self, emitter)
-  return self._updater:start(emitter:with({name = self.name})):catch(function(err)
+  return self._updater:start(emitter:with({name = self.name})):next(function(updated_now)
+    if updated_now then
+      self._post_update_hook()
+    end
+    return updated_now
+  end):catch(function(err)
     emitter:emit(Event.Error, err)
   end)
 end
 
 function Plugin.install(self, emitter)
-  return self._installer:start(emitter:with({name = self.name})):catch(function(err)
+  return self._installer:start(emitter:with({name = self.name})):next(function(installed_now)
+    if installed_now then
+      self._post_install_hook()
+    end
+    return installed_now
+  end):catch(function(err)
     emitter:emit(Event.Error, err)
   end)
 end
