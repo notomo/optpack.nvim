@@ -11,6 +11,7 @@ function EventEmitter.new(handlers, ctx)
 end
 
 function EventEmitter.emit(self, event_name, ...)
+  vim.validate({event_name = {event_name, "string"}})
   for _, handler in ipairs(self._handlers) do
     handler:handle(event_name, self._ctx, ...)
   end

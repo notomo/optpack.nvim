@@ -66,7 +66,7 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
 
   parallel:start():finally(function()
     self:_load_installed(names)
-    emitter:emit(Event.FinishedUpdated)
+    emitter:emit(Event.FinishedUpdate)
     on_finished()
   end)
 end

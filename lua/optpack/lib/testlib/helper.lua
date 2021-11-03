@@ -62,6 +62,7 @@ function M.on_finished()
         return finished
       end, 10, false)
       if not ok then
+        M.print_buffer()
         error("wait timeout")
       end
     end,
