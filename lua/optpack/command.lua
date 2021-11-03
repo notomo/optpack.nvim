@@ -1,5 +1,5 @@
-local UpdateOption = require("optpack.core.option").UpdateOption
-local InstallOption = require("optpack.core.option").InstallOption
+local AddOption = require("optpack.core.option").AddOption
+local InstallOrUpdateOption = require("optpack.core.option").InstallOrUpdateOption
 local Plugins = require("optpack.core.plugin").Plugins
 local Outputters = require("optpack.view.outputter").Outputters
 local EventEmitter = require("optpack.lib.event_emitter").EventEmitter
@@ -27,7 +27,8 @@ function Command.new(name, ...)
 end
 
 function Command.add(full_name, raw_opts)
-  return nil, Plugins.state():add(full_name, raw_opts)
+  local opts = AddOption.new(raw_opts)
+  return nil, Plugins.state():add(full_name, opts)
 end
 
 function Command.list()
@@ -35,7 +36,7 @@ function Command.list()
 end
 
 function Command.install(raw_opts)
-  local opts = InstallOption.new(raw_opts)
+  local opts = InstallOrUpdateOption.new(raw_opts)
 
   local outputters, err = Outputters.new("install", opts.outputters)
   if err then
@@ -47,7 +48,7 @@ function Command.install(raw_opts)
 end
 
 function Command.update(raw_opts)
-  local opts = UpdateOption.new(raw_opts)
+  local opts = InstallOrUpdateOption.new(raw_opts)
 
   local outputters, err = Outputters.new("update", opts.outputters)
   if err then

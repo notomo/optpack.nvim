@@ -5,11 +5,11 @@ function M.set_default(setting)
   M.user_default = vim.tbl_deep_extend("force", M.user_default, setting)
 end
 
-local Option = {}
-Option.__index = Option
-M.Option = Option
+local AddOption = {}
+AddOption.__index = AddOption
+M.AddOption = AddOption
 
-Option.default = {
+AddOption.default = {
   load_on = {events = {}, modules = {}, cmds = {}, filetypes = {}},
   hooks = {
     post_add = function()
@@ -31,17 +31,17 @@ Option.default = {
   enabled = true,
 }
 
-function Option.new(raw_opts)
+function AddOption.new(raw_opts)
   vim.validate({raw_opts = {raw_opts, "table", true}})
   raw_opts = raw_opts or {}
-  return vim.tbl_deep_extend("force", Option.default, M.user_default.add, raw_opts)
+  return vim.tbl_deep_extend("force", AddOption.default, M.user_default.add, raw_opts)
 end
 
-local UpdateOption = {}
-UpdateOption.__index = UpdateOption
-M.UpdateOption = UpdateOption
+local InstallOrUpdateOption = {}
+InstallOrUpdateOption.__index = InstallOrUpdateOption
+M.InstallOrUpdateOption = InstallOrUpdateOption
 
-UpdateOption.default = {
+InstallOrUpdateOption.default = {
   on_finished = function()
   end,
   pattern = ".*",
@@ -58,22 +58,10 @@ UpdateOption.default = {
   parallel = {limit = 8, interval = 250},
 }
 
-function UpdateOption.new(raw_opts)
+function InstallOrUpdateOption.new(raw_opts)
   vim.validate({raw_opts = {raw_opts, "table", true}})
   raw_opts = raw_opts or {}
-  return vim.tbl_deep_extend("force", UpdateOption.default, M.user_default.install_or_update, raw_opts)
-end
-
-local InstallOption = {}
-InstallOption.__index = InstallOption
-M.InstallOption = InstallOption
-
-InstallOption.default = vim.deepcopy(UpdateOption.default)
-
-function InstallOption.new(raw_opts)
-  vim.validate({raw_opts = {raw_opts, "table", true}})
-  raw_opts = raw_opts or {}
-  return vim.tbl_deep_extend("force", InstallOption.default, M.user_default.install_or_update, raw_opts)
+  return vim.tbl_deep_extend("force", InstallOrUpdateOption.default, M.user_default.install_or_update, raw_opts)
 end
 
 return M

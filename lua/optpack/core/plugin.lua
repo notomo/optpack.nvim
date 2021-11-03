@@ -1,4 +1,3 @@
-local Option = require("optpack.core.option").Option
 local Loader = require("optpack.core.loader").Loader
 local Updater = require("optpack.core.updater").Updater
 local Installer = require("optpack.core.installer").Installer
@@ -29,10 +28,8 @@ function Plugins.state()
   return _plugins
 end
 
-function Plugins.add(self, full_name, raw_opts)
-  local opts = Option.new(raw_opts)
+function Plugins.add(self, full_name, opts)
   local plugin = Plugin.new(full_name, opts)
-
   if opts.enabled then
     self._plugins[plugin.name] = plugin
     self._loaders[plugin.name] = Loader.new(plugin.name, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
