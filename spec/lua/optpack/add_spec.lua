@@ -59,21 +59,13 @@ command! MyPluginTest echo ''
   end)
 
   it("can set a plugin that is loaded by event with pattern", function()
-    local called = false
-    optpack.add(plugin1, {
-      hooks = {
-        post_load = function()
-          called = true
-        end,
-      },
-      load_on = {events = {{"BufNewFile", "*.txt"}}},
-    })
+    optpack.add(plugin1, {load_on = {events = {{"BufNewFile", "*.txt"}}}})
 
     vim.cmd("edit test")
-    assert.is_false(called)
+    assert.no.can_require(plugin_name1)
 
     vim.cmd("edit test.txt")
-    assert.is_true(called)
+    assert.can_require(plugin_name1)
   end)
 
   it("can set a plugin that is loaded by requiring module", function()
@@ -94,15 +86,15 @@ command! MyPluginTest echo ''
     local called = false
     optpack.add(plugin1, {
       hooks = {
-        pre_load = function()
-          called = true
+        pre_load = function(plugin)
+          called = plugin.name
         end,
       },
       load_on = {modules = {plugin_name1}},
     })
     require(plugin_name1)
 
-    assert.is_true(called)
+    assert.equal(plugin_name1, called)
   end)
 
   it("can set a hook post_load by module loading", function()
@@ -112,8 +104,8 @@ command! MyPluginTest echo ''
         pre_load = function()
           called = false
         end,
-        post_load = function()
-          called = true
+        post_load = function(plugin)
+          called = plugin.name
           require(plugin_name1)
         end,
       },
@@ -121,7 +113,7 @@ command! MyPluginTest echo ''
     })
     require(plugin_name1)
 
-    assert.is_true(called)
+    assert.equal(plugin_name1, called)
   end)
 
   it("can set a hook pre_load by filetype loading", function()
@@ -158,16 +150,16 @@ command! MyPluginTest echo ''
   end)
 
   it("can set a hook post_add", function()
-    local called = false
+    local added
     optpack.add(plugin1, {
       hooks = {
-        post_add = function()
-          called = true
+        post_add = function(plugin)
+          added = plugin.name
         end,
       },
     })
 
-    assert.is_true(called)
+    assert.equal(plugin_name1, added)
   end)
 
   it("executes hooks only once", function()

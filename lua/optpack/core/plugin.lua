@@ -32,8 +32,8 @@ function Plugins.add(self, full_name, opts)
   local plugin = Plugin.new(full_name, opts)
   if opts.enabled then
     self._plugins[plugin.name] = plugin
-    self._loaders[plugin.name] = Loader.new(plugin.name, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
-    opts.hooks.post_add()
+    self._loaders[plugin.name] = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
+    opts.hooks.post_add(plugin:expose())
   else
     self._plugins[plugin.name] = nil
     self._loaders[plugin.name] = nil
@@ -44,12 +44,7 @@ end
 function Plugins.list(self)
   local values = {}
   for _, plugin in self._plugins:iter() do
-    table.insert(values, {
-      full_name = plugin.full_name,
-      name = plugin.name,
-      directory = plugin.directory,
-      url = plugin.url,
-    })
+    table.insert(values, plugin:expose())
   end
   return values
 end
@@ -141,11 +136,11 @@ function Plugins._collect(self, pattern)
   return raw_plugins
 end
 
-function Plugins._load_installed(self, installed_plugin_names)
-  local plugin_names = vim.tbl_filter(function(name)
+function Plugins._load_installed(self, plugin_names)
+  local names = vim.tbl_filter(function(name)
     return self._load_on_installed[name]
-  end, installed_plugin_names)
-  for _, plugin_name in ipairs(plugin_names) do
+  end, plugin_names)
+  for _, plugin_name in ipairs(names) do
     self:load(plugin_name)
   end
 end
@@ -171,6 +166,10 @@ function Plugin.new(full_name, opts)
   return setmetatable(tbl, Plugin)
 end
 
+function Plugin.expose(self)
+  return {full_name = self.full_name, name = self.name, directory = self.directory, url = self.url}
+end
+
 function Plugin.install_or_update(self, emitter)
   if not self:installed() then
     return self:install(emitter)
@@ -183,7 +182,7 @@ end
 function Plugin.update(self, emitter)
   return self._updater:start(emitter:with({name = self.name})):next(function(updated_now)
     if updated_now then
-      self._post_update_hook()
+      self._post_update_hook(self:expose())
     end
     return updated_now
   end):catch(function(err)
@@ -194,7 +193,7 @@ end
 function Plugin.install(self, emitter)
   return self._installer:start(emitter:with({name = self.name})):next(function(installed_now)
     if installed_now then
-      self._post_install_hook()
+      self._post_install_hook(self:expose())
     end
     return installed_now
   end):catch(function(err)

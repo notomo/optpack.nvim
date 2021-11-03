@@ -104,12 +104,12 @@ describe("optpack.install()", function()
   it("exexutes post_install hook", function()
     helper.set_packpath()
 
-    local called = false
+    local installed
     optpack.add("account1/test1", {
       fetch = {base_url = git_server.url},
       hooks = {
-        post_install = function()
-          called = true
+        post_install = function(plugin)
+          installed = plugin.name
         end,
       },
     })
@@ -118,7 +118,7 @@ describe("optpack.install()", function()
     optpack.install({on_finished = on_finished})
     on_finished:wait()
 
-    assert.is_true(called)
+    assert.equal("test1", installed)
   end)
 
 end)

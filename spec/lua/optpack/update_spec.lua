@@ -112,12 +112,12 @@ describe("optpack.update()", function()
 
     helper.set_packpath()
 
-    local called = false
+    local udpated
     optpack.add("account1/test1", {
       fetch = {base_url = git_server.url},
       hooks = {
-        post_update = function()
-          called = true
+        post_update = function(plugin)
+          udpated = plugin.name
         end,
       },
     })
@@ -126,7 +126,7 @@ describe("optpack.update()", function()
     optpack.update({on_finished = on_finished})
     on_finished:wait()
 
-    assert.is_true(called)
+    assert.equal("test1", udpated)
   end)
 
 end)

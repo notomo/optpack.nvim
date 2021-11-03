@@ -9,14 +9,15 @@ local Loader = {}
 Loader.__index = Loader
 M.Loader = Loader
 
-function Loader.new(plugin_name, load_on, pre_load_hook, post_load_hook)
+function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
   vim.validate({
-    plugin_name = {plugin_name, "string"},
+    plugin = {plugin, "table"},
     load_on = {load_on, "table"},
     pre_load_hook = {pre_load_hook, "function"},
     post_load_hook = {post_load_hook, "function"},
   })
 
+  local plugin_name = plugin.name
   local group_name = "optpack_" .. plugin_name
   vim.cmd(([[
 augroup %s
@@ -33,7 +34,7 @@ augroup END
   local lua_loader_removers = OnModules.set(plugin_name, load_on.modules)
 
   local tbl = {
-    _plugin_name = plugin_name,
+    _plugin = plugin,
     _pre_load_hook = pre_load_hook,
     _post_load_hook = post_load_hook,
     _removers = {autocmd_remover, unpack(lua_loader_removers)},
@@ -46,9 +47,10 @@ function Loader.load(self)
     remover()
   end
 
-  self._pre_load_hook()
-  vim.cmd("packadd " .. self._plugin_name)
-  self._post_load_hook()
+  local plugin = self._plugin:expose()
+  self._pre_load_hook(plugin)
+  vim.cmd("packadd " .. self._plugin.name)
+  self._post_load_hook(plugin)
 end
 
 return M
