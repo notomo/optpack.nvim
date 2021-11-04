@@ -3,4 +3,7 @@ local path = pathlib.join(vim.fn.stdpath("cache"), "optpack", "test.log")
 local file = io.open(path, "a+")
 file:write("\n")
 file:close()
-return require("optpack.lib.logger").Logger.new(require("optpack.lib.logger").file_output(path))
+return {
+  logger = require("optpack.lib.logger").Logger.new(require("optpack.lib.logger").file_output(path)),
+  path = path,
+}

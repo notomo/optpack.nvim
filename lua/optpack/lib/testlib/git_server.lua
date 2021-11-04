@@ -1,6 +1,8 @@
 local GitClient = require("optpack.lib.testlib.git_client").GitClient
 local pathlib = require("optpack.lib.path")
-local logger = require("optpack.lib.testlib.logger"):add_prefix("[git_server]")
+local log = require("optpack.lib.testlib.logger")
+local logger = log.logger:add_prefix("[git_server]")
+local log_file_path = log.path
 
 local M = {}
 
@@ -72,9 +74,11 @@ function GitServer._add_commit(self, tmp_path, msg)
 end
 
 function GitServer.teardown(self)
-  vim.fn.jobstop(self._job_id)
   vim.fn.delete(self._tmp_dir, "rf")
   vim.fn.delete(self._git_root_dir, "rf")
+  if vim.fn.jobstop(self._job_id) == 0 then
+    error("git server is something wrong. see: " .. log_file_path)
+  end
 end
 
 function GitServer._health_check(self)
