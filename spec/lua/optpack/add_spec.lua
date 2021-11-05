@@ -273,4 +273,16 @@ describe("optpack.load()", function()
     assert.is_true(called)
   end)
 
+  it("raises an error if unexpected plugin is loaded", function()
+    local unexpected_packpath = "_unexpected"
+    helper.create_plugin_dir(plugin_name1, {opt_path = unexpected_packpath .. "/pack/optpack/opt/"})
+
+    optpack.add(plugin1)
+    vim.o.packpath = helper.test_data_dir .. unexpected_packpath
+
+    optpack.load(plugin_name1)
+
+    assert.exists_message([[failed to load expected directory: ]] .. helper.test_data_dir .. helper.opt_path .. plugin_name1)
+  end)
+
 end)

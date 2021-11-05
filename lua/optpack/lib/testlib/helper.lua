@@ -87,7 +87,8 @@ function M.create_plugin_dir(name, opts)
   opts = opts or {}
   M.cleanup_loaded_modules(name)
 
-  local root_dir = M.opt_path .. name
+  opts.opt_path = opts.opt_path or M.opt_path
+  local root_dir = opts.opt_path .. name
 
   local plugin_dir = ("%s/plugin/"):format(root_dir)
   M.new_directory(plugin_dir)

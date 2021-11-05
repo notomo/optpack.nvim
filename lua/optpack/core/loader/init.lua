@@ -51,6 +51,10 @@ function Loader.load(self)
   self._pre_load_hook(plugin)
   vim.cmd("packadd " .. self._plugin.name)
   self._post_load_hook(plugin)
+
+  if not vim.tbl_contains(vim.api.nvim_list_runtime_paths(), self._plugin.directory) then
+    return ([[failed to load expected directory: %s]]):format(self._plugin.directory)
+  end
 end
 
 return M
