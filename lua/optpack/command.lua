@@ -1,6 +1,6 @@
 local AddOption = require("optpack.core.option").AddOption
 local InstallOrUpdateOption = require("optpack.core.option").InstallOrUpdateOption
-local Plugins = require("optpack.core.plugin").Plugins
+local Plugins = require("optpack.core.plugins").Plugins
 local Outputters = require("optpack.view.outputter").Outputters
 local EventEmitter = require("optpack.lib.event_emitter").EventEmitter
 local messagelib = require("optpack.lib.message")
@@ -32,7 +32,7 @@ function Command.add(full_name, raw_opts)
 end
 
 function Command.list()
-  return Plugins.state():list()
+  return Plugins.state():expose()
 end
 
 function Command.install(raw_opts)
