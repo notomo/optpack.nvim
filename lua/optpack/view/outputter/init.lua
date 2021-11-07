@@ -1,3 +1,4 @@
+local MessageFactory = require("optpack.view.message_factory").MessageFactory
 local modulelib = require("optpack.lib.module")
 
 local M = {}
@@ -12,7 +13,7 @@ function Outputters.new(cmd_type, raw_outputters)
   local outputters = {}
   local errs = {}
   for _, raw_outputter in ipairs(raw_outputters) do
-    local outputter, err = Outputters._new_one(cmd_type, raw_outputter.type, raw_outputter.opts)
+    local outputter, err = Outputters._new_one(cmd_type, raw_outputter.type, raw_outputter.handlers, raw_outputter.opts)
     if err then
       table.insert(errs, err)
     else
@@ -25,7 +26,7 @@ function Outputters.new(cmd_type, raw_outputters)
   return outputters
 end
 
-function Outputters._new_one(cmd_type, typ, opts)
+function Outputters._new_one(cmd_type, typ, handlers, opts)
   vim.validate({
     cmd_type = {cmd_type, "string"},
     typ = {typ, "string"},
@@ -36,7 +37,8 @@ function Outputters._new_one(cmd_type, typ, opts)
   if not Outputter then
     return nil, "not found outputter: " .. typ
   end
-  return Outputter.new(cmd_type, opts)
+  local message_factory = MessageFactory.new(handlers)
+  return Outputter.new(cmd_type, message_factory, opts)
 end
 
 return M

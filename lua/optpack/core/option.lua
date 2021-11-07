@@ -48,6 +48,7 @@ InstallOrUpdateOption.default = {
   outputters = {
     {
       type = "buffer",
+      handlers = {},
       opts = {
         open = function(bufnr)
           vim.cmd("botright split | buffer" .. bufnr)

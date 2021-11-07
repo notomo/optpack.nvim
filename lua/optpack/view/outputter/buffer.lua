@@ -1,11 +1,10 @@
-local Event = require("optpack.core.event").Event
 local Once = require("optpack.lib.once").Once
 local bufferlib = require("optpack.lib.buffer")
 
 local M = {}
 M.__index = M
 
-function M.new(cmd_type, opts)
+function M.new(cmd_type, message_factory, opts)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "optpack"
@@ -18,60 +17,21 @@ function M.new(cmd_type, opts)
     _delete_first_line = Once.new(function()
       vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, {})
     end),
+    _message_factory = message_factory,
   }
   return setmetatable(tbl, M), nil
 end
-
-local message_handlers = {
-  [Event.StartInstall] = function()
-    return {"Start installing."}
-  end,
-  [Event.GitCloned] = function(output)
-    return output
-  end,
-  [Event.Installed] = function()
-    return {"Installed."}
-  end,
-  [Event.FinishedInstall] = function()
-    return {"Finished installing."}
-  end,
-
-  [Event.StartUpdate] = function()
-    return {"Start updating."}
-  end,
-  [Event.GitPulled] = function(_)
-    return {}
-  end,
-  [Event.Updated] = function(reivision_diff)
-    local msg = ("Updated. (%s)"):format(reivision_diff)
-    return {msg}
-  end,
-  [Event.GitCommitLog] = function(output)
-    return output, "Comment"
-  end,
-  [Event.FinishedUpdate] = function()
-    return {"Finished updating."}
-  end,
-
-  [Event.Error] = function(err)
-    if type(err) == "table" then
-      return err
-    end
-    return {err}, "WarningMsg"
-  end,
-}
 
 function M.handle(self, event_name, ctx, ...)
   if not vim.api.nvim_buf_is_valid(self._bufnr) then
     return
   end
 
-  local handler = message_handlers[event_name]
-  if not handler then
+  local lines, hl_group = self._message_factory:create(event_name, ...)
+  if not lines then
     return
   end
 
-  local lines, hl_group = handler(...)
   lines = vim.tbl_map(function(line)
     return self:_format(ctx, line)
   end, lines)
