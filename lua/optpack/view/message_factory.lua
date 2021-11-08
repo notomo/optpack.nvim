@@ -34,7 +34,7 @@ MessageFactory.default_handlers = {
   [Event.GitCommitLog] = function(self, ctx, output)
     local prefix = self:_prefix(ctx)
     return vim.tbl_map(function(line)
-      return {prefix, {line, "Comment"}}
+      return {prefix, {line, "OptpackGitCommitLog"}}
     end, output)
   end,
   [Event.FinishedUpdate] = function(self, ctx)
@@ -45,10 +45,10 @@ MessageFactory.default_handlers = {
     local prefix = self:_prefix(ctx)
     if type(err) == "table" then
       return vim.tbl_map(function(e)
-        return {prefix, {e, "WarningMsg"}}
+        return {prefix, {e, "OptpackError"}}
       end, err)
     end
-    return {{prefix, {err, "WarningMsg"}}}
+    return {{prefix, {err, "OptpackError"}}}
   end,
 }
 
@@ -76,5 +76,12 @@ function MessageFactory._prefix(_, ctx)
   end
   return {("%s > "):format(ctx.name)}
 end
+
+local highlightlib = require("optpack.lib.highlight")
+local force = false
+M.hl_groups = {
+  highlightlib.link("OptpackGitCommitLog", force, "Comment"),
+  highlightlib.link("OptpackError", force, "WarningMsg"),
+}
 
 return M
