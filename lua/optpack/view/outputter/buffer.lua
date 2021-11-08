@@ -1,5 +1,6 @@
 local Once = require("optpack.lib.once").Once
 local bufferlib = require("optpack.lib.buffer")
+local vim = vim
 
 local M = {}
 M.__index = M
@@ -27,36 +28,18 @@ function M.handle(self, event_name, ctx, ...)
     return
   end
 
-  local lines, hl_group = self._message_factory:create(event_name, ...)
-  if not lines then
+  local hl_lines = self._message_factory:create(event_name, ctx, ...)
+  if not hl_lines then
     return
   end
 
-  lines = vim.tbl_map(function(line)
-    return self:_format(ctx, line)
-  end, lines)
-
   vim.bo[self._bufnr].modifiable = true
-  vim.api.nvim_buf_set_lines(self._bufnr, -1, -1, false, lines)
+  vim.api.nvim_buf_set_lines(self._bufnr, -1, -1, false, hl_lines:lines())
   self._delete_first_line()
   vim.bo[self._bufnr].modifiable = false
 
-  if not hl_group then
-    return
-  end
-
-  local count = vim.api.nvim_buf_line_count(self._bufnr)
-  vim.api.nvim_buf_set_extmark(self._bufnr, self._ns, count - #lines, 0, {
-    end_line = count,
-    hl_group = hl_group,
-  })
-end
-
-function M._format(_, ctx, line)
-  if not ctx.name then
-    return ("> %s"):format(line)
-  end
-  return ("%s > %s"):format(ctx.name, line)
+  local end_row = vim.api.nvim_buf_line_count(self._bufnr)
+  hl_lines:add_highlight(self._bufnr, self._ns, end_row)
 end
 
 return M
