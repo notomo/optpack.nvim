@@ -88,6 +88,8 @@ function Promise._start_resolve(self, v)
   end
   result:next(function(...)
     self:_resolve(...)
+  end):catch(function(...)
+    self:_reject(...)
   end)
 end
 
@@ -116,7 +118,9 @@ function Promise._start_reject(self, v)
   if not Promise.is_promise(result) then
     return self:_reject(result)
   end
-  result:catch(function(...)
+  result:next(function(...)
+    self:_resolve(...)
+  end):catch(function(...)
     self:_reject(...)
   end)
 end

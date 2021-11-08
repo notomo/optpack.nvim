@@ -46,7 +46,8 @@ function Plugin.install_or_update(self, emitter)
 end
 
 function Plugin.update(self, emitter)
-  return self._updater:start(emitter:with({name = self.name})):next(function(updated_now)
+  emitter = emitter:with({name = self.name})
+  return self._updater:start(emitter):next(function(updated_now)
     if updated_now then
       self._post_update_hook(self:expose())
     end
@@ -57,7 +58,8 @@ function Plugin.update(self, emitter)
 end
 
 function Plugin.install(self, emitter)
-  return self._installer:start(emitter:with({name = self.name})):next(function(installed_now)
+  emitter = emitter:with({name = self.name})
+  return self._installer:start(emitter):next(function(installed_now)
     if installed_now then
       self._post_install_hook(self:expose())
     end

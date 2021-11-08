@@ -179,6 +179,27 @@ describe("promise:catch()", function()
     assert.equal(want, got)
   end)
 
+  it("can chain with timered promise", function()
+    local want = "error"
+    local got
+    local on_finished = helper.on_finished()
+    Promise.new(function(resolve)
+      resolve("ok")
+    end):next(function()
+      return Promise.new(function(_, reject)
+        vim.defer_fn(function()
+          reject(want)
+        end, 25)
+      end)
+    end):catch(function(v)
+      got = v
+      on_finished()
+    end)
+    on_finished.wait()
+
+    assert.equal(want, got)
+  end)
+
 end)
 
 describe("promise:finally()", function()
