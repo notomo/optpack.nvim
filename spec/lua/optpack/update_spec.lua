@@ -68,15 +68,25 @@ describe("optpack.update()", function()
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
 
     local on_finished = helper.on_finished()
-    optpack.update({
-      on_finished = on_finished,
-      parallel_interval = helper.parallel_interval,
-      pattern = "test2",
-    })
+    optpack.update({on_finished = on_finished, pattern = "test2"})
     on_finished:wait()
 
     assert.no.exists_pattern([[test1 > Updated.]])
     assert.exists_pattern([[test2 > Updated.]])
+  end)
+
+  it("shows error if non-git repository directory exists", function()
+    helper.create_plugin_dir("test1")
+
+    helper.set_packpath()
+
+    optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
+
+    local on_finished = helper.on_finished()
+    optpack.update({on_finished = on_finished})
+    on_finished:wait()
+
+    assert.exists_pattern([[test1 > fatal: not a git repository]])
   end)
 
   it("does not raise an error event if output buffer already exists", function()
@@ -112,12 +122,12 @@ describe("optpack.update()", function()
 
     helper.set_packpath()
 
-    local udpated
+    local updated
     optpack.add("account1/test1", {
       fetch = {base_url = git_server.url},
       hooks = {
         post_update = function(plugin)
-          udpated = plugin.name
+          updated = plugin.name
         end,
       },
     })
@@ -126,7 +136,7 @@ describe("optpack.update()", function()
     optpack.update({on_finished = on_finished})
     on_finished:wait()
 
-    assert.equal("test1", udpated)
+    assert.equal("test1", updated)
   end)
 
 end)

@@ -1,5 +1,6 @@
 local Promise = require("optpack.lib.promise").Promise
 local Output = require("optpack.lib.output").Output
+local pathlib = require("optpack.lib.path")
 
 local M = {}
 
@@ -42,7 +43,14 @@ function Git.clone(self, directory, url, depth)
 end
 
 function Git.pull(self, directory)
-  local cmd = {"git", "pull", "--ff-only", "--rebase=false"}
+  local cmd = {
+    "git",
+    "--git-dir",
+    pathlib.join(directory, ".git"),
+    "pull",
+    "--ff-only",
+    "--rebase=false",
+  }
   local stdout = Output.new()
   local stderr = Output.new()
   return Promise.new(function(resolve, reject)
@@ -66,7 +74,7 @@ function Git.pull(self, directory)
 end
 
 function Git.get_revision(self, directory)
-  local cmd = {"git", "rev-parse", "--short", "HEAD"}
+  local cmd = {"git", "--git-dir", pathlib.join(directory, ".git"), "rev-parse", "--short", "HEAD"}
   local stdout = Output.new()
   local stderr = Output.new()
   return Promise.new(function(resolve, reject)
@@ -91,7 +99,14 @@ function Git.get_revision(self, directory)
 end
 
 function Git.log(self, directory, revision)
-  local cmd = {"git", "log", [[--pretty=format:%h %s]], revision}
+  local cmd = {
+    "git",
+    "--git-dir",
+    pathlib.join(directory, ".git"),
+    "log",
+    [[--pretty=format:%h %s]],
+    revision,
+  }
   local stdout = Output.new()
   local stderr = Output.new()
   return Promise.new(function(resolve, reject)
