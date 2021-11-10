@@ -27,7 +27,8 @@ function Git.clone(self, directory, url, depth)
     local _, err = self._job_factory:create(cmd, {
       on_exit = function(_, code)
         if code ~= 0 then
-          return reject(stderr:lines())
+          local err = {table.concat(cmd, " "), unpack(stderr:lines())}
+          return reject(err)
         end
         return resolve(stdout:lines())
       end,
@@ -57,7 +58,8 @@ function Git.pull(self, directory)
     local _, err = self._job_factory:create(cmd, {
       on_exit = function(_, code)
         if code ~= 0 then
-          return reject(stderr:lines())
+          local err = {table.concat(cmd, " "), unpack(stderr:lines())}
+          return reject(err)
         end
         return resolve(stdout:lines())
       end,
@@ -81,7 +83,8 @@ function Git.get_revision(self, directory)
     local _, err = self._job_factory:create(cmd, {
       on_exit = function(_, code)
         if code ~= 0 then
-          return reject(stderr:lines())
+          local err = {table.concat(cmd, " "), unpack(stderr:lines())}
+          return reject(err)
         end
         local revision = stdout:str()
         return resolve(revision)
@@ -113,7 +116,8 @@ function Git.log(self, directory, revision)
     local _, err = self._job_factory:create(cmd, {
       on_exit = function(_, code)
         if code ~= 0 then
-          return reject(stderr:lines())
+          local err = {table.concat(cmd, " "), unpack(stderr:lines())}
+          return reject(err)
         end
         return resolve(stdout:lines())
       end,

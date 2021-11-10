@@ -86,6 +86,7 @@ describe("optpack.update()", function()
     optpack.update({on_finished = on_finished})
     on_finished:wait()
 
+    assert.exists_pattern([[test1 > git --git-dir ]])
     assert.exists_pattern([[test1 > fatal: not a git repository]])
   end)
 
