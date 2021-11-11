@@ -140,5 +140,9 @@ describe("optpack.update()", function()
     assert.equal("test1", updated)
   end)
 
-end)
+  it("raises an error if pattern is invalid", function()
+    optpack.update({pattern = [[\(test]]})
+    assert.exists_message([[invalid pattern]])
+  end)
 
+end)

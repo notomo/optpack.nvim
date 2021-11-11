@@ -121,4 +121,9 @@ describe("optpack.install()", function()
     assert.equal("test1", installed)
   end)
 
+  it("raises an error if pattern is invalid", function()
+    optpack.install({pattern = [[\(test]]})
+    assert.exists_message([[invalid pattern]])
+  end)
+
 end)

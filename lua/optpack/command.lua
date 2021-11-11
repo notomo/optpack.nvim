@@ -36,7 +36,10 @@ function Command.list()
 end
 
 function Command.install(raw_opts)
-  local opts = InstallOrUpdateOption.new(raw_opts)
+  local opts, opts_err = InstallOrUpdateOption.new(raw_opts)
+  if opts_err then
+    return nil, opts_err
+  end
 
   local outputters, err = Outputters.new("install", opts.outputters)
   if err then
@@ -48,7 +51,10 @@ function Command.install(raw_opts)
 end
 
 function Command.update(raw_opts)
-  local opts = InstallOrUpdateOption.new(raw_opts)
+  local opts, opts_err = InstallOrUpdateOption.new(raw_opts)
+  if opts_err then
+    return nil, opts_err
+  end
 
   local outputters, err = Outputters.new("update", opts.outputters)
   if err then
