@@ -61,11 +61,7 @@ describe("optpack.install()", function()
     optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
 
     local on_finished = helper.on_finished()
-    optpack.install({
-      on_finished = on_finished,
-      parallel_interval = helper.parallel_interval,
-      pattern = "test2",
-    })
+    optpack.install({on_finished = on_finished, pattern = "test2"})
     on_finished:wait()
 
     assert.exists_dir(helper.packpath_name .. "/pack/optpack/opt/test2")

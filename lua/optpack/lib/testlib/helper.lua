@@ -23,6 +23,7 @@ function M.after_each()
   vim.fn.delete(M.root .. "/spec/test_data", "rf")
   vim.cmd("comclear")
   vim.cmd("silent! autocmd! optpack")
+  vim.cmd("messages clear")
   print(" ")
 end
 
