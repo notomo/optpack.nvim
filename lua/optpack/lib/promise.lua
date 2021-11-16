@@ -207,22 +207,13 @@ end
 
 function Promise.finally(self, f)
   vim.validate({f = {f, "function"}})
-
-  if self._status == PromiseStatus.Fulfilled then
-    local promise = Promise._new_pending(f)
-    promise:_start_resolve_finally(self._value)
-    return promise
-  end
-
-  if self._status == PromiseStatus.Rejected then
-    local promise = Promise._new_pending(f)
-    promise:_start_reject_finally(self._value)
-    return promise
-  end
-
-  local promise = Promise._new_pending(f)
-  table.insert(self._finally_promises, promise)
-  return promise
+  return self:next(function(...)
+    f()
+    return ...
+  end):catch(function(err)
+    f()
+    error(err, 0)
+  end)
 end
 
 function Promise.is_pending(self)
