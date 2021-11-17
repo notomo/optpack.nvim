@@ -8,17 +8,17 @@ local Promise = {}
 Promise.__index = Promise
 M.Promise = Promise
 
-function Promise._new_pending(f)
-  vim.validate({f = {f, "function", true}})
+function Promise._new_pending(on_fullfilled, on_rejected)
+  vim.validate({
+    on_fullfilled = {on_fullfilled, "function", true},
+    on_rejected = {on_rejected, "function", true},
+  })
   local tbl = {
     _status = PromiseStatus.Pending,
-    _next_promises = {},
-    _catch_promises = {},
-    _finally_promises = {},
+    _queued = {},
     _value = nil,
-    _f = f or function(...)
-      return ...
-    end,
+    _on_fullfilled = on_fullfilled,
+    _on_rejected = on_rejected,
   }
   return setmetatable(tbl, Promise)
 end
@@ -67,19 +67,17 @@ function Promise._resolve(self, resolved)
   end
   self._status = PromiseStatus.Fulfilled
   self._value = resolved
-  for _, promise in ipairs(self._next_promises) do
+  for _ = 1, #self._queued do
+    local promise = table.remove(self._queued, 1)
     promise:_start_resolve(resolved)
-  end
-  for _, promise in ipairs(self._catch_promises) do
-    promise:_resolve(resolved)
-  end
-  for _, promise in ipairs(self._finally_promises) do
-    promise:_start_resolve_finally(resolved)
   end
 end
 
 function Promise._start_resolve(self, v)
-  local ok, result = pcall(self._f, v)
+  if not self._on_fullfilled then
+    return self:_resolve(v)
+  end
+  local ok, result = pcall(self._on_fullfilled, v)
   if not ok then
     return self:_reject(result)
   end
@@ -99,19 +97,17 @@ function Promise._reject(self, rejected)
   end
   self._status = PromiseStatus.Rejected
   self._value = rejected
-  for _, promise in ipairs(self._catch_promises) do
+  for _ = 1, #self._queued do
+    local promise = table.remove(self._queued, 1)
     promise:_start_reject(rejected)
-  end
-  for _, promise in ipairs(self._next_promises) do
-    promise:_reject(rejected)
-  end
-  for _, promise in ipairs(self._finally_promises) do
-    promise:_start_reject_finally(rejected)
   end
 end
 
 function Promise._start_reject(self, v)
-  local ok, result = pcall(self._f, v)
+  if not self._on_rejected then
+    return self:_reject(v)
+  end
+  local ok, result = pcall(self._on_rejected, v)
   if ok and not Promise.is_promise(result) then
     return self:_resolve(result)
   end
@@ -125,93 +121,41 @@ function Promise._start_reject(self, v)
   end)
 end
 
--- TODO: promise
-function Promise._start_resolve_finally(self, v)
-  if self._status ~= PromiseStatus.Pending then
-    return
-  end
-  local ok, result = pcall(self._f)
-  if ok then
-    if not Promise.is_promise(result) then
-      return self:_resolve(v)
-    end
-    return result:next(function(...)
-      self:_resolve(...)
-    end)
-  end
-  if not Promise.is_promise(result) then
-    return self:_reject(result)
-  end
-  result:catch(function(...)
-    self:_reject(...)
-  end)
-end
-
--- TODO: promise
-function Promise._start_reject_finally(self, rejected)
-  if self._status ~= PromiseStatus.Pending then
-    return
-  end
-  local ok, result = pcall(self._f)
-  if ok then
-    if not Promise.is_promise(result) then
-      return self:_reject(rejected)
-    end
-    return result:catch(function(...)
-      self:_reject(...)
-    end)
-  end
-  if not Promise.is_promise(result) then
-    return self:_reject(result)
-  end
-  result:catch(function(...)
-    self:_reject(...)
-  end)
-end
-
-function Promise.next(self, f)
-  vim.validate({f = {f, "function"}})
+-- TODO: schedule
+-- TODO: detect unhandled rejection
+function Promise.next(self, on_fullfilled, on_rejected)
+  vim.validate({
+    on_fullfilled = {on_fullfilled, "function", true},
+    on_rejected = {on_rejected, "function", true},
+  })
 
   if self._status == PromiseStatus.Fulfilled then
-    local promise = Promise._new_pending(f)
+    local promise = Promise._new_pending(on_fullfilled, nil)
     promise:_start_resolve(self._value)
     return promise
   end
 
   if self._status == PromiseStatus.Rejected then
-    return Promise.reject(self._value)
-  end
-
-  local promise = Promise._new_pending(f)
-  table.insert(self._next_promises, promise)
-  return promise
-end
-
-function Promise.catch(self, f)
-  vim.validate({f = {f, "function"}})
-
-  if self._status == PromiseStatus.Fulfilled then
-    return Promise.resolve(self._value)
-  end
-
-  if self._status == PromiseStatus.Rejected then
-    local promise = Promise._new_pending(f)
+    local promise = Promise._new_pending(nil, on_rejected)
     promise:_start_reject(self._value)
     return promise
   end
 
-  local promise = Promise._new_pending(f)
-  table.insert(self._catch_promises, promise)
+  local promise = Promise._new_pending(on_fullfilled, on_rejected)
+  table.insert(self._queued, promise)
   return promise
 end
 
-function Promise.finally(self, f)
-  vim.validate({f = {f, "function"}})
+function Promise.catch(self, on_rejected)
+  return self:next(nil, on_rejected)
+end
+
+function Promise.finally(self, on_finally)
   return self:next(function(...)
-    f()
+    on_finally()
     return ...
   end):catch(function(err)
-    f()
+    on_finally()
     error(err, 0)
   end)
 end
