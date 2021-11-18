@@ -121,28 +121,22 @@ function Promise._start_reject(self, v)
   end)
 end
 
--- TODO: schedule
 -- TODO: detect unhandled rejection
 function Promise.next(self, on_fullfilled, on_rejected)
   vim.validate({
     on_fullfilled = {on_fullfilled, "function", true},
     on_rejected = {on_rejected, "function", true},
   })
-
-  if self._status == PromiseStatus.Fulfilled then
-    local promise = Promise._new_pending(on_fullfilled, nil)
-    promise:_start_resolve(self._value)
-    return promise
-  end
-
-  if self._status == PromiseStatus.Rejected then
-    local promise = Promise._new_pending(nil, on_rejected)
-    promise:_start_reject(self._value)
-    return promise
-  end
-
   local promise = Promise._new_pending(on_fullfilled, on_rejected)
-  table.insert(self._queued, promise)
+  vim.schedule(function()
+    if self._status == PromiseStatus.Fulfilled then
+      return promise:_start_resolve(self._value)
+    end
+    if self._status == PromiseStatus.Rejected then
+      return promise:_start_reject(self._value)
+    end
+    table.insert(self._queued, promise)
+  end)
   return promise
 end
 
