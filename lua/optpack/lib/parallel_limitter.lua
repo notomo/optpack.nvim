@@ -4,6 +4,22 @@ local vim = vim
 
 local M = {}
 
+local IsRunning = {}
+IsRunning.__index = IsRunning
+M.IsRunning = IsRunning
+
+function IsRunning.new(promise)
+  local tbl = {_is_running = true}
+  promise:finally(function()
+    tbl._is_running = false
+  end)
+  return setmetatable(tbl, IsRunning)
+end
+
+function IsRunning.__call(self)
+  return self._is_running
+end
+
 local ParallelLimitter = {}
 ParallelLimitter.__index = ParallelLimitter
 M.ParallelLimitter = ParallelLimitter
@@ -56,9 +72,7 @@ function ParallelLimitter._consume_queued(self, count)
   self._queued = vim.list_slice(self._queued, count + 1)
   for _, f in ipairs(funcs) do
     local promise = f()
-    table.insert(self._running, function()
-      return promise:is_pending()
-    end)
+    table.insert(self._running, IsRunning.new(promise))
   end
 end
 

@@ -39,12 +39,12 @@ function Promise.new(f)
   return self
 end
 
-function Promise.is_promise(v)
+function Promise._is_promise(v)
   return getmetatable(v) == Promise
 end
 
 function Promise.resolve(v)
-  if Promise.is_promise(v) then
+  if Promise._is_promise(v) then
     return v
   end
   return Promise.new(function(resolve, _)
@@ -53,7 +53,7 @@ function Promise.resolve(v)
 end
 
 function Promise.reject(v)
-  if Promise.is_promise(v) then
+  if Promise._is_promise(v) then
     return v
   end
   return Promise.new(function(_, reject)
@@ -81,7 +81,7 @@ function Promise._start_resolve(self, v)
   if not ok then
     return self:_reject(result)
   end
-  if not Promise.is_promise(result) then
+  if not Promise._is_promise(result) then
     return self:_resolve(result)
   end
   result:next(function(...)
@@ -108,10 +108,10 @@ function Promise._start_reject(self, v)
     return self:_reject(v)
   end
   local ok, result = pcall(self._on_rejected, v)
-  if ok and not Promise.is_promise(result) then
+  if ok and not Promise._is_promise(result) then
     return self:_resolve(result)
   end
-  if not Promise.is_promise(result) then
+  if not Promise._is_promise(result) then
     return self:_reject(result)
   end
   result:next(function(...)
@@ -152,10 +152,6 @@ function Promise.finally(self, on_finally)
     on_finally()
     error(err, 0)
   end)
-end
-
-function Promise.is_pending(self)
-  return self._status == PromiseStatus.Pending
 end
 
 return M
