@@ -44,18 +44,12 @@ function Promise._is_promise(v)
 end
 
 function Promise.resolve(v)
-  if Promise._is_promise(v) then
-    return v
-  end
   return Promise.new(function(resolve, _)
     resolve(v)
   end)
 end
 
 function Promise.reject(v)
-  if Promise._is_promise(v) then
-    return v
-  end
   return Promise.new(function(_, reject)
     reject(v)
   end)
@@ -79,10 +73,16 @@ function Promise._start_resolve(self, v)
   end
   local ok, result = pcall(self._on_fullfilled, v)
   if not ok then
-    return self:_reject(result)
+    vim.schedule(function()
+      self:_reject(result)
+    end)
+    return
   end
   if not Promise._is_promise(result) then
-    return self:_resolve(result)
+    vim.schedule(function()
+      self:_resolve(result)
+    end)
+    return
   end
   result:next(function(...)
     self:_resolve(...)
@@ -109,10 +109,16 @@ function Promise._start_reject(self, v)
   end
   local ok, result = pcall(self._on_rejected, v)
   if ok and not Promise._is_promise(result) then
-    return self:_resolve(result)
+    vim.schedule(function()
+      self:_resolve(result)
+    end)
+    return
   end
   if not Promise._is_promise(result) then
-    return self:_reject(result)
+    vim.schedule(function()
+      self:_reject(result)
+    end)
+    return
   end
   result:next(function(...)
     self:_resolve(...)

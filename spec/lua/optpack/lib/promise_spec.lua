@@ -23,6 +23,32 @@ describe("promise:next()", function()
     assert.equal(want, got)
   end)
 
+  it("schedules function to be invoked by event loop", function()
+    local promise = Promise.new(function(resolve)
+      resolve()
+    end)
+
+    local got = {}
+    local on_finished1 = helper.on_finished()
+    local on_finished2 = helper.on_finished()
+    promise:next(function()
+      table.insert(got, 1)
+    end):next(function()
+      table.insert(got, 3)
+      on_finished1()
+    end)
+    promise:next(function()
+      table.insert(got, 2)
+    end):next(function()
+      table.insert(got, 4)
+      on_finished2()
+    end)
+    on_finished1:wait()
+    on_finished2:wait()
+
+    assert.is_same({1, 2, 3, 4}, got)
+  end)
+
   it("skips catch()", function()
     local want = "ok"
     local got
