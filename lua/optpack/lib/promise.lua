@@ -8,7 +8,11 @@ local Promise = {}
 Promise.__index = Promise
 M.Promise = Promise
 
-function Promise._new_pending(on_fullfilled, on_rejected)
+local is_promise = function(v)
+  return getmetatable(v) == Promise
+end
+
+local new_pending = function(on_fullfilled, on_rejected)
   vim.validate({
     on_fullfilled = {on_fullfilled, "function", true},
     on_rejected = {on_rejected, "function", true},
@@ -26,7 +30,7 @@ end
 function Promise.new(f)
   vim.validate({f = {f, "function"}})
 
-  local self = Promise._new_pending()
+  local self = new_pending()
 
   local resolve = function(...)
     self:_resolve(...)
@@ -39,12 +43,8 @@ function Promise.new(f)
   return self
 end
 
-function Promise._is_promise(v)
-  return getmetatable(v) == Promise
-end
-
 function Promise.resolve(v)
-  if Promise._is_promise(v) then
+  if is_promise(v) then
     return v
   end
   return Promise.new(function(resolve, _)
@@ -53,7 +53,7 @@ function Promise.resolve(v)
 end
 
 function Promise.reject(v)
-  if Promise._is_promise(v) then
+  if is_promise(v) then
     return v
   end
   return Promise.new(function(_, reject)
@@ -73,22 +73,20 @@ function Promise._resolve(self, resolved)
   end
 end
 
-function Promise._start_resolve(self, v)
+function Promise._start_resolve(self, resolved)
   if not self._on_fullfilled then
-    return self:_resolve(v)
+    return self:_resolve(resolved)
   end
-  local ok, result = pcall(self._on_fullfilled, v)
+  local ok, result = pcall(self._on_fullfilled, resolved)
   if not ok then
-    vim.schedule(function()
+    return vim.schedule(function()
       self:_reject(result)
     end)
-    return
   end
-  if not Promise._is_promise(result) then
-    vim.schedule(function()
+  if not is_promise(result) then
+    return vim.schedule(function()
       self:_resolve(result)
     end)
-    return
   end
   result:next(function(...)
     self:_resolve(...)
@@ -109,22 +107,20 @@ function Promise._reject(self, rejected)
   end
 end
 
-function Promise._start_reject(self, v)
+function Promise._start_reject(self, rejected)
   if not self._on_rejected then
-    return self:_reject(v)
+    return self:_reject(rejected)
   end
-  local ok, result = pcall(self._on_rejected, v)
-  if ok and not Promise._is_promise(result) then
-    vim.schedule(function()
+  local ok, result = pcall(self._on_rejected, rejected)
+  if ok and not is_promise(result) then
+    return vim.schedule(function()
       self:_resolve(result)
     end)
-    return
   end
-  if not Promise._is_promise(result) then
-    vim.schedule(function()
+  if not is_promise(result) then
+    return vim.schedule(function()
       self:_reject(result)
     end)
-    return
   end
   result:next(function(...)
     self:_resolve(...)
@@ -139,7 +135,7 @@ function Promise.next(self, on_fullfilled, on_rejected)
     on_fullfilled = {on_fullfilled, "function", true},
     on_rejected = {on_rejected, "function", true},
   })
-  local promise = Promise._new_pending(on_fullfilled, on_rejected)
+  local promise = new_pending(on_fullfilled, on_rejected)
   vim.schedule(function()
     if self._status == PromiseStatus.Fulfilled then
       return promise:_start_resolve(self._value)
@@ -157,6 +153,7 @@ function Promise.catch(self, on_rejected)
 end
 
 function Promise.finally(self, on_finally)
+  vim.validate({on_finally = {on_finally, "function", true}})
   return self:next(function(...)
     on_finally()
     return ...
@@ -175,14 +172,8 @@ function Promise.all(list)
       resolve(results)
     end
 
-    local promises = vim.tbl_map(function(e)
-      if Promise._is_promise(e) then
-        return e
-      end
-      return Promise.resolve(e)
-    end, list)
-    for i, p in ipairs(promises) do
-      p:next(function(v)
+    for i, e in ipairs(list) do
+      Promise.resolve(e):next(function(v)
         results[i] = v
         if remain == 1 then
           return resolve(results)
@@ -198,14 +189,8 @@ end
 function Promise.race(list)
   vim.validate({list = {list, "table"}})
   return Promise.new(function(resolve, reject)
-    local promises = vim.tbl_map(function(e)
-      if Promise._is_promise(e) then
-        return e
-      end
-      return Promise.resolve(e)
-    end, list)
-    for _, p in ipairs(promises) do
-      p:next(function(...)
+    for _, e in ipairs(list) do
+      Promise.resolve(e):next(function(...)
         return resolve(...)
       end):catch(function(...)
         reject(...)
