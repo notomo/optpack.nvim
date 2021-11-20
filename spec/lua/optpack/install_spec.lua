@@ -14,10 +14,7 @@ describe("optpack.install()", function()
     git_server:teardown()
   end)
 
-  before_each(function()
-    helper.before_each()
-    optpack.set_default({install_or_update = {parallel = {interval = helper.parallel_interval}}})
-  end)
+  before_each(helper.before_each)
   after_each(helper.after_each)
 
   it("installs plugins if directories do not exist", function()

@@ -1,35 +1,18 @@
 local Promise = require("optpack.lib.promise").Promise
-
 local vim = vim
 
 local M = {}
-
-local IsRunning = {}
-IsRunning.__index = IsRunning
-M.IsRunning = IsRunning
-
-function IsRunning.new(promise)
-  local tbl = {_is_running = true}
-  promise:finally(function()
-    tbl._is_running = false
-  end)
-  return setmetatable(tbl, IsRunning)
-end
-
-function IsRunning.__call(self)
-  return self._is_running
-end
 
 local ParallelLimitter = {}
 ParallelLimitter.__index = ParallelLimitter
 M.ParallelLimitter = ParallelLimitter
 
-function ParallelLimitter.new(limit, interval)
-  vim.validate({limit = {limit, "number"}, interval = {interval, "number"}})
+function ParallelLimitter.new(limit)
+  vim.validate({limit = {limit, "number"}})
   if limit <= 0 then
     error("limit: must be natural number")
   end
-  local tbl = {_limit = limit, _queued = {}, _running = {}, _interval = interval}
+  local tbl = {_limit = limit, _queued = {}, _started = {}}
   return setmetatable(tbl, ParallelLimitter)
 end
 
@@ -39,41 +22,27 @@ end
 
 function ParallelLimitter.start(self)
   return Promise.new(function(resolve)
-    self:_start(resolve, 0)
+    self:_start(resolve, self._limit)
   end)
 end
 
-function ParallelLimitter._start(self, resolve, next_time_ms)
-  vim.loop.new_timer():start(next_time_ms, 0, vim.schedule_wrap(function()
-    self:_remove_finished()
-    self:_consume_queued(self._limit - #self._running)
-    if #self._queued == 0 and #self._running == 0 then
-      resolve()
-    else
-      self:_start(resolve, self._interval)
-    end
-  end))
-end
-
-function ParallelLimitter._remove_finished(self)
-  local finished = {}
-  for i, is_running in ipairs(self._running) do
-    if not is_running() then
-      table.insert(finished, i)
-    end
-  end
-  for _, i in ipairs(vim.fn.reverse(finished)) do
-    table.remove(self._running, i)
-  end
-end
-
-function ParallelLimitter._consume_queued(self, count)
+function ParallelLimitter._start(self, resolve, count)
   local funcs = vim.list_slice(self._queued, 0, count)
   self._queued = vim.list_slice(self._queued, count + 1)
+  local started = {}
   for _, f in ipairs(funcs) do
-    local promise = f()
-    table.insert(self._running, IsRunning.new(promise))
+    local promise = f():finally(function()
+      return self:_start(resolve, 1)
+    end)
+    table.insert(started, promise)
   end
+  vim.list_extend(self._started, started)
+  if #self._queued == 0 then
+    Promise.all(self._started):next(function()
+      resolve()
+    end)
+  end
+  return Promise.all(started)
 end
 
 return M

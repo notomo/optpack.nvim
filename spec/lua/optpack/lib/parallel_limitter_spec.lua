@@ -9,7 +9,7 @@ describe("ParallelLimitter", function()
 
   it("consumes all added task", function()
     local call_count = 0
-    local parallel = ParallelLimitter.new(8, 10)
+    local parallel = ParallelLimitter.new(8)
     for _ = 1, 10 do
       parallel:add(function()
         call_count = call_count + 1
@@ -24,6 +24,34 @@ describe("ParallelLimitter", function()
     on_finished:wait()
 
     assert.equal(10, call_count)
+  end)
+
+  it("finishes even if empty", function()
+    local parallel = ParallelLimitter.new(1)
+    local on_finished = helper.on_finished()
+    parallel:start():finally(function()
+      on_finished()
+    end)
+    on_finished:wait()
+  end)
+
+  it("finishes even if a few task", function()
+    local call_count = 0
+    local parallel = ParallelLimitter.new(10)
+    for _ = 1, 2 do
+      parallel:add(function()
+        call_count = call_count + 1
+        return Promise.resolve()
+      end)
+    end
+
+    local on_finished = helper.on_finished()
+    parallel:start():finally(function()
+      on_finished()
+    end)
+    on_finished:wait()
+
+    assert.equal(2, call_count)
   end)
 
 end)

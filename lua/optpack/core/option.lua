@@ -56,7 +56,7 @@ InstallOrUpdateOption.default = {
       },
     },
   },
-  parallel = {limit = 8, interval = 250},
+  parallel = {limit = 8},
 }
 
 function InstallOrUpdateOption.new(raw_opts)

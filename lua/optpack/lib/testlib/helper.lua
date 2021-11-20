@@ -74,9 +74,6 @@ function M.on_finished()
   })
 end
 
--- small for test speed
-M.parallel_interval = 3
-
 M.packpath_name = "mypackpath"
 M.opt_path = M.packpath_name .. "/pack/optpack/opt/"
 

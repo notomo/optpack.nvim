@@ -44,12 +44,18 @@ function Promise._is_promise(v)
 end
 
 function Promise.resolve(v)
+  if Promise._is_promise(v) then
+    return v
+  end
   return Promise.new(function(resolve, _)
     resolve(v)
   end)
 end
 
 function Promise.reject(v)
+  if Promise._is_promise(v) then
+    return v
+  end
   return Promise.new(function(_, reject)
     reject(v)
   end)
@@ -157,6 +163,54 @@ function Promise.finally(self, on_finally)
   end):catch(function(err)
     on_finally()
     error(err, 0)
+  end)
+end
+
+function Promise.all(list)
+  vim.validate({list = {list, "table"}})
+  local remain = #list
+  local results = {}
+  return Promise.new(function(resolve, reject)
+    if remain == 0 then
+      resolve(results)
+    end
+
+    local promises = vim.tbl_map(function(e)
+      if Promise._is_promise(e) then
+        return e
+      end
+      return Promise.resolve(e)
+    end, list)
+    for i, p in ipairs(promises) do
+      p:next(function(v)
+        results[i] = v
+        if remain == 1 then
+          return resolve(results)
+        end
+        remain = remain - 1
+      end):catch(function(...)
+        reject(...)
+      end)
+    end
+  end)
+end
+
+function Promise.race(list)
+  vim.validate({list = {list, "table"}})
+  return Promise.new(function(resolve, reject)
+    local promises = vim.tbl_map(function(e)
+      if Promise._is_promise(e) then
+        return e
+      end
+      return Promise.resolve(e)
+    end, list)
+    for _, p in ipairs(promises) do
+      p:next(function(...)
+        return resolve(...)
+      end):catch(function(...)
+        reject(...)
+      end)
+    end
   end)
 end
 
