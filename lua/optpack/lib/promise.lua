@@ -12,6 +12,13 @@ local is_promise = function(v)
   return getmetatable(v) == Promise
 end
 
+local new_any_userdata = function()
+  local userdata = vim.loop.new_async(function()
+  end)
+  userdata:close()
+  return userdata
+end
+
 local new_pending = function(on_fullfilled, on_rejected)
   vim.validate({
     on_fullfilled = {on_fullfilled, "function", true},
@@ -23,8 +30,21 @@ local new_pending = function(on_fullfilled, on_rejected)
     _value = nil,
     _on_fullfilled = on_fullfilled,
     _on_rejected = on_rejected,
+    _handled = false,
+    _unhandled_detector = new_any_userdata(),
   }
-  return setmetatable(tbl, Promise)
+  local self = setmetatable(tbl, Promise)
+
+  getmetatable(tbl._unhandled_detector).__gc = function()
+    if self._status ~= PromiseStatus.Rejected or self._handled then
+      return
+    end
+    vim.schedule(function()
+      error("unhandled promise rejection: " .. tostring(self._value))
+    end)
+  end
+
+  return self
 end
 
 function Promise.new(f)
@@ -101,10 +121,13 @@ function Promise._reject(self, rejected)
   end
   self._status = PromiseStatus.Rejected
   self._value = rejected
+  local handled = self._handled
   for _ = 1, #self._queued do
     local promise = table.remove(self._queued, 1)
     promise:_start_reject(rejected)
+    handled = handled or promise._on_rejected ~= nil
   end
+  self._handled = handled
 end
 
 function Promise._start_reject(self, rejected)
@@ -129,7 +152,6 @@ function Promise._start_reject(self, rejected)
   end)
 end
 
--- TODO: detect unhandled rejection
 function Promise.next(self, on_fullfilled, on_rejected)
   vim.validate({
     on_fullfilled = {on_fullfilled, "function", true},
@@ -141,6 +163,7 @@ function Promise.next(self, on_fullfilled, on_rejected)
       return promise:_start_resolve(self._value)
     end
     if self._status == PromiseStatus.Rejected then
+      self._handled = self._handled or on_rejected ~= nil
       return promise:_start_reject(self._value)
     end
     table.insert(self._queued, promise)
