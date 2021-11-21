@@ -1,4 +1,4 @@
-local Promise = require("optpack.lib.promise").Promise
+local Promise = require("optpack.lib.promise")
 local Output = require("optpack.lib.output").Output
 local pathlib = require("optpack.lib.path")
 

@@ -1,6 +1,6 @@
 local helper = require("optpack.lib.testlib.helper")
 local ParallelLimitter = helper.require("optpack.lib.parallel_limitter").ParallelLimitter
-local Promise = require("optpack.lib.promise").Promise
+local Promise = require("optpack.lib.promise")
 
 describe("ParallelLimitter", function()
 

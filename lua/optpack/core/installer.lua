@@ -1,5 +1,5 @@
 local Event = require("optpack.core.event").Event
-local Promise = require("optpack.lib.promise").Promise
+local Promise = require("optpack.lib.promise")
 
 local M = {}
 

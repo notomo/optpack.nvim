@@ -1,7 +1,3 @@
-local vim = vim
-
-local M = {}
-
 local PackedValue = {}
 PackedValue.__index = PackedValue
 
@@ -27,11 +23,12 @@ function PackedValue.first(self)
   return first
 end
 
-local PromiseStatus = {Pending = "Pending", Fulfilled = "Fulfilled", Rejected = "Rejected"}
+local vim = vim
 
 local Promise = {}
 Promise.__index = Promise
-M.Promise = Promise
+
+local PromiseStatus = {Pending = "Pending", Fulfilled = "Fulfilled", Rejected = "Rejected"}
 
 local is_promise = function(v)
   return getmetatable(v) == Promise
@@ -66,13 +63,15 @@ local new_pending = function(on_fullfilled, on_rejected)
     end
     self._handled = true
     vim.schedule(function()
-      error("unhandled promise rejection: " .. tostring(self._value))
+      error("unhandled promise rejection: " .. vim.inspect({self._value:unpack()}))
     end)
   end
 
   return self
 end
 
+--- TODO doc
+--- @param f function:
 function Promise.new(f)
   vim.validate({f = {f, "function"}})
 
@@ -89,6 +88,8 @@ function Promise.new(f)
   return self
 end
 
+--- TODO doc
+--- @vararg any:
 function Promise.resolve(...)
   local v = ...
   if is_promise(v) then
@@ -100,6 +101,8 @@ function Promise.resolve(...)
   end)
 end
 
+--- TODO doc
+--- @vararg any:
 function Promise.reject(...)
   local v = ...
   if is_promise(v) then
@@ -186,6 +189,9 @@ function Promise._start_reject(self, value)
   end)
 end
 
+--- TODO doc
+--- @param on_fullfilled function|nil:
+--- @param on_rejected function|nil:
 function Promise.next(self, on_fullfilled, on_rejected)
   vim.validate({
     on_fullfilled = {on_fullfilled, "function", true},
@@ -204,10 +210,14 @@ function Promise.next(self, on_fullfilled, on_rejected)
   return promise
 end
 
+--- TODO doc
+--- @param on_rejected function|nil:
 function Promise.catch(self, on_rejected)
   return self:next(nil, on_rejected)
 end
 
+--- TODO doc
+--- @param on_finally function:
 function Promise.finally(self, on_finally)
   vim.validate({on_finally = {on_finally, "function", true}})
   return self:next(function(...)
@@ -222,6 +232,8 @@ function Promise.finally(self, on_finally)
   end)
 end
 
+--- TODO doc
+--- @param list table:
 function Promise.all(list)
   vim.validate({list = {list, "table"}})
   local remain = #list
@@ -246,6 +258,8 @@ function Promise.all(list)
   end)
 end
 
+--- TODO doc
+--- @param list table:
 function Promise.race(list)
   vim.validate({list = {list, "table"}})
   return Promise.new(function(resolve, reject)
@@ -259,4 +273,4 @@ function Promise.race(list)
   end)
 end
 
-return M
+return Promise

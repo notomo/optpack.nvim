@@ -1,4 +1,4 @@
-local Promise = require("optpack.lib.promise").Promise
+local Promise = require("optpack.lib.promise")
 local vim = vim
 
 local M = {}
