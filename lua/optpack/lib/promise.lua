@@ -39,6 +39,7 @@ local new_pending = function(on_fullfilled, on_rejected)
     if self._status ~= PromiseStatus.Rejected or self._handled then
       return
     end
+    self._handled = true
     vim.schedule(function()
       error("unhandled promise rejection: " .. tostring(self._value))
     end)
@@ -82,7 +83,7 @@ function Promise.reject(v)
 end
 
 function Promise._resolve(self, resolved)
-  if self._status ~= PromiseStatus.Pending then
+  if self._status == PromiseStatus.Rejected then
     return
   end
   self._status = PromiseStatus.Fulfilled
@@ -95,7 +96,9 @@ end
 
 function Promise._start_resolve(self, resolved)
   if not self._on_fullfilled then
-    return self:_resolve(resolved)
+    return vim.schedule(function()
+      self:_resolve(resolved)
+    end)
   end
   local ok, result = pcall(self._on_fullfilled, resolved)
   if not ok then
@@ -116,23 +119,23 @@ function Promise._start_resolve(self, resolved)
 end
 
 function Promise._reject(self, rejected)
-  if self._status ~= PromiseStatus.Pending then
+  if self._status == PromiseStatus.Resolved then
     return
   end
   self._status = PromiseStatus.Rejected
   self._value = rejected
-  local handled = self._handled
+  self._handled = self._handled or #self._queued > 0
   for _ = 1, #self._queued do
     local promise = table.remove(self._queued, 1)
     promise:_start_reject(rejected)
-    handled = handled or promise._on_rejected ~= nil
   end
-  self._handled = handled
 end
 
 function Promise._start_reject(self, rejected)
   if not self._on_rejected then
-    return self:_reject(rejected)
+    return vim.schedule(function()
+      self:_reject(rejected)
+    end)
   end
   local ok, result = pcall(self._on_rejected, rejected)
   if ok and not is_promise(result) then
@@ -160,14 +163,13 @@ function Promise.next(self, on_fullfilled, on_rejected)
   local promise = new_pending(on_fullfilled, on_rejected)
   vim.schedule(function()
     if self._status == PromiseStatus.Fulfilled then
-      return promise:_start_resolve(self._value)
+      return self:_resolve(self._value)
     end
     if self._status == PromiseStatus.Rejected then
-      self._handled = self._handled or on_rejected ~= nil
-      return promise:_start_reject(self._value)
+      return self:_reject(self._value)
     end
-    table.insert(self._queued, promise)
   end)
+  table.insert(self._queued, promise)
   return promise
 end
 
@@ -192,7 +194,7 @@ function Promise.all(list)
   local results = {}
   return Promise.new(function(resolve, reject)
     if remain == 0 then
-      resolve(results)
+      return resolve(results)
     end
 
     for i, e in ipairs(list) do
@@ -214,7 +216,7 @@ function Promise.race(list)
   return Promise.new(function(resolve, reject)
     for _, e in ipairs(list) do
       Promise.resolve(e):next(function(...)
-        return resolve(...)
+        resolve(...)
       end):catch(function(...)
         reject(...)
       end)
