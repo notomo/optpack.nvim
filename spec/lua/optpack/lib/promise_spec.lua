@@ -166,6 +166,26 @@ describe("promise:next()", function()
     assert.equal(want .. "2", got)
   end)
 
+  it("can chain with multiple values", function()
+    local got
+    local on_finished = helper.on_finished()
+    Promise.new(function(resolve)
+      vim.defer_fn(function()
+        resolve(1, 2, 3)
+      end, 25)
+    end):next(function(...)
+      return ...
+    end):next(function(...)
+      return Promise.resolve(...)
+    end):next(function(...)
+      got = {...}
+      on_finished()
+    end)
+    on_finished:wait()
+
+    assert.is_same({1, 2, 3}, got)
+  end)
+
 end)
 
 describe("promise:catch()", function()
@@ -287,6 +307,24 @@ describe("promise:catch()", function()
     on_finished:wait()
 
     assert.equal(want, got)
+  end)
+
+  it("can chain with multiple values", function()
+    local got
+    local on_finished = helper.on_finished()
+    Promise.new(function(_, reject)
+      vim.defer_fn(function()
+        reject(1, 2, 3)
+      end, 25)
+    end):catch(function(...)
+      return Promise.reject(...)
+    end):catch(function(...)
+      got = {...}
+      on_finished()
+    end)
+    on_finished:wait()
+
+    assert.is_same({1, 2, 3}, got)
   end)
 
 end)
