@@ -33,6 +33,8 @@ function M.handle(self, event_name, ctx, ...)
     return
   end
 
+  local output_follower = bufferlib.OutputFollower.new(self._bufnr)
+
   vim.bo[self._bufnr].modifiable = true
   vim.api.nvim_buf_set_lines(self._bufnr, -1, -1, false, hl_lines:lines())
   self._delete_first_line()
@@ -40,6 +42,8 @@ function M.handle(self, event_name, ctx, ...)
 
   local end_row = vim.api.nvim_buf_line_count(self._bufnr)
   hl_lines:add_highlight(self._bufnr, self._ns, end_row)
+
+  output_follower:follow(end_row)
 end
 
 return M

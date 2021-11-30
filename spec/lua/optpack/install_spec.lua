@@ -34,7 +34,7 @@ describe("optpack.install()", function()
     assert.exists_pattern([[\v^\> Start installing\.$]])
     assert.exists_pattern([[\v^test1 \> Installed\.$]])
     assert.exists_pattern([[\v^test2 \> Installed\.$]])
-    assert.exists_pattern([[\v^\> Finished installing\.$]])
+    assert.current_line([[> Finished installing.]])
   end)
 
   it("does nothing if directories exist", function()

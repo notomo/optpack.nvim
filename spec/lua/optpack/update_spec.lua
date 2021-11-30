@@ -34,7 +34,7 @@ describe("optpack.update()", function()
     assert.exists_pattern([[\v^\> Start updating\.$]])
     assert.exists_pattern([[\v^test1 \> Installed\.$]])
     assert.exists_pattern([[\v^test2 \> Installed\.$]])
-    assert.exists_pattern([[\v^\> Finished updating\.$]])
+    assert.current_line([[> Finished updating.]])
   end)
 
   it("updates plugins if directories exist", function()
