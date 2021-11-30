@@ -29,6 +29,7 @@ end
 function ParallelLimitter._start(self, resolve, reject, count)
   local funcs = vim.list_slice(self._queued, 0, count)
   self._queued = vim.list_slice(self._queued, count + 1)
+
   local started = {}
   for _, f in ipairs(funcs) do
     local promise = f():finally(function()
@@ -37,12 +38,9 @@ function ParallelLimitter._start(self, resolve, reject, count)
     table.insert(started, promise)
   end
   vim.list_extend(self._started, started)
+
   if #self._queued == 0 then
-    Promise.all(self._started):next(function()
-      resolve()
-    end):catch(function(...)
-      reject(...)
-    end)
+    return Promise.all(self._started):next(resolve, reject)
   end
   return Promise.all(started)
 end

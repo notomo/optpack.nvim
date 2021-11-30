@@ -34,11 +34,8 @@ local is_promise = function(v)
   return getmetatable(v) == Promise
 end
 
-local new_any_userdata = function()
-  local userdata = vim.loop.new_async(function()
-  end)
-  userdata:close()
-  return userdata
+local new_empty_userdata = function()
+  return newproxy(true)
 end
 
 local new_pending = function(on_fullfilled, on_rejected)
@@ -53,17 +50,19 @@ local new_pending = function(on_fullfilled, on_rejected)
     _on_fullfilled = on_fullfilled,
     _on_rejected = on_rejected,
     _handled = false,
-    _unhandled_detector = new_any_userdata(),
   }
   local self = setmetatable(tbl, Promise)
 
-  getmetatable(tbl._unhandled_detector).__gc = function()
+  local userdata = new_empty_userdata()
+  self._unhandled_detector = setmetatable({[self] = userdata}, {__mode = "k"})
+  getmetatable(userdata).__gc = function()
     if self._status ~= PromiseStatus.Rejected or self._handled then
       return
     end
     self._handled = true
     vim.schedule(function()
-      error("unhandled promise rejection: " .. vim.inspect({self._value:unpack()}))
+      local values = vim.inspect({self._value:unpack()}, {newline = "", indent = ""})
+      error("unhandled promise rejection: " .. values, 0)
     end)
   end
 
@@ -94,9 +93,9 @@ end
 --- @vararg any: one promise or non-promises
 --- @return table: Promise
 function Promise.resolve(...)
-  local v = ...
-  if is_promise(v) then
-    return v
+  local first = ...
+  if is_promise(first) then
+    return first
   end
   local value = PackedValue.new(...)
   return Promise.new(function(resolve, _)
@@ -109,9 +108,9 @@ end
 --- @vararg any: one promise or non-promises
 --- @return table: Promise
 function Promise.reject(...)
-  local v = ...
-  if is_promise(v) then
-    return v
+  local first = ...
+  if is_promise(first) then
+    return first
   end
   local value = PackedValue.new(...)
   return Promise.new(function(_, reject)
@@ -204,6 +203,7 @@ function Promise.next(self, on_fullfilled, on_rejected)
     on_rejected = {on_rejected, "function", true},
   })
   local promise = new_pending(on_fullfilled, on_rejected)
+  table.insert(self._queued, promise)
   vim.schedule(function()
     if self._status == PromiseStatus.Fulfilled then
       return self:_resolve(self._value:unpack())
@@ -212,7 +212,6 @@ function Promise.next(self, on_fullfilled, on_rejected)
       return self:_reject(self._value:unpack())
     end
   end)
-  table.insert(self._queued, promise)
   return promise
 end
 
@@ -238,17 +237,18 @@ function Promise.finally(self, on_finally)
 end
 
 --- Equivalents to JavaScript's Promise.all.
+--- Even if multiple value are resolved, results includes only the first value.
 --- @param list table: promise or non-promise values
 --- @return table: Promise
 function Promise.all(list)
   vim.validate({list = {list, "table"}})
-  local remain = #list
-  local results = {}
   return Promise.new(function(resolve, reject)
+    local remain = #list
     if remain == 0 then
-      return resolve(results)
+      return resolve({})
     end
 
+    local results = {}
     for i, e in ipairs(list) do
       Promise.resolve(e):next(function(...)
         -- use only the first argument

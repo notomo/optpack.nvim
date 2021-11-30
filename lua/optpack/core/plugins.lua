@@ -48,10 +48,13 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
   local names = {}
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
-      return plugin:install_or_update(emitter):next(function(installed_now)
+      local plugin_emitter = emitter:with({name = plugin.name})
+      return plugin:install_or_update(plugin_emitter):next(function(installed_now)
         if installed_now then
           table.insert(names, plugin.name)
         end
+      end):catch(function(err)
+        plugin_emitter:emit(Event.Error, err)
       end)
     end)
   end
@@ -60,6 +63,8 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
     self:_load_installed(names)
     emitter:emit(Event.FinishedUpdate)
     on_finished()
+  end):catch(function(err)
+    emitter:emit(Event.Error, err)
   end)
 end
 
@@ -70,10 +75,13 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
   local names = {}
   for _, plugin in ipairs(self:_collect(pattern)) do
     parallel:add(function()
-      return plugin:install(emitter):next(function(installed_now)
+      local plugin_emitter = emitter:with({name = plugin.name})
+      return plugin:install(plugin_emitter):next(function(installed_now)
         if installed_now then
           table.insert(names, plugin.name)
         end
+      end):catch(function(err)
+        plugin_emitter:emit(Event.Error, err)
       end)
     end)
   end
@@ -82,6 +90,8 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
     self:_load_installed(names)
     emitter:emit(Event.FinishedInstall)
     on_finished()
+  end):catch(function(err)
+    emitter:emit(Event.Error, err)
   end)
 end
 

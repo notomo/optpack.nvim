@@ -24,6 +24,7 @@ function M.after_each()
   vim.cmd("comclear")
   vim.cmd("silent! autocmd! optpack")
   vim.cmd("messages clear")
+  collectgarbage("collect") -- for unhandled rejection
   print(" ")
 end
 

@@ -1,6 +1,5 @@
 local Updater = require("optpack.core.updater").Updater
 local Installer = require("optpack.core.installer").Installer
-local Event = require("optpack.core.event").Event
 local JobFactory = require("optpack.lib.job_factory").JobFactory
 local Git = require("optpack.lib.git").Git
 local pathlib = require("optpack.lib.path")
@@ -46,26 +45,20 @@ function Plugin.install_or_update(self, emitter)
 end
 
 function Plugin.update(self, emitter)
-  emitter = emitter:with({name = self.name})
   return self._updater:start(emitter):next(function(updated_now)
     if updated_now then
       self._post_update_hook(self:expose())
     end
     return updated_now
-  end):catch(function(err)
-    emitter:emit(Event.Error, err)
   end)
 end
 
 function Plugin.install(self, emitter)
-  emitter = emitter:with({name = self.name})
   return self._installer:start(emitter):next(function(installed_now)
     if installed_now then
       self._post_install_hook(self:expose())
     end
     return installed_now
-  end):catch(function(err)
-    emitter:emit(Event.Error, err)
   end)
 end
 
