@@ -1,3 +1,5 @@
+local Event = require("optpack.core.event").Event
+
 local M = {}
 
 M.user_default = {add = {}, install_or_update = {}}
@@ -48,7 +50,13 @@ InstallOrUpdateOption.default = {
   outputters = {
     {
       type = "buffer",
-      handlers = {},
+      handlers = {
+        [Event.Progressed] = function(_, _, finished_count, all_count)
+          local digit = #tostring(all_count)
+          local fmt = ("[ %%%dd / %%%dd ]"):format(digit, digit)
+          return nil, {{{(fmt):format(finished_count, all_count), "Comment"}}}
+        end,
+      },
       opts = {
         open = function(bufnr)
           vim.cmd("botright split | buffer" .. bufnr)

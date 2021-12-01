@@ -12,6 +12,8 @@ M.Event = {
   GitCommitLog = "GitCommitLog",
   FinishedUpdate = "FinishedUpdate",
 
+  Progressed = "Progressed",
+
   Error = "Error",
 }
 

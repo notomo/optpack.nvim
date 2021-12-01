@@ -44,9 +44,14 @@ end
 function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
   emitter:emit(Event.StartUpdate)
 
+  local raw_plugins = self:_collect(pattern)
+  local all_count = #raw_plugins
+  local finished_count = 0
+  emitter:emit(Event.Progressed, finished_count, all_count)
+
   local parallel = ParallelLimitter.new(parallel_opts.limit)
   local names = {}
-  for _, plugin in ipairs(self:_collect(pattern)) do
+  for _, plugin in ipairs(raw_plugins) do
     parallel:add(function()
       local plugin_emitter = emitter:with({name = plugin.name})
       return plugin:install_or_update(plugin_emitter):next(function(installed_now)
@@ -55,6 +60,9 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
         end
       end):catch(function(err)
         plugin_emitter:emit(Event.Error, err)
+      end):finally(function()
+        finished_count = finished_count + 1
+        plugin_emitter:emit(Event.Progressed, finished_count, all_count)
       end)
     end)
   end
@@ -71,9 +79,14 @@ end
 function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
   emitter:emit(Event.StartInstall)
 
+  local raw_plugins = self:_collect(pattern)
+  local all_count = #raw_plugins
+  local finished_count = 0
+  emitter:emit(Event.Progressed, finished_count, all_count)
+
   local parallel = ParallelLimitter.new(parallel_opts.limit)
   local names = {}
-  for _, plugin in ipairs(self:_collect(pattern)) do
+  for _, plugin in ipairs(raw_plugins) do
     parallel:add(function()
       local plugin_emitter = emitter:with({name = plugin.name})
       return plugin:install(plugin_emitter):next(function(installed_now)
@@ -82,6 +95,8 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
         end
       end):catch(function(err)
         plugin_emitter:emit(Event.Error, err)
+      end):finally(function()
+        plugin_emitter:emit(Event.Progressed, finished_count, all_count)
       end)
     end)
   end

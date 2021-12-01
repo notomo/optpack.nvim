@@ -19,6 +19,8 @@ function M.new(cmd_type, message_factory, opts)
       vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, {})
     end),
     _message_factory = message_factory,
+    _progress_ns = vim.api.nvim_create_namespace("optpack-progress"),
+    _progress_lines = {},
   }
   return setmetatable(tbl, M), nil
 end
@@ -28,22 +30,37 @@ function M.handle(self, event_name, ctx, ...)
     return
   end
 
-  local hl_lines = self._message_factory:create(event_name, ctx, ...)
-  if not hl_lines then
+  local normal, info = self._message_factory:create(event_name, ctx, ...)
+  if not (normal or info) then
     return
   end
 
   local output_follower = bufferlib.OutputFollower.new(self._bufnr)
 
-  vim.bo[self._bufnr].modifiable = true
-  vim.api.nvim_buf_set_lines(self._bufnr, -1, -1, false, hl_lines:lines())
-  self._delete_first_line()
-  vim.bo[self._bufnr].modifiable = false
+  if normal then
+    vim.bo[self._bufnr].modifiable = true
+    vim.api.nvim_buf_set_lines(self._bufnr, -1, -1, false, normal:lines())
+    self._delete_first_line()
+    vim.bo[self._bufnr].modifiable = false
 
-  local end_row = vim.api.nvim_buf_line_count(self._bufnr)
-  hl_lines:add_highlight(self._bufnr, self._ns, end_row)
+    local end_row = vim.api.nvim_buf_line_count(self._bufnr)
+    normal:add_highlight(self._bufnr, self._ns, end_row)
+    self:_redraw_progress(end_row)
+  end
+  if info then
+    self._progress_lines = info
+    local end_row = vim.api.nvim_buf_line_count(self._bufnr)
+    self:_redraw_progress(end_row)
+  end
 
-  output_follower:follow(end_row)
+  output_follower:follow()
+end
+
+function M._redraw_progress(self, end_row)
+  vim.api.nvim_buf_clear_namespace(self._bufnr, self._progress_ns, 0, -1)
+  vim.api.nvim_buf_set_extmark(self._bufnr, self._progress_ns, end_row - 1, 0, {
+    virt_lines = self._progress_lines,
+  })
 end
 
 return M

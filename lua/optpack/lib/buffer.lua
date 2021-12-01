@@ -24,13 +24,15 @@ function OutputFollower.new(bufnr)
     _windows = vim.tbl_filter(function(e)
       return e.row == last_row
     end, windows),
+    _bufnr = bufnr,
   }
   return setmetatable(tbl, OutputFollower)
 end
 
-function OutputFollower.follow(self, row)
+function OutputFollower.follow(self)
+  local last_row = vim.api.nvim_buf_line_count(self._bufnr)
   for _, window in ipairs(self._windows) do
-    vim.api.nvim_win_set_cursor(window.id, {row, window.column})
+    vim.api.nvim_win_set_cursor(window.id, {last_row, window.column})
   end
 end
 

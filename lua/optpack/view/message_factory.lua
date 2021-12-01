@@ -41,6 +41,10 @@ MessageFactory.default_handlers = {
     return {{self:_prefix(ctx), {"Finished updating."}}}
   end,
 
+  [Event.Progressed] = function()
+    return {}
+  end,
+
   [Event.Error] = function(self, ctx, err)
     local prefix = self:_prefix(ctx)
     if type(err) == "table" then
@@ -63,11 +67,14 @@ function MessageFactory.create(self, event_name, ctx, ...)
   if not handler or type(handler) ~= "function" then
     return nil
   end
-  local raw_hl_lines = handler(self, ctx, ...)
-  if not raw_hl_lines then
-    return nil
+  local normal, info = handler(self, ctx, ...)
+  if normal then
+    return HighlightedLines.new(normal)
   end
-  return HighlightedLines.new(raw_hl_lines)
+  if info then
+    return nil, info
+  end
+  return nil
 end
 
 function MessageFactory._prefix(_, ctx)
