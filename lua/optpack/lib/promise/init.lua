@@ -28,7 +28,7 @@ local vim = vim
 local Promise = {}
 Promise.__index = Promise
 
-local PromiseStatus = {Pending = "Pending", Fulfilled = "Fulfilled", Rejected = "Rejected"}
+local PromiseStatus = {Pending = "pending", Fulfilled = "fulfilled", Rejected = "rejected"}
 
 local is_promise = function(v)
   return getmetatable(v) == Promise
@@ -156,7 +156,7 @@ function Promise._start_resolve(self, value)
 end
 
 function Promise._reject(self, ...)
-  if self._status == PromiseStatus.Resolved then
+  if self._status == PromiseStatus.Fulfilled then
     return
   end
   self._status = PromiseStatus.Rejected
@@ -237,7 +237,7 @@ function Promise.finally(self, on_finally)
 end
 
 --- Equivalents to JavaScript's Promise.all.
---- Even if multiple value are resolved, results includes only the first value.
+--- Even if multiple value are resolved, results include only the first value.
 --- @param list table: promise or non-promise values
 --- @return table: Promise
 function Promise.all(list)
@@ -275,6 +275,66 @@ function Promise.race(list)
         resolve(...)
       end):catch(function(...)
         reject(...)
+      end)
+    end
+  end)
+end
+
+--- Equivalents to JavaScript's Promise.any.
+--- Even if multiple value are rejected, errors include only the first value.
+--- @param list table: promise or non-promise values
+--- @return table: Promise
+function Promise.any(list)
+  vim.validate({list = {list, "table"}})
+  return Promise.new(function(resolve, reject)
+    local remain = #list
+    if remain == 0 then
+      return reject({})
+    end
+
+    local errs = {}
+    for i, e in ipairs(list) do
+      Promise.resolve(e):next(function(...)
+        resolve(...)
+      end):catch(function(...)
+        -- use only the first argument
+        errs[i] = ...
+        if remain == 1 then
+          return reject(errs)
+        end
+        remain = remain - 1
+      end)
+    end
+  end)
+end
+
+--- Equivalents to JavaScript's Promise.allSettled.
+--- Even if multiple value are resolved/rejected, value/reason is only the first value.
+--- @param list table: promise or non-promise values
+--- @return table: Promise
+function Promise.all_settled(list)
+  vim.validate({list = {list, "table"}})
+  return Promise.new(function(resolve)
+    local remain = #list
+    if remain == 0 then
+      return resolve({})
+    end
+
+    local results = {}
+    for i, e in ipairs(list) do
+      Promise.resolve(e):next(function(...)
+        -- use only the first argument
+        local first = ...
+        results[i] = {status = PromiseStatus.Fulfilled, value = first}
+      end):catch(function(...)
+        -- use only the first argument
+        local first = ...
+        results[i] = {status = PromiseStatus.Rejected, reason = first}
+      end):finally(function()
+        if remain == 1 then
+          return resolve(results)
+        end
+        remain = remain - 1
       end)
     end
   end)

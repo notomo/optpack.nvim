@@ -26,6 +26,29 @@ describe("ParallelLimitter", function()
     assert.equal(10, call_count)
   end)
 
+  it("finishes even if exists rejected promise", function()
+    local call_count = 0
+    local parallel = ParallelLimitter.new(8)
+    for _ = 1, 10 do
+      parallel:add(function()
+        return Promise.new(function(_, reject)
+          vim.defer_fn(function()
+            call_count = call_count + 1
+            reject()
+          end, 25)
+        end)
+      end)
+    end
+
+    local on_finished = helper.on_finished()
+    parallel:start():finally(function()
+      on_finished()
+    end)
+    on_finished:wait()
+
+    assert.equal(10, call_count)
+  end)
+
   it("finishes even if empty", function()
     local parallel = ParallelLimitter.new(1)
     local on_finished = helper.on_finished()

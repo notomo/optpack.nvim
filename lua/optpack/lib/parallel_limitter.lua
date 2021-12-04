@@ -40,9 +40,9 @@ function ParallelLimitter._start(self, resolve, reject, count)
   vim.list_extend(self._started, started)
 
   if #self._queued == 0 then
-    return Promise.all(self._started):next(resolve, reject)
+    return Promise.all_settled(self._started):next(resolve, reject)
   end
-  return Promise.all(started)
+  return Promise.all_settled(started)
 end
 
 return M
