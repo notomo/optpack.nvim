@@ -28,8 +28,7 @@ MessageFactory.default_handlers = {
     return {}
   end,
   [Event.Updated] = function(self, ctx, revision_range)
-    local msg = ("Updated. (%s)"):format(revision_range)
-    return {{self:_prefix(ctx), {msg}}}
+    return {{self:_prefix(ctx), {"Updated. "}, {revision_range, "OptpackUpdatedRevisionRange"}}}
   end,
   [Event.GitCommitLog] = function(self, ctx, output)
     local prefix = self:_prefix(ctx)
@@ -88,6 +87,7 @@ local highlightlib = require("optpack.lib.highlight")
 local force = false
 M.hl_groups = {
   highlightlib.link("OptpackGitCommitLog", force, "Comment"),
+  highlightlib.link("OptpackUpdatedRevisionRange", force, "Comment"),
   highlightlib.link("OptpackError", force, "WarningMsg"),
 }
 
