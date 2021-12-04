@@ -54,7 +54,7 @@ InstallOrUpdateOption.default = {
         [Event.Progressed] = function(_, _, finished_count, all_count)
           local digit = #tostring(all_count)
           local fmt = ("[ %%%dd / %%%dd ]"):format(digit, digit)
-          return nil, {{{(fmt):format(finished_count, all_count), "Comment"}}}
+          return nil, {{{(fmt):format(finished_count, all_count), "OptpackProgressed"}}}
         end,
       },
       opts = {

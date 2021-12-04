@@ -88,6 +88,7 @@ local force = false
 M.hl_groups = {
   highlightlib.link("OptpackGitCommitLog", force, "Comment"),
   highlightlib.link("OptpackUpdatedRevisionRange", force, "Comment"),
+  highlightlib.link("OptpackProgressed", force, "Comment"),
   highlightlib.link("OptpackError", force, "WarningMsg"),
 }
 
