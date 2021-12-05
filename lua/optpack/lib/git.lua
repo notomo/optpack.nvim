@@ -20,27 +20,7 @@ function Git.clone(self, directory, url, depth)
     vim.list_extend(cmd, {"--depth", depth})
   end
   vim.list_extend(cmd, {"--", url .. ".git", directory})
-
-  local stdout = Output.new()
-  local stderr = Output.new()
-  return Promise.new(function(resolve, reject)
-    local _, err = self._job_factory:create(cmd, {
-      on_exit = function(_, code)
-        if code ~= 0 then
-          local err = {table.concat(cmd, " "), unpack(stderr:lines())}
-          return reject(err)
-        end
-        return resolve(stdout:lines())
-      end,
-      on_stdout = stdout:collector(),
-      on_stderr = stderr:collector(),
-      stderr_buffered = true,
-      stdout_buffered = true,
-    })
-    if err then
-      return reject(err)
-    end
-  end)
+  return self:_start(cmd)
 end
 
 function Git.pull(self, directory)
@@ -52,53 +32,17 @@ function Git.pull(self, directory)
     "--ff-only",
     "--rebase=false",
   }
-  local stdout = Output.new()
-  local stderr = Output.new()
-  return Promise.new(function(resolve, reject)
-    local _, err = self._job_factory:create(cmd, {
-      on_exit = function(_, code)
-        if code ~= 0 then
-          local err = {table.concat(cmd, " "), unpack(stderr:lines())}
-          return reject(err)
-        end
-        return resolve(stdout:lines())
-      end,
-      on_stdout = stdout:collector(),
-      on_stderr = stderr:collector(),
-      stderr_buffered = true,
-      stdout_buffered = true,
-      cwd = directory,
-    })
-    if err then
-      return reject(err)
-    end
-  end)
+  return self:_start(cmd, {cwd = directory})
 end
 
 function Git.get_revision(self, directory)
   local cmd = {"git", "--git-dir", pathlib.join(directory, ".git"), "rev-parse", "--short", "HEAD"}
-  local stdout = Output.new()
-  local stderr = Output.new()
-  return Promise.new(function(resolve, reject)
-    local _, err = self._job_factory:create(cmd, {
-      on_exit = function(_, code)
-        if code ~= 0 then
-          local err = {table.concat(cmd, " "), unpack(stderr:lines())}
-          return reject(err)
-        end
-        local revision = stdout:str()
-        return resolve(revision)
-      end,
-      on_stdout = stdout:collector(),
-      on_stderr = stderr:collector(),
-      stderr_buffered = true,
-      stdout_buffered = true,
-      cwd = directory,
-    })
-    if err then
-      return reject(err)
-    end
-  end)
+  return self:_start(cmd, {
+    cwd = directory,
+    handle_stdout = function(stdout)
+      return stdout:str()
+    end,
+  })
 end
 
 function Git.log(self, directory, revision)
@@ -110,6 +54,14 @@ function Git.log(self, directory, revision)
     [[--pretty=format:%h %s]],
     revision,
   }
+  return self:_start(cmd, {cwd = directory})
+end
+
+function Git._start(self, cmd, opts)
+  opts = opts or {}
+  opts.handle_stdout = opts.handle_stdout or function(stdout)
+    return stdout:lines()
+  end
   local stdout = Output.new()
   local stderr = Output.new()
   return Promise.new(function(resolve, reject)
@@ -119,13 +71,13 @@ function Git.log(self, directory, revision)
           local err = {table.concat(cmd, " "), unpack(stderr:lines())}
           return reject(err)
         end
-        return resolve(stdout:lines())
+        return resolve(opts.handle_stdout(stdout))
       end,
       on_stdout = stdout:collector(),
       on_stderr = stderr:collector(),
       stderr_buffered = true,
       stdout_buffered = true,
-      cwd = directory,
+      cwd = opts.cwd,
     })
     if err then
       return reject(err)
