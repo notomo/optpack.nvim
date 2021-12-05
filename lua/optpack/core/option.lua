@@ -25,7 +25,7 @@ AddOption.default = {
     post_update = function()
     end,
   },
-  fetch = {depth = 1, base_url = "https://github.com"},
+  fetch = {depth = 1, base_url = "https://github.com", revision = "", revision_type = "branch"},
   package_name = "optpack",
   select_packpath = function()
     return vim.opt.packpath:get()[1]

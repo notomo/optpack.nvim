@@ -21,7 +21,10 @@ function Plugins.state()
 end
 
 function Plugins.add(self, full_name, opts)
-  local plugin = Plugin.new(full_name, opts)
+  local plugin, err = Plugin.new(full_name, opts)
+  if err then
+    return err
+  end
   if opts.enabled then
     self._plugins[plugin.name] = plugin
     self._loaders[plugin.name] = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)

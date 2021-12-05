@@ -1,5 +1,7 @@
 local Updater = require("optpack.core.updater").Updater
 local Installer = require("optpack.core.installer").Installer
+local Revision = require("optpack.core.revision").Revision
+local RevisionSwitcher = require("optpack.core.revision").RevisionSwitcher
 local JobFactory = require("optpack.lib.job_factory").JobFactory
 local Git = require("optpack.lib.git").Git
 local pathlib = require("optpack.lib.path")
@@ -18,12 +20,18 @@ function Plugin.new(full_name, opts)
   local git = Git.new(JobFactory.new())
   local url = pathlib.join(opts.fetch.base_url, full_name)
 
+  local revision, err = Revision.new(opts.fetch.revision, opts.fetch.revision_type)
+  if err then
+    return nil, err
+  end
+  local revision_switcher = RevisionSwitcher.new(git, directory, revision)
+
   local tbl = {
     name = name,
     full_name = full_name,
     directory = directory,
     url = url,
-    _installer = Installer.new(git, directory, url, opts.fetch.depth),
+    _installer = Installer.new(git, directory, url, opts.fetch.depth, revision_switcher),
     _post_install_hook = opts.hooks.post_install,
     _updater = Updater.new(git, directory),
     _post_update_hook = opts.hooks.post_update,
