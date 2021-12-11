@@ -1,3 +1,4 @@
+local Event = require("optpack.core.event").Event
 local Once = require("optpack.lib.once").Once
 local bufferlib = require("optpack.lib.buffer")
 local vim = vim
@@ -24,6 +25,14 @@ function M.new(cmd_type, message_factory, opts)
   }
   return setmetatable(tbl, M), nil
 end
+
+M.handlers = {
+  [Event.Progressed] = function(_, _, finished_count, all_count)
+    local digit = #tostring(all_count)
+    local fmt = ("[ %%%dd / %%%dd ]"):format(digit, digit)
+    return nil, {{{(fmt):format(finished_count, all_count), "OptpackProgressed"}}}
+  end,
+}
 
 function M.handle(self, event_name, ctx, ...)
   if not vim.api.nvim_buf_is_valid(self._bufnr) then

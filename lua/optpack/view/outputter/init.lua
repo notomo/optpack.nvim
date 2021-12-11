@@ -12,8 +12,8 @@ function Outputters.new(cmd_type, raw_outputters)
 
   local outputters = {}
   local errs = {}
-  for _, raw_outputter in ipairs(raw_outputters) do
-    local outputter, err = Outputters._new_one(cmd_type, raw_outputter.type, raw_outputter.handlers, raw_outputter.opts)
+  for outputter_typ, outputter_opts in pairs(raw_outputters) do
+    local outputter, err = Outputters._new_one(cmd_type, outputter_typ, outputter_opts)
     if err then
       table.insert(errs, err)
     else
@@ -26,19 +26,19 @@ function Outputters.new(cmd_type, raw_outputters)
   return outputters
 end
 
-function Outputters._new_one(cmd_type, typ, handlers, opts)
+function Outputters._new_one(cmd_type, typ, outputter_opts)
   vim.validate({
     cmd_type = {cmd_type, "string"},
     typ = {typ, "string"},
-    opts = {opts, "table", true},
+    outputter_opts = {outputter_opts, "table", true},
   })
-  opts = opts or {}
+  outputter_opts = outputter_opts or {}
   local Outputter = modulelib.find("optpack.view.outputter." .. typ)
   if not Outputter then
     return nil, "not found outputter: " .. typ
   end
-  local message_factory = MessageFactory.new(handlers)
-  return Outputter.new(cmd_type, message_factory, opts)
+  local message_factory = MessageFactory.new(Outputter.handlers or {})
+  return Outputter.new(cmd_type, message_factory, outputter_opts)
 end
 
 return M

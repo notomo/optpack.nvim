@@ -1,0 +1,140 @@
+*optpack.nvim.txt*
+
+==============================================================================
+Lua module: optpack                                     *optpack.nvim-optpack*
+
+add({full_name}, {opts})                                       *optpack.add()*
+  Add a plugin.
+
+  Parameters: ~
+    {full_name} (string) {account_name}/{plugin_name} format
+    {opts} (table|nil) |optpack.nvim-add-option|
+
+list()                                                        *optpack.list()*
+  Returns list of plugins.
+
+  Return: ~
+    (table) list of |optpack.nvim-plugin|
+
+install({opts})                                            *optpack.install()*
+  Install plugins.
+
+  Parameters: ~
+    {opts} (table|nil) |optpack.nvim-install-or-update-option|
+
+update({opts})                                              *optpack.update()*
+  Update plugins.
+
+  Parameters: ~
+    {opts} (table|nil) |optpack.nvim-install-or-update-option|
+
+load({plugin_name})                                           *optpack.load()*
+  Load a plugin.
+
+  Parameters: ~
+    {plugin_name} (string) 
+
+set_default({setting})                                 *optpack.set_default()*
+  Set default setting.
+
+  Parameters: ~
+    {setting} (table) |optpack.nvim-setting|
+
+==============================================================================
+TYPES                                                     *optpack.nvim-TYPES*
+
+|optpack.add()| option                               *optpack.nvim-add-option*
+
+- {enabled} (boolean | nil): if enabled=false, optpack ignores the plugin.
+    default: true
+- {fetch} (table | nil): fetch setting
+  - {base_url} A git server base url,
+      default: "https://github.com"
+  - {depth} for shallow clone depth. Used full clone if depth < 1.
+      default: 1
+- {hooks} (table | nil): hook functions for some timings
+  - {post_add} (function | nil) called on after |optpack.add()|
+  - {post_install} (function | nil) called on after installing
+  - {post_load} (function | nil) called on after loading
+  - {post_update} (function | nil) called on after updating
+  - {pre_load} (function | nil) called on before loading
+- {load_on} (table | nil): setting for lazy loading
+  - {cmds} (table | nil): EX command pattern list,
+      default: {}
+  - {events} (table | nil): autocmd event name or [name, pattern] list,
+      default: {}
+  - {filetypes} (table | nil): file type pattern list,
+      default: {}
+  - {modules} (table | nil): for require() lua module name list,
+      default: {}
+- {package_name} (string | nil): used as the package directory name.
+    your-packpath/pack/{package_name}/opt
+    default: "optpack"
+- {select_packpath} (function | nil): returns a directory path.
+    default: returns the first element of 'packpath'
+
+|optpack.install()| or |optpack.update()| option
+                                       *optpack.nvim-install-or-update-option*
+
+- {on_finished} (function | nil): called on finished updating or installing
+- {outputters} (table | nil): outputter settings
+  - {buffer} (table | nil): buffer output setting
+    - {open} (function | nil) (bufnr) -> open buffer
+- {parallel} (table | nil): parallel setting
+  - {limit} max number for parallel job,  default: 8
+- {pattern} (string | nil): target plugin name pattern for vim regex,
+    default: ".*"
+
+Plugin                                                   *optpack.nvim-plugin*
+
+- {directory} (string): full path of the plugin directory
+- {full_name} (string): {account_name}/{plugin_name} format plugin name
+- {name} (string): plugin name
+- {url} (string): git repository url
+
+|optpack.set_default()| setting                         *optpack.nvim-setting*
+
+- {add} (table | nil): |optpack.nvim-add-option|
+    default: {}
+- {install_or_update} (table | nil): |optpack.nvim-install-or-update-option|
+    default: {}
+
+==============================================================================
+EXAMPLES                                               *optpack.nvim-EXAMPLES*
+
+>
+  local pack_dir = vim.fn.expand("~/example-packages")
+  vim.opt.packpath:prepend(pack_dir)
+  local manager_dir = pack_dir .. "/pack/optpack/opt/optpack.nvim"
+  local initializing = vim.fn.isdirectory(manager_dir) ~= 1
+  if initializing then
+    vim.cmd([[!git clone https://github.com/notomo/optpack.nvim ]] .. manager_dir)
+  end
+
+  local optpack = require("optpack")
+
+  -- add some plugins
+  optpack.add("notomo/optpack.nvim")
+  optpack.add("notomo/ignored", {enabled = false})
+  optpack.add("notomo/gesture.nvim", {
+    load_on = {modules = {"gesture"}}, -- load on `require("gesture")`
+    hooks = {
+      post_add = function()
+        -- mapping
+      end,
+      post_load = function()
+        -- setting after loading
+      end,
+    },
+  })
+  optpack.add("notomo/vusted", {
+    fetch = {depth = 0}, -- fetch including history
+  })
+
+  if initializing then
+    optpack.update()
+  end
+<
+
+==============================================================================
+vim:tw=78:ts=8:ft=help

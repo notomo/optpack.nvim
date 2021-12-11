@@ -1,10 +1,3 @@
-# optpack.nvim
-
-This is a neovim plugin manager that uses only opt package.
-
-## Example
-
-```lua
 local pack_dir = vim.fn.expand("~/example-packages")
 vim.opt.packpath:prepend(pack_dir)
 local manager_dir = pack_dir .. "/pack/optpack/opt/optpack.nvim"
@@ -36,4 +29,3 @@ optpack.add("notomo/vusted", {
 if initializing then
   optpack.update()
 end
-```
