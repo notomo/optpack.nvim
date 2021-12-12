@@ -2,6 +2,7 @@ local OnEvents = require("optpack.core.loader.event").OnEvents
 local OnFileTypes = require("optpack.core.loader.filetype").OnFileTypes
 local OnCommands = require("optpack.core.loader.cmd").OnCommands
 local OnModules = require("optpack.core.loader.module").OnModules
+local pathlib = require("optpack.lib.path")
 
 local M = {}
 
@@ -52,7 +53,10 @@ function Loader.load(self)
   vim.cmd("packadd " .. self._plugin.name)
   self._post_load_hook(plugin)
 
-  if not vim.tbl_contains(vim.api.nvim_list_runtime_paths(), self._plugin.directory) then
+  local paths = vim.tbl_map(function(path)
+    return pathlib.adjust_sep(path)
+  end, vim.api.nvim_list_runtime_paths())
+  if not vim.tbl_contains(paths, self._plugin.directory) then
     return ([[failed to load expected directory: %s]]):format(self._plugin.directory)
   end
 end
