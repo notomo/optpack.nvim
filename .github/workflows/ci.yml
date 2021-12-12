@@ -1,0 +1,36 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # os: [ubuntu-latest, macos-latest, windows-latest] # TODO
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: notomo/action-setup-nvim-lua@v1
+        with:
+          luarocks-version: '3.5.0' # workaround for vusted
+      - run: luarocks install vusted
+
+      - uses: rhysd/action-setup-vim@v1
+        id: vim
+        with:
+          neovim: true
+          version: nightly
+
+      - name: Git config to commit in testing
+        run: |
+          git config --global user.email ${EMAIL}
+          git config --global user.name "notomo"
+        env:
+          EMAIL: ${{ secrets.EMAIL }}
+
+      - run: make test
+        env:
+          VUSTED_NVIM: ${{ steps.vim.outputs.executable }}
