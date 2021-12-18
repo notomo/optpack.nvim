@@ -96,6 +96,7 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
       end):catch(function(err)
         plugin_emitter:emit(Event.Error, err)
       end):finally(function()
+        finished_count = finished_count + 1
         plugin_emitter:emit(Event.Progressed, finished_count, all_count)
       end)
     end)
