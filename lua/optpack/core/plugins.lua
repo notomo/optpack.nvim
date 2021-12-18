@@ -25,7 +25,10 @@ function Plugins.add(self, full_name, opts)
   if opts.enabled then
     self._plugins[plugin.name] = plugin
     self._loaders[plugin.name] = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
-    opts.hooks.post_add(plugin:expose())
+    local ok, err = pcall(opts.hooks.post_add, plugin:expose())
+    if not ok then
+      return ("%s: post_add: %s"):format(plugin.name, err)
+    end
   else
     self._plugins[plugin.name] = nil
     self._loaders[plugin.name] = nil

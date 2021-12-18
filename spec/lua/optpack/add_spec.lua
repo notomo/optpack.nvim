@@ -273,7 +273,7 @@ describe("optpack.load()", function()
     assert.is_true(called)
   end)
 
-  it("raises an error if unexpected plugin is loaded", function()
+  it("show an error message if unexpected plugin is loaded", function()
     local unexpected_packpath = "_unexpected"
     helper.create_plugin_dir(plugin_name1, {opt_path = unexpected_packpath .. "/pack/optpack/opt/"})
 
@@ -283,6 +283,18 @@ describe("optpack.load()", function()
     optpack.load(plugin_name1)
 
     assert.exists_message([[failed to load expected directory: ]] .. helper.test_data_dir .. helper.opt_path .. plugin_name1)
+  end)
+
+  it("show an error message if hooks.post_add raises an error", function()
+    optpack.add(plugin1, {
+      hooks = {
+        post_add = function()
+          error("test error", 0)
+        end,
+      },
+    })
+
+    assert.exists_message(plugin_name1 .. [[: post_add: test error]])
   end)
 
 end)
