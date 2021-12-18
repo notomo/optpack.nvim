@@ -297,4 +297,32 @@ describe("optpack.load()", function()
     assert.exists_message(plugin_name1 .. [[: post_add: test error]])
   end)
 
+  it("show an error message if hooks.pre_load raises an error", function()
+    optpack.add(plugin1, {
+      hooks = {
+        pre_load = function()
+          error("test error", 0)
+        end,
+      },
+    })
+
+    optpack.load(plugin_name1)
+
+    assert.exists_message(plugin_name1 .. [[: pre_load: test error]])
+  end)
+
+  it("show an error message if hooks.post_load raises an error", function()
+    optpack.add(plugin1, {
+      hooks = {
+        post_load = function()
+          error("test error", 0)
+        end,
+      },
+    })
+
+    optpack.load(plugin_name1)
+
+    assert.exists_message(plugin_name1 .. [[: post_load: test error]])
+  end)
+
 end)

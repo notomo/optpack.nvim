@@ -49,15 +49,33 @@ function Loader.load(self)
   end
 
   local plugin = self._plugin:expose()
-  self._pre_load_hook(plugin)
+
+  do
+    local ok, err = pcall(self._pre_load_hook, plugin)
+    if not ok then
+      return ("%s: pre_load: %s"):format(plugin.name, err)
+    end
+  end
+
   vim.cmd("packadd " .. self._plugin.name)
-  self._post_load_hook(plugin)
+
+  local errs = {}
+  do
+    local ok, err = pcall(self._post_load_hook, plugin)
+    if not ok then
+      table.insert(errs, ("%s: post_load: %s"):format(plugin.name, err))
+    end
+  end
 
   local paths = vim.tbl_map(function(path)
     return pathlib.adjust_sep(path)
   end, vim.api.nvim_list_runtime_paths())
   if not vim.tbl_contains(paths, self._plugin.directory) then
-    return ([[failed to load expected directory: %s]]):format(self._plugin.directory)
+    table.insert(errs, ([[failed to load expected directory: %s]]):format(self._plugin.directory))
+  end
+
+  if #errs ~= 0 then
+    return table.concat(errs, "\n")
   end
 end
 

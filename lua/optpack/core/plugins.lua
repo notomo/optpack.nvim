@@ -161,8 +161,16 @@ function Plugins._load_installed(self, plugin_names)
   local names = vim.tbl_filter(function(name)
     return self._load_on_installed[name]
   end, plugin_names)
+
+  local errs = {}
   for _, plugin_name in ipairs(names) do
-    self:load(plugin_name)
+    local err = self:load(plugin_name)
+    if err then
+      table.insert(errs, err)
+    end
+  end
+  if #errs ~= 0 then
+    return table.concat(errs, "\n")
   end
 end
 
