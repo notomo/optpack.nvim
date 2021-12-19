@@ -1,6 +1,6 @@
 local PluginCollection = require("optpack.core.plugin_collection").PluginCollection
 local Plugin = require("optpack.core.plugin").Plugin
-local Loader = require("optpack.core.loader").Loader
+local Loaders = require("optpack.core.loaders").Loaders
 local Event = require("optpack.core.event").Event
 local Counter = require("optpack.lib.counter").Counter
 local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
@@ -12,28 +12,29 @@ Plugins.__index = Plugins
 M.Plugins = Plugins
 
 function Plugins.new()
-  local tbl = {_plugins = PluginCollection.new(), _loaders = {}, _load_on_installed = {}}
+  local tbl = {_plugins = PluginCollection.new(), _loaders = Loaders.new()}
   return setmetatable(tbl, Plugins)
 end
 
-local _plugins = Plugins.new()
+local _state = Plugins.new()
 function Plugins.state()
-  return _plugins
+  return _state
 end
 
 function Plugins.add(self, full_name, opts)
   local plugin = Plugin.new(full_name, opts)
-  if opts.enabled then
-    self._plugins:add(plugin)
-    self._loaders[plugin.name] = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
-    local ok, err = pcall(opts.hooks.post_add, plugin:expose())
-    if not ok then
-      return ("%s: post_add: %s"):format(plugin.name, err)
-    end
-  else
+
+  if not opts.enabled then
     self._plugins:remove(plugin.name)
-    self._loaders[plugin.name] = nil
-    self._load_on_installed[plugin.name] = nil
+    self._loaders:remove(plugin.name)
+    return
+  end
+
+  self._plugins:add(plugin)
+  self._loaders:add(plugin, opts)
+  local ok, err = pcall(opts.hooks.post_add, plugin:expose())
+  if not ok then
+    return ("%s: post_add: %s"):format(plugin.name, err)
   end
 end
 
@@ -67,7 +68,10 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
   end
 
   parallel:start():finally(function()
-    self:_load_installed(names)
+    local err = self._loaders:load_installed(self._plugins:from(names))
+    if err then
+      emitter:emit(Event.Error, err)
+    end
     emitter:emit(Event.FinishedUpdate)
     on_finished()
   end):catch(function(err)
@@ -101,7 +105,10 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
   end
 
   parallel:start():finally(function()
-    self:_load_installed(names)
+    local err = self._loaders:load_installed(self._plugins:from(names))
+    if err then
+      emitter:emit(Event.Error, err)
+    end
     emitter:emit(Event.FinishedInstall)
     on_finished()
   end):catch(function(err)
@@ -112,40 +119,9 @@ end
 function Plugins.load(self, plugin_name)
   local plugin = self._plugins:find_by_name(plugin_name)
   if not plugin then
-    return
+    return nil
   end
-
-  local loader = self._loaders[plugin.name]
-  if not loader then
-    return
-  end
-
-  if not plugin:installed() then
-    self._load_on_installed[plugin.name] = true
-    return
-  end
-
-  self._loaders[plugin.name] = nil
-  self._load_on_installed[plugin.name] = nil
-
-  return loader:load()
-end
-
-function Plugins._load_installed(self, plugin_names)
-  local names = vim.tbl_filter(function(name)
-    return self._load_on_installed[name]
-  end, plugin_names)
-
-  local errs = {}
-  for _, plugin_name in ipairs(names) do
-    local err = self:load(plugin_name)
-    if err then
-      table.insert(errs, err)
-    end
-  end
-  if #errs ~= 0 then
-    return table.concat(errs, "\n")
-  end
+  return self._loaders:load(plugin)
 end
 
 return M

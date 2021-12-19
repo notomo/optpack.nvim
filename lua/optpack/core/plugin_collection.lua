@@ -22,6 +22,15 @@ function PluginCollection.collect(self, pattern)
   return raw_plugins
 end
 
+function PluginCollection.from(self, plugin_names)
+  local raw_plugins = vim.tbl_map(function(name)
+    return self:find_by_name(name)
+  end, plugin_names)
+  return vim.tbl_filter(function(plugin)
+    return plugin ~= nil
+  end, raw_plugins)
+end
+
 function PluginCollection.add(self, plugin)
   self._plugins[plugin.name] = plugin
 end
