@@ -1,7 +1,7 @@
+local PluginCollection = require("optpack.core.plugin_collection").PluginCollection
 local Plugin = require("optpack.core.plugin").Plugin
 local Loader = require("optpack.core.loader").Loader
 local Event = require("optpack.core.event").Event
-local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 local Counter = require("optpack.lib.counter").Counter
 local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
 
@@ -12,7 +12,7 @@ Plugins.__index = Plugins
 M.Plugins = Plugins
 
 function Plugins.new()
-  local tbl = {_plugins = OrderedDict.new(), _loaders = {}, _load_on_installed = {}}
+  local tbl = {_plugins = PluginCollection.new(), _loaders = {}, _load_on_installed = {}}
   return setmetatable(tbl, Plugins)
 end
 
@@ -24,31 +24,27 @@ end
 function Plugins.add(self, full_name, opts)
   local plugin = Plugin.new(full_name, opts)
   if opts.enabled then
-    self._plugins[plugin.name] = plugin
+    self._plugins:add(plugin)
     self._loaders[plugin.name] = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
     local ok, err = pcall(opts.hooks.post_add, plugin:expose())
     if not ok then
       return ("%s: post_add: %s"):format(plugin.name, err)
     end
   else
-    self._plugins[plugin.name] = nil
+    self._plugins:remove(plugin.name)
     self._loaders[plugin.name] = nil
     self._load_on_installed[plugin.name] = nil
   end
 end
 
 function Plugins.expose(self)
-  local values = {}
-  for _, plugin in self._plugins:iter() do
-    table.insert(values, plugin:expose())
-  end
-  return values
+  return self._plugins:expose()
 end
 
 function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
   emitter:emit(Event.StartUpdate)
 
-  local raw_plugins = self:_collect(pattern)
+  local raw_plugins = self._plugins:collect(pattern)
   local counter = Counter.new(#raw_plugins, function(finished_count, all_count)
     emitter:emit(Event.Progressed, finished_count, all_count)
   end)
@@ -82,7 +78,7 @@ end
 function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
   emitter:emit(Event.StartInstall)
 
-  local raw_plugins = self:_collect(pattern)
+  local raw_plugins = self._plugins:collect(pattern)
   local counter = Counter.new(#raw_plugins, function(finished_count, all_count)
     emitter:emit(Event.Progressed, finished_count, all_count)
   end)
@@ -114,9 +110,7 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
 end
 
 function Plugins.load(self, plugin_name)
-  local plugin = self:find(function(p)
-    return p.name == plugin_name
-  end)
+  local plugin = self._plugins:find_by_name(plugin_name)
   if not plugin then
     return
   end
@@ -135,25 +129,6 @@ function Plugins.load(self, plugin_name)
   self._load_on_installed[plugin.name] = nil
 
   return loader:load()
-end
-
-function Plugins.find(self, f)
-  for _, plugin in self._plugins:iter() do
-    if f(plugin) then
-      return plugin
-    end
-  end
-end
-
-function Plugins._collect(self, pattern)
-  local raw_plugins = {}
-  local regex = vim.regex(pattern)
-  for _, plugin in self._plugins:iter() do
-    if regex:match_str(plugin.name) then
-      table.insert(raw_plugins, plugin)
-    end
-  end
-  return raw_plugins
 end
 
 function Plugins._load_installed(self, plugin_names)
