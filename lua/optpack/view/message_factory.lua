@@ -11,9 +11,6 @@ MessageFactory.default_handlers = {
   [Event.StartInstall] = function(self, ctx)
     return {{self:_prefix(ctx), {"Start installing."}}}
   end,
-  [Event.GitCloned] = function()
-    return {}
-  end,
   [Event.Installed] = function(self, ctx)
     return {{self:_prefix(ctx), {"Installed."}}}
   end,
@@ -23,9 +20,6 @@ MessageFactory.default_handlers = {
 
   [Event.StartUpdate] = function(self, ctx)
     return {{self:_prefix(ctx), {"Start updating."}}}
-  end,
-  [Event.GitPulled] = function()
-    return {}
   end,
   [Event.Updated] = function(self, ctx, revision_range)
     return {{self:_prefix(ctx), {"Updated. "}, {revision_range, "OptpackUpdatedRevisionRange"}}}

@@ -13,18 +13,16 @@ function Updater.new(git, directory)
 end
 
 function Updater.start(self, emitter)
-  local before_revision, pull_output
+  local before_revision
   return self._git:get_revision(self._directory):next(function(revision)
     before_revision = revision
     return self._git:pull(self._directory)
-  end):next(function(output)
-    pull_output = output
+  end):next(function()
     return self._git:get_revision(self._directory)
   end):next(function(revision)
     if before_revision == revision then
       return
     end
-    emitter:emit(Event.GitPulled, pull_output)
     local revision_range = before_revision .. "..." .. revision
     emitter:emit(Event.Updated, revision_range)
     return self._git:log(self._directory, revision_range)

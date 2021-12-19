@@ -1,4 +1,5 @@
 local Event = require("optpack.core.event").Event
+local MessageFactory = require("optpack.view.message_factory").MessageFactory
 local Once = require("optpack.lib.once").Once
 local bufferlib = require("optpack.lib.buffer")
 local vim = vim
@@ -6,7 +7,7 @@ local vim = vim
 local M = {}
 M.__index = M
 
-function M.new(cmd_type, message_factory, opts)
+function M.new(cmd_type, opts)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "optpack"
@@ -19,7 +20,7 @@ function M.new(cmd_type, message_factory, opts)
     _delete_first_line = Once.new(function()
       vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, {})
     end),
-    _message_factory = message_factory,
+    _message_factory = MessageFactory.new(M.handlers),
     _progress_ns = vim.api.nvim_create_namespace("optpack-progress"),
     _progress_lines = {},
   }

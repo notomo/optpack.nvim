@@ -1,4 +1,3 @@
-local MessageFactory = require("optpack.view.message_factory").MessageFactory
 local modulelib = require("optpack.lib.module")
 
 local M = {}
@@ -37,8 +36,7 @@ function Outputters._new_one(cmd_type, typ, outputter_opts)
   if not Outputter then
     return nil, "not found outputter: " .. typ
   end
-  local message_factory = MessageFactory.new(Outputter.handlers or {})
-  return Outputter.new(cmd_type, message_factory, outputter_opts)
+  return Outputter.new(cmd_type, outputter_opts)
 end
 
 return M

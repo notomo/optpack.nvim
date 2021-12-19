@@ -27,8 +27,7 @@ function Installer.start(self, emitter)
     return Promise.resolve(false)
   end
 
-  return self._git:clone(self._directory, self._url, self._depth):next(function(output)
-    emitter:emit(Event.GitCloned, output)
+  return self._git:clone(self._directory, self._url, self._depth):next(function()
     emitter:emit(Event.Installed)
     return true
   end)
