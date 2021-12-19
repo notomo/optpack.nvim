@@ -2,6 +2,7 @@ local Plugin = require("optpack.core.plugin").Plugin
 local Loader = require("optpack.core.loader").Loader
 local Event = require("optpack.core.event").Event
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
+local Counter = require("optpack.lib.counter").Counter
 local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
 
 local M = {}
@@ -48,9 +49,9 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
   emitter:emit(Event.StartUpdate)
 
   local raw_plugins = self:_collect(pattern)
-  local all_count = #raw_plugins
-  local finished_count = 0
-  emitter:emit(Event.Progressed, finished_count, all_count)
+  local counter = Counter.new(#raw_plugins, function(finished_count, all_count)
+    emitter:emit(Event.Progressed, finished_count, all_count)
+  end)
 
   local parallel = ParallelLimitter.new(parallel_opts.limit)
   local names = {}
@@ -64,8 +65,7 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
       end):catch(function(err)
         plugin_emitter:emit(Event.Error, err)
       end):finally(function()
-        finished_count = finished_count + 1
-        plugin_emitter:emit(Event.Progressed, finished_count, all_count)
+        counter = counter:increment()
       end)
     end)
   end
@@ -83,9 +83,9 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
   emitter:emit(Event.StartInstall)
 
   local raw_plugins = self:_collect(pattern)
-  local all_count = #raw_plugins
-  local finished_count = 0
-  emitter:emit(Event.Progressed, finished_count, all_count)
+  local counter = Counter.new(#raw_plugins, function(finished_count, all_count)
+    emitter:emit(Event.Progressed, finished_count, all_count)
+  end)
 
   local parallel = ParallelLimitter.new(parallel_opts.limit)
   local names = {}
@@ -99,8 +99,7 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
       end):catch(function(err)
         plugin_emitter:emit(Event.Error, err)
       end):finally(function()
-        finished_count = finished_count + 1
-        plugin_emitter:emit(Event.Progressed, finished_count, all_count)
+        counter = counter:increment()
       end)
     end)
   end
