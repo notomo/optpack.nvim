@@ -22,7 +22,10 @@ function Plugins.state()
 end
 
 function Plugins.add(self, full_name, opts)
-  local plugin = Plugin.new(full_name, opts)
+  local plugin, err = Plugin.new(full_name, opts)
+  if err then
+    return ("%s: %s"):format(full_name, err)
+  end
 
   if not opts.enabled then
     self._plugins:remove(plugin.name)
@@ -32,9 +35,9 @@ function Plugins.add(self, full_name, opts)
 
   self._plugins:add(plugin)
   self._loaders:add(plugin, opts)
-  local ok, err = pcall(opts.hooks.post_add, plugin:expose())
+  local ok, hook_err = pcall(opts.hooks.post_add, plugin:expose())
   if not ok then
-    return ("%s: post_add: %s"):format(plugin.name, err)
+    return ("%s: post_add: %s"):format(plugin.name, hook_err)
   end
 end
 

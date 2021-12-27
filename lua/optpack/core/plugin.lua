@@ -14,7 +14,11 @@ function Plugin.new(full_name, opts)
   vim.validate({name = {full_name, "string"}, opts = {opts, "table"}})
 
   local name = pathlib.tail(full_name)
-  local directory = pathlib.join(opts.select_packpath(), "pack", opts.package_name, "opt", name)
+  local packpath = opts.select_packpath()
+  if not packpath or packpath == "" then
+    return nil, "`select_packpath` should return non-empty string"
+  end
+  local directory = pathlib.join(packpath, "pack", opts.package_name, "opt", name)
   local git = Git.new(JobFactory.new())
   local url = pathlib.join(opts.fetch.base_url, full_name)
 
@@ -28,7 +32,7 @@ function Plugin.new(full_name, opts)
     _updater = Updater.new(git, directory),
     _post_update_hook = opts.hooks.post_update,
   }
-  return setmetatable(tbl, Plugin)
+  return setmetatable(tbl, Plugin), nil
 end
 
 function Plugin.expose(self)

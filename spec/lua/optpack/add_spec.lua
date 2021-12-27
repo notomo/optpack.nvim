@@ -325,4 +325,14 @@ describe("optpack.load()", function()
     assert.exists_message(plugin_name1 .. [[: post_load: test error]])
   end)
 
+  it("show an error message if there is no packpath", function()
+    optpack.add(plugin1, {
+      select_packpath = function()
+        return nil
+      end,
+    })
+
+    assert.exists_message(plugin1 .. [[: `select_packpath` should return non%-empty string]])
+  end)
+
 end)
