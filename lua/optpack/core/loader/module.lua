@@ -17,7 +17,7 @@ function OnModules.set(plugin_name, module_names)
 end
 
 function OnModule.new(plugin_name, module_name)
-  local tbl = {_plugin_name = plugin_name, _module_name = module_name, _loaded = false}
+  local tbl = { _plugin_name = plugin_name, _module_name = module_name, _loaded = false }
   local self = setmetatable(tbl, OnModule)
 
   self._f = function(required_name)

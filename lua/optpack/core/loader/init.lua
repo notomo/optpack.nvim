@@ -12,10 +12,10 @@ M.Loader = Loader
 
 function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
   vim.validate({
-    plugin = {plugin, "table"},
-    load_on = {load_on, "table"},
-    pre_load_hook = {pre_load_hook, "function"},
-    post_load_hook = {post_load_hook, "function"},
+    plugin = { plugin, "table" },
+    load_on = { load_on, "table" },
+    pre_load_hook = { pre_load_hook, "function" },
+    post_load_hook = { post_load_hook, "function" },
   })
 
   local plugin_name = plugin.name
@@ -38,7 +38,7 @@ augroup END
     _plugin = plugin,
     _pre_load_hook = pre_load_hook,
     _post_load_hook = post_load_hook,
-    _removers = {autocmd_remover, unpack(lua_loader_removers)},
+    _removers = { autocmd_remover, unpack(lua_loader_removers) },
   }
   return setmetatable(tbl, Loader)
 end

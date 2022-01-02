@@ -9,12 +9,12 @@ M.Installer = Installer
 
 function Installer.new(git, directory, url, depth)
   vim.validate({
-    git = {git, "table"},
-    directory = {directory, "string"},
-    url = {url, "string"},
-    depth = {depth, "number"},
+    git = { git, "table" },
+    directory = { directory, "string" },
+    url = { url, "string" },
+    depth = { depth, "number" },
   })
-  local tbl = {_git = git, _directory = directory, _url = url, _depth = depth}
+  local tbl = { _git = git, _directory = directory, _url = url, _depth = depth }
   return setmetatable(tbl, Installer)
 end
 

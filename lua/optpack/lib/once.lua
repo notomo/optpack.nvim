@@ -5,8 +5,8 @@ Once.__index = Once
 M.Once = Once
 
 function Once.new(f)
-  vim.validate({f = {f, "function"}})
-  local tbl = {_called = false, _f = f}
+  vim.validate({ f = { f, "function" } })
+  local tbl = { _called = false, _f = f }
   return setmetatable(tbl, Once)
 end
 

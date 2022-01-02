@@ -3,7 +3,7 @@ local pathlib = require("optpack.lib.path")
 local M = {}
 
 M.file_output = function(file_path)
-  vim.validate({file_path = {file_path, "string"}})
+  vim.validate({ file_path = { file_path, "string" } })
   local dir_path = pathlib.dir(file_path)
   vim.fn.mkdir(dir_path, "p")
   local file = io.open(file_path, "a+")
@@ -25,11 +25,11 @@ Logger._prefixes = {
 }
 
 function Logger.new(output, opts)
-  vim.validate({output = {output, "function"}, opts = {opts, "table", true}})
+  vim.validate({ output = { output, "function" }, opts = { opts, "table", true } })
   opts = opts or {}
   opts.level = opts.level or Logger.levels.INFO
   opts.prefix = opts.prefix or ""
-  local tbl = {_level = opts.level, _output = output, _prefix = opts.prefix}
+  local tbl = { _level = opts.level, _output = output, _prefix = opts.prefix }
   return setmetatable(tbl, Logger)
 end
 
@@ -58,8 +58,8 @@ function Logger.log(self, level, msg)
 end
 
 function Logger.add_prefix(self, prefix)
-  vim.validate({prefix = {prefix, "string"}})
-  return Logger.new(self._output, {level = self._level, prefix = self._prefix .. prefix})
+  vim.validate({ prefix = { prefix, "string" } })
+  return Logger.new(self._output, { level = self._level, prefix = self._prefix .. prefix })
 end
 
 return M

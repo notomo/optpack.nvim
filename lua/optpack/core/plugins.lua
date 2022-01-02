@@ -12,7 +12,7 @@ Plugins.__index = Plugins
 M.Plugins = Plugins
 
 function Plugins.new()
-  local tbl = {_plugins = PluginCollection.new(), _loaders = Loaders.new()}
+  local tbl = { _plugins = PluginCollection.new(), _loaders = Loaders.new() }
   return setmetatable(tbl, Plugins)
 end
 
@@ -57,29 +57,36 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
   local names = {}
   for _, plugin in ipairs(raw_plugins) do
     parallel:add(function()
-      local plugin_emitter = emitter:with({name = plugin.name})
-      return plugin:install_or_update(plugin_emitter):next(function(installed_now)
-        if installed_now then
-          table.insert(names, plugin.name)
-        end
-      end):catch(function(err)
-        plugin_emitter:emit(Event.Error, err)
-      end):finally(function()
-        counter = counter:increment()
-      end)
+      local plugin_emitter = emitter:with({ name = plugin.name })
+      return plugin
+        :install_or_update(plugin_emitter)
+        :next(function(installed_now)
+          if installed_now then
+            table.insert(names, plugin.name)
+          end
+        end)
+        :catch(function(err)
+          plugin_emitter:emit(Event.Error, err)
+        end)
+        :finally(function()
+          counter = counter:increment()
+        end)
     end)
   end
 
-  parallel:start():finally(function()
-    local err = self._loaders:load_installed(self._plugins:from(names))
-    if err then
+  parallel
+    :start()
+    :finally(function()
+      local err = self._loaders:load_installed(self._plugins:from(names))
+      if err then
+        emitter:emit(Event.Error, err)
+      end
+      emitter:emit(Event.FinishedUpdate)
+      on_finished()
+    end)
+    :catch(function(err)
       emitter:emit(Event.Error, err)
-    end
-    emitter:emit(Event.FinishedUpdate)
-    on_finished()
-  end):catch(function(err)
-    emitter:emit(Event.Error, err)
-  end)
+    end)
 end
 
 function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
@@ -94,29 +101,36 @@ function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
   local names = {}
   for _, plugin in ipairs(raw_plugins) do
     parallel:add(function()
-      local plugin_emitter = emitter:with({name = plugin.name})
-      return plugin:install(plugin_emitter):next(function(installed_now)
-        if installed_now then
-          table.insert(names, plugin.name)
-        end
-      end):catch(function(err)
-        plugin_emitter:emit(Event.Error, err)
-      end):finally(function()
-        counter = counter:increment()
-      end)
+      local plugin_emitter = emitter:with({ name = plugin.name })
+      return plugin
+        :install(plugin_emitter)
+        :next(function(installed_now)
+          if installed_now then
+            table.insert(names, plugin.name)
+          end
+        end)
+        :catch(function(err)
+          plugin_emitter:emit(Event.Error, err)
+        end)
+        :finally(function()
+          counter = counter:increment()
+        end)
     end)
   end
 
-  parallel:start():finally(function()
-    local err = self._loaders:load_installed(self._plugins:from(names))
-    if err then
+  parallel
+    :start()
+    :finally(function()
+      local err = self._loaders:load_installed(self._plugins:from(names))
+      if err then
+        emitter:emit(Event.Error, err)
+      end
+      emitter:emit(Event.FinishedInstall)
+      on_finished()
+    end)
+    :catch(function(err)
       emitter:emit(Event.Error, err)
-    end
-    emitter:emit(Event.FinishedInstall)
-    on_finished()
-  end):catch(function(err)
-    emitter:emit(Event.Error, err)
-  end)
+    end)
 end
 
 function Plugins.load(self, plugin_name)

@@ -2,7 +2,6 @@ local helper = require("optpack.lib.testlib.helper")
 local optpack = helper.require("optpack")
 
 describe("optpack.add()", function()
-
   local plugin_name1 = "myplugin_name1"
   local plugin1 = "account_name/" .. plugin_name1
 
@@ -29,15 +28,15 @@ command! MyPluginTest echo ''
   end)
 
   it("can set a plugin that is loaded by filetype", function()
-    optpack.add(plugin1, {load_on = {filetypes = {"lua"}}})
+    optpack.add(plugin1, { load_on = { filetypes = { "lua" } } })
     vim.bo.filetype = "lua"
 
     assert.can_require(plugin_name1)
   end)
 
   it("can set plugins that is loaded by filetype", function()
-    optpack.add(plugin1, {load_on = {filetypes = {"lua"}}})
-    optpack.add(plugin2, {load_on = {filetypes = {"lua"}}})
+    optpack.add(plugin1, { load_on = { filetypes = { "lua" } } })
+    optpack.add(plugin2, { load_on = { filetypes = { "lua" } } })
     vim.bo.filetype = "lua"
 
     assert.can_require(plugin_name1)
@@ -45,21 +44,21 @@ command! MyPluginTest echo ''
   end)
 
   it("can set a plugin that is loaded by command", function()
-    optpack.add(plugin1, {load_on = {cmds = {"MyPlugin*"}}})
+    optpack.add(plugin1, { load_on = { cmds = { "MyPlugin*" } } })
     vim.cmd("MyPluginTest")
 
     assert.can_require(plugin_name1)
   end)
 
   it("can set a plugin that is loaded by event only", function()
-    optpack.add(plugin1, {load_on = {events = {"TabNew"}}})
+    optpack.add(plugin1, { load_on = { events = { "TabNew" } } })
     vim.cmd("tabedit")
 
     assert.can_require(plugin_name1)
   end)
 
   it("can set a plugin that is loaded by event with pattern", function()
-    optpack.add(plugin1, {load_on = {events = {{"BufNewFile", "*.txt"}}}})
+    optpack.add(plugin1, { load_on = { events = { { "BufNewFile", "*.txt" } } } })
 
     vim.cmd("edit test")
     assert.no.can_require(plugin_name1)
@@ -69,14 +68,14 @@ command! MyPluginTest echo ''
   end)
 
   it("can set a plugin that is loaded by requiring module", function()
-    optpack.add(plugin1, {load_on = {modules = {plugin_name1}}})
+    optpack.add(plugin1, { load_on = { modules = { plugin_name1 } } })
 
     assert.can_require(plugin_name1)
   end)
 
   it("can disable a plugin with enabled=false", function()
     optpack.add(plugin1)
-    optpack.add(plugin1, {enabled = false})
+    optpack.add(plugin1, { enabled = false })
 
     local got = optpack.list()
     assert.is_same({}, got)
@@ -90,7 +89,7 @@ command! MyPluginTest echo ''
           called = plugin.name
         end,
       },
-      load_on = {modules = {plugin_name1}},
+      load_on = { modules = { plugin_name1 } },
     })
     require(plugin_name1)
 
@@ -109,7 +108,7 @@ command! MyPluginTest echo ''
           require(plugin_name1)
         end,
       },
-      load_on = {modules = {plugin_name1}},
+      load_on = { modules = { plugin_name1 } },
     })
     require(plugin_name1)
 
@@ -124,7 +123,7 @@ command! MyPluginTest echo ''
           called = true
         end,
       },
-      load_on = {filetypes = {"lua"}},
+      load_on = { filetypes = { "lua" } },
     })
     vim.bo.filetype = "lua"
 
@@ -142,7 +141,7 @@ command! MyPluginTest echo ''
           called = true
         end,
       },
-      load_on = {filetypes = {"lua"}},
+      load_on = { filetypes = { "lua" } },
     })
     vim.bo.filetype = "lua"
 
@@ -170,7 +169,7 @@ command! MyPluginTest echo ''
           called = called + 1
         end,
       },
-      load_on = {filetypes = {"lua"}, events = {"TabNew"}},
+      load_on = { filetypes = { "lua" }, events = { "TabNew" } },
     })
     vim.bo.filetype = "lua"
     vim.cmd("tabedit")
@@ -216,11 +215,9 @@ command! MyPluginTest echo ''
 
     assert.is_true(called)
   end)
-
 end)
 
 describe("optpack.list()", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -242,11 +239,9 @@ describe("optpack.list()", function()
       url = "https://github.com/account/test",
     }, got)
   end)
-
 end)
 
 describe("optpack.load()", function()
-
   local plugin_name1 = "myplugin_name1"
   local plugin1 = "account_name/" .. plugin_name1
 
@@ -275,14 +270,16 @@ describe("optpack.load()", function()
 
   it("show an error message if unexpected plugin is loaded", function()
     local unexpected_packpath = "_unexpected"
-    helper.create_plugin_dir(plugin_name1, {opt_path = unexpected_packpath .. "/pack/optpack/opt/"})
+    helper.create_plugin_dir(plugin_name1, { opt_path = unexpected_packpath .. "/pack/optpack/opt/" })
 
     optpack.add(plugin1)
     vim.o.packpath = helper.test_data_dir .. unexpected_packpath
 
     optpack.load(plugin_name1)
 
-    assert.exists_message([[failed to load expected directory: ]] .. helper.test_data_dir .. helper.opt_path .. plugin_name1)
+    assert.exists_message(
+      [[failed to load expected directory: ]] .. helper.test_data_dir .. helper.opt_path .. plugin_name1
+    )
   end)
 
   it("show an error message if hooks.post_add raises an error", function()
@@ -334,5 +331,4 @@ describe("optpack.load()", function()
 
     assert.exists_message(plugin1 .. [[: `select_packpath` should return non%-empty string]])
   end)
-
 end)

@@ -5,7 +5,7 @@ vim.o.runtimepath = vim.fn.getcwd() .. "," .. vim.o.runtimepath
 dofile(example_path)
 
 require("genvdoc").generate("optpack.nvim", {
-  sources = {{name = "lua", pattern = "lua/optpack/init.lua"}},
+  sources = { { name = "lua", pattern = "lua/optpack/init.lua" } },
   chapters = {
     {
       name = function(group)
@@ -79,13 +79,13 @@ require("genvdoc").generate("optpack.nvim", {
               children = {
                 buffer = {
                   text = [[(table | nil): buffer output setting]],
-                  children = {open = [[(function | nil) (bufnr) -> open buffer]]},
+                  children = { open = [[(function | nil) (bufnr) -> open buffer]] },
                 },
               },
             },
             parallel = {
               text = [[(table | nil): parallel setting]],
-              children = {limit = [[max number for parallel job,  default: %s]]},
+              children = { limit = [[max number for parallel job,  default: %s]] },
             },
             pattern = [[(string | nil): target plugin name pattern for vim regex,
     default: %s]],
@@ -104,7 +104,10 @@ require("genvdoc").generate("optpack.nvim", {
             name = [[(string): plugin name]],
             url = [[(string): git repository url]],
           }
-          local default = require("optpack.core.plugin").Plugin.new("doc", require("optpack.core.option").AddOption.new()):expose()
+          local default = require("optpack.core.plugin").Plugin.new(
+            "doc",
+            require("optpack.core.option").AddOption.new()
+          ):expose()
           local keys = vim.tbl_keys(default)
           local lines = util.each_keys_description(keys, descriptions)
           plugin_text = table.concat(lines, "\n")
@@ -125,14 +128,14 @@ require("genvdoc").generate("optpack.nvim", {
         end
 
         return util.sections(ctx, {
-          {name = "|optpack.add()| option", tag_name = "add-option", text = add_option_text},
+          { name = "|optpack.add()| option", tag_name = "add-option", text = add_option_text },
           {
             name = "|optpack.install()| or |optpack.update()| option",
             tag_name = "install-or-update-option",
             text = install_or_update_option_text,
           },
-          {name = "Plugin", tag_name = "plugin", text = plugin_text},
-          {name = "|optpack.set_default()| setting", tag_name = "setting", text = setting_text},
+          { name = "Plugin", tag_name = "plugin", text = plugin_text },
+          { name = "|optpack.set_default()| setting", tag_name = "setting", text = setting_text },
         })
       end,
     },

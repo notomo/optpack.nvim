@@ -9,17 +9,17 @@ Git.__index = Git
 M.Git = Git
 
 function Git.new(job_factory)
-  vim.validate({job_factory = {job_factory, "table"}})
-  local tbl = {_job_factory = job_factory}
+  vim.validate({ job_factory = { job_factory, "table" } })
+  local tbl = { _job_factory = job_factory }
   return setmetatable(tbl, Git)
 end
 
 function Git.clone(self, directory, url, depth)
-  local cmd = {"git", "clone", "--no-single-branch"}
+  local cmd = { "git", "clone", "--no-single-branch" }
   if depth > 0 then
-    vim.list_extend(cmd, {"--depth", depth})
+    vim.list_extend(cmd, { "--depth", depth })
   end
-  vim.list_extend(cmd, {"--", url .. ".git", directory})
+  vim.list_extend(cmd, { "--", url .. ".git", directory })
   return self:_start(cmd)
 end
 
@@ -32,11 +32,11 @@ function Git.pull(self, directory)
     "--ff-only",
     "--rebase=false",
   }
-  return self:_start(cmd, {cwd = directory})
+  return self:_start(cmd, { cwd = directory })
 end
 
 function Git.get_revision(self, directory)
-  local cmd = {"git", "--git-dir", pathlib.join(directory, ".git"), "rev-parse", "--short", "HEAD"}
+  local cmd = { "git", "--git-dir", pathlib.join(directory, ".git"), "rev-parse", "--short", "HEAD" }
   return self:_start(cmd, {
     cwd = directory,
     handle_stdout = function(stdout)
@@ -54,7 +54,7 @@ function Git.log(self, directory, revision)
     [[--pretty=format:%h %s]],
     revision,
   }
-  return self:_start(cmd, {cwd = directory})
+  return self:_start(cmd, { cwd = directory })
 end
 
 function Git._start(self, cmd, opts)
@@ -68,7 +68,7 @@ function Git._start(self, cmd, opts)
     local _, err = self._job_factory:create(cmd, {
       on_exit = function(_, code)
         if code ~= 0 then
-          local err = {table.concat(cmd, " "), unpack(stderr:lines())}
+          local err = { table.concat(cmd, " "), unpack(stderr:lines()) }
           return reject(err)
         end
         return resolve(opts.handle_stdout(stdout))

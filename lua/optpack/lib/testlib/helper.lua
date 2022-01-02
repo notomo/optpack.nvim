@@ -30,7 +30,7 @@ end
 
 function M.new_file(path, ...)
   local f = io.open(M.test_data_dir .. path, "w")
-  for _, line in ipairs({...}) do
+  for _, line in ipairs({ ... }) do
     f:write(line .. "\n")
   end
   f:close()

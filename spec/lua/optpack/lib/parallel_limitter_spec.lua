@@ -3,7 +3,6 @@ local ParallelLimitter = helper.require("optpack.lib.parallel_limitter").Paralle
 local Promise = require("optpack.lib.promise")
 
 describe("ParallelLimitter", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -76,5 +75,4 @@ describe("ParallelLimitter", function()
 
     assert.equal(2, call_count)
   end)
-
 end)

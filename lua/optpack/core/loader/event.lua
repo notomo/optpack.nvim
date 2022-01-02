@@ -19,7 +19,9 @@ function OnEvents.set(plugin_name, group_name, events)
 end
 
 function OnEvents._set(plugin_name, group_name, event_name, pattern)
-  vim.cmd(([[autocmd %s %s %s ++once lua require("optpack").load(%q)]]):format(group_name, event_name, pattern, plugin_name))
+  vim.cmd(
+    ([[autocmd %s %s %s ++once lua require("optpack").load(%q)]]):format(group_name, event_name, pattern, plugin_name)
+  )
 end
 
 return M

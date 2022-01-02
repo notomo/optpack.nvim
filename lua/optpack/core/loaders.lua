@@ -7,7 +7,7 @@ Loaders.__index = Loaders
 M.Loaders = Loaders
 
 function Loaders.new()
-  local tbl = {_loaders = {}, _load_on_installed = {}}
+  local tbl = { _loaders = {}, _load_on_installed = {} }
   return setmetatable(tbl, Loaders)
 end
 

@@ -11,7 +11,7 @@ Plugin.__index = Plugin
 M.Plugin = Plugin
 
 function Plugin.new(full_name, opts)
-  vim.validate({name = {full_name, "string"}, opts = {opts, "table"}})
+  vim.validate({ name = { full_name, "string" }, opts = { opts, "table" } })
 
   local name = pathlib.tail(full_name)
   local packpath = opts.select_packpath()
@@ -36,7 +36,7 @@ function Plugin.new(full_name, opts)
 end
 
 function Plugin.expose(self)
-  return {full_name = self.full_name, name = self.name, directory = self.directory, url = self.url}
+  return { full_name = self.full_name, name = self.name, directory = self.directory, url = self.url }
 end
 
 function Plugin.install_or_update(self, emitter)

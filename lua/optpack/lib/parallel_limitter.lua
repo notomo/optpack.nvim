@@ -8,11 +8,11 @@ ParallelLimitter.__index = ParallelLimitter
 M.ParallelLimitter = ParallelLimitter
 
 function ParallelLimitter.new(limit)
-  vim.validate({limit = {limit, "number"}})
+  vim.validate({ limit = { limit, "number" } })
   if limit <= 0 then
     error("limit: must be natural number")
   end
-  local tbl = {_limit = limit, _queued = {}, _started = {}}
+  local tbl = { _limit = limit, _queued = {}, _started = {} }
   return setmetatable(tbl, ParallelLimitter)
 end
 

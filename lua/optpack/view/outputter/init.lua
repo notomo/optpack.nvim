@@ -7,7 +7,7 @@ Outputters.__index = Outputters
 M.Outputters = Outputters
 
 function Outputters.new(cmd_type, raw_outputters)
-  vim.validate({raw_outputters = {raw_outputters, "table"}})
+  vim.validate({ raw_outputters = { raw_outputters, "table" } })
 
   local outputters = {}
   local errs = {}
@@ -27,9 +27,9 @@ end
 
 function Outputters._new_one(cmd_type, typ, outputter_opts)
   vim.validate({
-    cmd_type = {cmd_type, "string"},
-    typ = {typ, "string"},
-    outputter_opts = {outputter_opts, "table", true},
+    cmd_type = { cmd_type, "string" },
+    typ = { typ, "string" },
+    outputter_opts = { outputter_opts, "table", true },
   })
   outputter_opts = outputter_opts or {}
   local Outputter = modulelib.find("optpack.view.outputter." .. typ)

@@ -2,13 +2,12 @@ local helper = require("optpack.lib.testlib.helper")
 local optpack = helper.require("optpack")
 
 describe("optpack.update()", function()
-
   local git_server
 
   lazy_setup(function()
     git_server = helper.git_server()
-    git_server:create_repository("account1/test1", {"commit1", "commit2"})
-    git_server:create_repository("account2/test2", {"commit3", "commit4"})
+    git_server:create_repository("account1/test1", { "commit1", "commit2" })
+    git_server:create_repository("account2/test2", { "commit3", "commit4" })
   end)
   lazy_teardown(function()
     git_server:teardown()
@@ -20,11 +19,11 @@ describe("optpack.update()", function()
   it("installs plugins if directories do not exist", function()
     helper.set_packpath()
 
-    optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
-    optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
+    optpack.add("account1/test1", { fetch = { base_url = git_server.url } })
+    optpack.add("account2/test2", { fetch = { base_url = git_server.url } })
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished})
+    optpack.update({ on_finished = on_finished })
     on_finished:wait()
 
     assert.exists_dir(helper.packpath_name .. "/pack/optpack/opt/test1")
@@ -44,11 +43,11 @@ describe("optpack.update()", function()
 
     helper.set_packpath()
 
-    optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
-    optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
+    optpack.add("account1/test1", { fetch = { base_url = git_server.url } })
+    optpack.add("account2/test2", { fetch = { base_url = git_server.url } })
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished})
+    optpack.update({ on_finished = on_finished })
     on_finished:wait()
 
     assert.exists_pattern([[test1 > Updated.]])
@@ -63,11 +62,11 @@ describe("optpack.update()", function()
 
     helper.set_packpath()
 
-    optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
-    optpack.add("account2/test2", {fetch = {base_url = git_server.url}})
+    optpack.add("account1/test1", { fetch = { base_url = git_server.url } })
+    optpack.add("account2/test2", { fetch = { base_url = git_server.url } })
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished, pattern = "test2"})
+    optpack.update({ on_finished = on_finished, pattern = "test2" })
     on_finished:wait()
 
     assert.no.exists_pattern([[test1 > Updated.]])
@@ -79,10 +78,10 @@ describe("optpack.update()", function()
 
     helper.set_packpath()
 
-    optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
+    optpack.add("account1/test1", { fetch = { base_url = git_server.url } })
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished})
+    optpack.update({ on_finished = on_finished })
     on_finished:wait()
 
     assert.exists_pattern([[test1 > git --git-dir ]])
@@ -92,25 +91,25 @@ describe("optpack.update()", function()
   it("does not raise an error event if output buffer already exists", function()
     do
       local on_finished = helper.on_finished()
-      optpack.update({on_finished = on_finished})
+      optpack.update({ on_finished = on_finished })
       on_finished:wait()
     end
     do
       local on_finished = helper.on_finished()
-      optpack.update({on_finished = on_finished})
+      optpack.update({ on_finished = on_finished })
       on_finished:wait()
     end
     assert.buffer_name("optpack://optpack-update")
   end)
 
   it("can set default option by optpack.set_default()", function()
-    optpack.set_default({install_or_update = {pattern = "invalid"}})
+    optpack.set_default({ install_or_update = { pattern = "invalid" } })
     helper.set_packpath()
 
-    optpack.add("account1/test1", {fetch = {base_url = git_server.url}})
+    optpack.add("account1/test1", { fetch = { base_url = git_server.url } })
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished})
+    optpack.update({ on_finished = on_finished })
     on_finished:wait()
 
     assert.no.exists_pattern([[test1 > Installed.]])
@@ -124,7 +123,7 @@ describe("optpack.update()", function()
 
     local updated
     optpack.add("account1/test1", {
-      fetch = {base_url = git_server.url},
+      fetch = { base_url = git_server.url },
       hooks = {
         post_update = function(plugin)
           updated = plugin.name
@@ -133,15 +132,14 @@ describe("optpack.update()", function()
     })
 
     local on_finished = helper.on_finished()
-    optpack.update({on_finished = on_finished})
+    optpack.update({ on_finished = on_finished })
     on_finished:wait()
 
     assert.equal("test1", updated)
   end)
 
   it("raises an error if pattern is invalid", function()
-    optpack.update({pattern = [[\(test]]})
+    optpack.update({ pattern = [[\(test]] })
     assert.exists_message([[invalid pattern]])
   end)
-
 end)

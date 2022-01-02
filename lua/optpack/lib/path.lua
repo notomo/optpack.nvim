@@ -3,7 +3,7 @@ local M = {}
 function M.join(...)
   local items = {}
   local slash = false
-  for _, item in ipairs({...}) do
+  for _, item in ipairs({ ... }) do
     item = M.adjust_sep(item)
     if vim.endswith(item, "/") then
       item = item:sub(1, #item - 1)

@@ -12,7 +12,7 @@ M.GitServer = GitServer
 
 function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   local port = 8888
-  local job_id = vim.fn.jobstart({"python", "-m", "http.server", port, "--cgi"}, {
+  local job_id = vim.fn.jobstart({ "python", "-m", "http.server", port, "--cgi" }, {
     on_stdout = function(_, data)
       local msg = table.concat(data, "")
       if msg ~= "" then
@@ -25,7 +25,7 @@ function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
         logger:warn(msg)
       end
     end,
-    env = {GIT_PROJECT_ROOT = git_root_dir, GIT_HTTP_EXPORT_ALL = "true"},
+    env = { GIT_PROJECT_ROOT = git_root_dir, GIT_HTTP_EXPORT_ALL = "true" },
     cwd = cgi_root_dir,
   })
 
@@ -52,7 +52,7 @@ function GitServer.create_repository(self, full_name, commits)
   local tmp_path = pathlib.join(self._tmp_dir, full_name)
   vim.fn.mkdir(tmp_path, "p")
 
-  self.client:execute({"init"}, {cwd = tmp_path})
+  self.client:execute({ "init" }, { cwd = tmp_path })
 
   self:_add_commit(tmp_path, "init")
   for _, msg in ipairs(commits or {}) do
@@ -62,15 +62,15 @@ function GitServer.create_repository(self, full_name, commits)
   local account_name = vim.split(full_name, "/", true)[1]
   local path = pathlib.join(self._git_root_dir, account_name)
   vim.fn.mkdir(path, "p")
-  self.client:execute({"clone", "--bare", "--local", tmp_path}, {cwd = path})
+  self.client:execute({ "clone", "--bare", "--local", tmp_path }, { cwd = path })
 end
 
 function GitServer._add_commit(self, tmp_path, msg)
   local name = ("%s_file"):format(msg)
   local file = pathlib.join(tmp_path, name)
   io.open(file, "w"):close()
-  self.client:execute({"add", "."}, {cwd = tmp_path})
-  self.client:execute({"commit", "-m", msg}, {cwd = tmp_path})
+  self.client:execute({ "add", "." }, { cwd = tmp_path })
+  self.client:execute({ "commit", "-m", msg }, { cwd = tmp_path })
 end
 
 function GitServer.teardown(self)
@@ -84,12 +84,12 @@ end
 function GitServer._health_check(self)
   local ok = vim.wait(1000, function()
     local exit_code
-    local job_id = vim.fn.jobstart({"curl", pathlib.join(self._cgi_url, "ready.py")}, {
+    local job_id = vim.fn.jobstart({ "curl", pathlib.join(self._cgi_url, "ready.py") }, {
       on_exit = function(_, code)
         exit_code = code
       end,
     })
-    vim.fn.jobwait({job_id}, 1000)
+    vim.fn.jobwait({ job_id }, 1000)
     return exit_code == 0
   end, 100)
   if not ok then

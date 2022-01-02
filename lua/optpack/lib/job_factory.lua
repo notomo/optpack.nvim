@@ -5,13 +5,13 @@ Job.__index = Job
 M.Job = Job
 
 function Job.new(id)
-  vim.validate({id = {id, "number"}})
-  local tbl = {id = id}
+  vim.validate({ id = { id, "number" } })
+  local tbl = { id = id }
   return setmetatable(tbl, Job)
 end
 
 function Job.is_running(self)
-  return vim.fn.jobwait({self.id}, 0)[1] == -1
+  return vim.fn.jobwait({ self.id }, 0)[1] == -1
 end
 
 local JobFactory = {}

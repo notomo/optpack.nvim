@@ -7,7 +7,7 @@ PluginCollection.__index = PluginCollection
 M.PluginCollection = PluginCollection
 
 function PluginCollection.new()
-  local tbl = {_plugins = OrderedDict.new()}
+  local tbl = { _plugins = OrderedDict.new() }
   return setmetatable(tbl, PluginCollection)
 end
 

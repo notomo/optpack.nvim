@@ -9,29 +9,29 @@ M.MessageFactory = MessageFactory
 
 MessageFactory.default_handlers = {
   [Event.StartInstall] = function(self, ctx)
-    return {{self:_prefix(ctx), {"Start installing."}}}
+    return { { self:_prefix(ctx), { "Start installing." } } }
   end,
   [Event.Installed] = function(self, ctx)
-    return {{self:_prefix(ctx), {"Installed."}}}
+    return { { self:_prefix(ctx), { "Installed." } } }
   end,
   [Event.FinishedInstall] = function(self, ctx)
-    return {{self:_prefix(ctx), {"Finished installing."}}}
+    return { { self:_prefix(ctx), { "Finished installing." } } }
   end,
 
   [Event.StartUpdate] = function(self, ctx)
-    return {{self:_prefix(ctx), {"Start updating."}}}
+    return { { self:_prefix(ctx), { "Start updating." } } }
   end,
   [Event.Updated] = function(self, ctx, revision_range)
-    return {{self:_prefix(ctx), {"Updated. "}, {revision_range, "OptpackUpdatedRevisionRange"}}}
+    return { { self:_prefix(ctx), { "Updated. " }, { revision_range, "OptpackUpdatedRevisionRange" } } }
   end,
   [Event.GitCommitLog] = function(self, ctx, output)
     local prefix = self:_prefix(ctx)
     return vim.tbl_map(function(line)
-      return {prefix, {line, "OptpackGitCommitLog"}}
+      return { prefix, { line, "OptpackGitCommitLog" } }
     end, output)
   end,
   [Event.FinishedUpdate] = function(self, ctx)
-    return {{self:_prefix(ctx), {"Finished updating."}}}
+    return { { self:_prefix(ctx), { "Finished updating." } } }
   end,
 
   [Event.Progressed] = function()
@@ -42,16 +42,16 @@ MessageFactory.default_handlers = {
     local prefix = self:_prefix(ctx)
     if type(err) == "table" then
       return vim.tbl_map(function(e)
-        return {prefix, {e, "OptpackError"}}
+        return { prefix, { e, "OptpackError" } }
       end, err)
     end
-    return {{prefix, {err, "OptpackError"}}}
+    return { { prefix, { err, "OptpackError" } } }
   end,
 }
 
 function MessageFactory.new(handlers)
-  vim.validate({handlers = {handlers, "table"}})
-  local tbl = {_handlers = vim.tbl_extend("force", MessageFactory.default_handlers, handlers)}
+  vim.validate({ handlers = { handlers, "table" } })
+  local tbl = { _handlers = vim.tbl_extend("force", MessageFactory.default_handlers, handlers) }
   return setmetatable(tbl, MessageFactory)
 end
 
@@ -72,9 +72,9 @@ end
 
 function MessageFactory._prefix(_, ctx)
   if not ctx.name then
-    return {"> "}
+    return { "> " }
   end
-  return {("%s > "):format(ctx.name)}
+  return { ("%s > "):format(ctx.name) }
 end
 
 local highlightlib = require("optpack.lib.highlight")

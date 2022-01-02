@@ -8,7 +8,7 @@ local HighlightedLine = {}
 HighlightedLine.__index = HighlightedLine
 
 function HighlightedLines.new(raw_hl_lines)
-  vim.validate({raw_hl_lines = {raw_hl_lines, "table"}})
+  vim.validate({ raw_hl_lines = { raw_hl_lines, "table" } })
   local tbl = {
     _lines = vim.tbl_map(function(pairs)
       return HighlightedLine.new(pairs)
@@ -32,14 +32,17 @@ function HighlightedLines.add_highlight(self, bufnr, ns, end_row)
 end
 
 function HighlightedLine.new(text_hl_pairs)
-  local tbl = {_pairs = text_hl_pairs}
+  local tbl = { _pairs = text_hl_pairs }
   return setmetatable(tbl, HighlightedLine)
 end
 
 function HighlightedLine.str(self)
-  return table.concat(vim.tbl_map(function(pair)
-    return pair[1]
-  end, self._pairs), "")
+  return table.concat(
+    vim.tbl_map(function(pair)
+      return pair[1]
+    end, self._pairs),
+    ""
+  )
 end
 
 function HighlightedLine.add_highlight(self, bufnr, ns, row)
@@ -47,7 +50,7 @@ function HighlightedLine.add_highlight(self, bufnr, ns, row)
   local last_index = #self._pairs
   for i, pair in ipairs(self._pairs) do
     local text, hl_group = unpack(pair)
-    local opts = {hl_group = hl_group, end_col = 0}
+    local opts = { hl_group = hl_group, end_col = 0 }
     if i == last_index then
       opts.end_line = row + 1
     else

@@ -5,7 +5,7 @@ Output.__index = Output
 M.Output = Output
 
 function Output.new()
-  local tbl = {_lines = {""}}
+  local tbl = { _lines = { "" } }
   return setmetatable(tbl, Output)
 end
 
