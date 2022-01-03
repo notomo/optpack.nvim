@@ -282,6 +282,18 @@ describe("optpack.load()", function()
     )
   end)
 
+  it("show an error message if the same another plugin is prior in 'runtimepath'", function()
+    local another_opt_path = ("%s/pack/%s/opt/"):format(helper.packpath_name, "another")
+    helper.create_plugin_dir(plugin_name1, { opt_path = another_opt_path })
+
+    optpack.add(plugin1)
+
+    optpack.load(plugin_name1)
+
+    local another_plugin_path = helper.test_data_dir .. another_opt_path .. plugin_name1
+    assert.exists_message([[loaded, but the same and prior plugin exists in 'runtimepath': ]] .. another_plugin_path)
+  end)
+
   it("show an error message if hooks.post_add raises an error", function()
     optpack.add(plugin1, {
       hooks = {

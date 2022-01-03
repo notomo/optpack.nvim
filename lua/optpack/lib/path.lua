@@ -22,6 +22,9 @@ end
 
 function M.tail(path)
   path = M.adjust_sep(path)
+  if vim.endswith(path, "/") then
+    path = path:sub(1, #path - 1)
+  end
   local splitted = vim.split(path, "/", true)
   return splitted[#splitted]
 end

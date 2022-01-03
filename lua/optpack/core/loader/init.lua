@@ -67,15 +67,35 @@ function Loader.load(self)
     end
   end
 
-  local paths = vim.tbl_map(function(path)
-    return pathlib.adjust_sep(path)
-  end, vim.api.nvim_list_runtime_paths())
-  if not vim.tbl_contains(paths, self._plugin.directory) then
-    table.insert(errs, ([[failed to load expected directory: %s]]):format(self._plugin.directory))
+  do
+    local err = self:_validate_after_loading()
+    if err then
+      table.insert(errs, err)
+    end
   end
 
   if #errs ~= 0 then
     return table.concat(errs, "\n")
+  end
+end
+
+function Loader._validate_after_loading(self)
+  local paths = vim.tbl_map(function(path)
+    return pathlib.adjust_sep(path)
+  end, vim.api.nvim_list_runtime_paths())
+
+  if not vim.tbl_contains(paths, self._plugin.directory) then
+    return ([[failed to load expected directory: %s]]):format(self._plugin.directory)
+  end
+
+  for _, path in ipairs(paths) do
+    local name = pathlib.tail(path)
+    if self._plugin.name == name and self._plugin.directory ~= path then
+      return ([[loaded, but the same and prior plugin exists in 'runtimepath': %s]]):format(path)
+    end
+    if self._plugin.name == name and self._plugin.directory == path then
+      return nil
+    end
   end
 end
 
