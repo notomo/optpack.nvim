@@ -343,4 +343,10 @@ describe("optpack.load()", function()
 
     assert.exists_message(plugin1 .. [[: `select_packpath` should return non%-empty string]])
   end)
+
+  it("show an error message if there is no plugin", function()
+    optpack.load("invalid_plugin")
+
+    assert.exists_message([[not found plugin: invalid_plugin]])
+  end)
 end)

@@ -136,7 +136,7 @@ end
 function Plugins.load(self, plugin_name)
   local plugin = self._plugins:find_by_name(plugin_name)
   if not plugin then
-    return nil
+    return "not found plugin: " .. plugin_name
   end
   return self._loaders:load(plugin)
 end
