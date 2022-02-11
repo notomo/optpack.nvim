@@ -17,9 +17,9 @@ local optpack = require("optpack")
 
 -- add some plugins
 optpack.add("notomo/optpack.nvim")
-optpack.add("notomo/ignored", {enabled = false})
+optpack.add("notomo/ignored", { enabled = false })
 optpack.add("notomo/gesture.nvim", {
-  load_on = {modules = {"gesture"}}, -- load on `require("gesture")`
+  load_on = { modules = { "gesture" } }, -- load on `require("gesture")`
   hooks = {
     post_add = function()
       -- mapping
@@ -30,7 +30,7 @@ optpack.add("notomo/gesture.nvim", {
   },
 })
 optpack.add("notomo/vusted", {
-  fetch = {depth = 0}, -- fetch including history
+  fetch = { depth = 0 }, -- fetch including history
 })
 
 if initializing then

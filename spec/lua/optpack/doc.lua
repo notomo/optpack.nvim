@@ -1,11 +1,14 @@
-local example_path = "./spec/lua/optpack/example.lua"
 local util = require("genvdoc.util")
+local plugin_name = vim.env.PLUGIN_NAME
+local full_plugin_name = plugin_name .. ".nvim"
+
+local example_path = ("./spec/lua/%s/example.lua"):format(plugin_name)
 
 vim.o.runtimepath = vim.fn.getcwd() .. "," .. vim.o.runtimepath
 dofile(example_path)
 
-require("genvdoc").generate("optpack.nvim", {
-  sources = { { name = "lua", pattern = "lua/optpack/init.lua" } },
+require("genvdoc").generate(full_plugin_name, {
+  sources = { { name = "lua", pattern = ("lua/%s/init.lua"):format(plugin_name) } },
   chapters = {
     {
       name = function(group)
@@ -142,7 +145,7 @@ require("genvdoc").generate("optpack.nvim", {
     {
       name = "EXAMPLES",
       body = function()
-        return require("genvdoc.util").help_code_block_from_file(example_path)
+        return util.help_code_block_from_file(example_path)
       end,
     },
   },
@@ -154,14 +157,14 @@ local gen_readme = function()
   f:close()
 
   local content = ([[
-# optpack.nvim
+# %s
 
 This is a neovim plugin manager that uses only opt package.
 
 ## Example
 
 ```lua
-%s```]]):format(exmaple)
+%s```]]):format(full_plugin_name, exmaple)
 
   local readme = io.open("README.md", "w")
   readme:write(content)
