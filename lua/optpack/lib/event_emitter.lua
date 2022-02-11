@@ -1,8 +1,5 @@
-local M = {}
-
 local EventEmitter = {}
 EventEmitter.__index = EventEmitter
-M.EventEmitter = EventEmitter
 
 function EventEmitter.new(handlers, ctx)
   vim.validate({ handlers = { handlers, "table" }, ctx = { ctx, "table", true } })
@@ -22,4 +19,4 @@ function EventEmitter.with(self, ctx)
   return EventEmitter.new(self._handlers, ctx)
 end
 
-return M
+return EventEmitter

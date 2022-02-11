@@ -1,10 +1,7 @@
 local modulelib = require("optpack.lib.module")
 
-local M = {}
-
 local Outputters = {}
 Outputters.__index = Outputters
-M.Outputters = Outputters
 
 function Outputters.new(cmd_type, raw_outputters)
   vim.validate({ raw_outputters = { raw_outputters, "table" } })
@@ -39,4 +36,4 @@ function Outputters._new_one(cmd_type, typ, outputter_opts)
   return Outputter.new(cmd_type, outputter_opts)
 end
 
-return M
+return Outputters

@@ -5,11 +5,8 @@ local Event = require("optpack.core.event").Event
 local Counter = require("optpack.lib.counter").Counter
 local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
 
-local M = {}
-
 local Plugins = {}
 Plugins.__index = Plugins
-M.Plugins = Plugins
 
 function Plugins.new()
   local tbl = { _plugins = PluginCollection.new(), _loaders = Loaders.new() }
@@ -141,4 +138,4 @@ function Plugins.load(self, plugin_name)
   return self._loaders:load(plugin)
 end
 
-return M
+return Plugins

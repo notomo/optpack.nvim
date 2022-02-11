@@ -4,13 +4,18 @@ local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
 local prefix = ("[%s] "):format(plugin_name)
 
 function M.error(err)
-  vim.validate({ err = { err, "string" } })
-  error(prefix .. err)
+  error(M.wrap(err))
 end
 
 function M.warn(msg)
-  vim.validate({ msg = { msg, "string" } })
-  vim.api.nvim_echo({ { prefix .. msg, "WarningMsg" } }, true, {})
+  vim.api.nvim_echo({ { M.wrap(msg), "WarningMsg" } }, true, {})
+end
+
+function M.wrap(msg)
+  if type(msg) == "string" then
+    return prefix .. msg
+  end
+  return prefix .. vim.inspect(msg)
 end
 
 return M
