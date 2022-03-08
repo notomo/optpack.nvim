@@ -14,14 +14,14 @@ function OnEvents.set(plugin_name, group_name, events)
     else
       event_name = event
     end
-    OnEvents._set(plugin_name, group_name, event_name, pattern)
+    vim.api.nvim_create_autocmd({ event_name }, {
+      group = group_name,
+      pattern = { pattern },
+      callback = function()
+        require("optpack").load(plugin_name)
+      end,
+    })
   end
-end
-
-function OnEvents._set(plugin_name, group_name, event_name, pattern)
-  vim.cmd(
-    ([[autocmd %s %s %s ++once lua require("optpack").load(%q)]]):format(group_name, event_name, pattern, plugin_name)
-  )
 end
 
 return M
