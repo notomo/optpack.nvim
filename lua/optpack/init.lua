@@ -16,13 +16,13 @@ end
 --- Install plugins.
 --- @param opts table|nil: |optpack.nvim-install-or-update-option|
 function M.install(opts)
-  require("optpack.command").install(opts)
+  require("optpack.command").install_or_update("install", opts)
 end
 
 --- Update plugins.
 --- @param opts table|nil: |optpack.nvim-install-or-update-option|
 function M.update(opts)
-  require("optpack.command").update(opts)
+  require("optpack.command").install_or_update("update", opts)
 end
 
 --- Load a plugin.

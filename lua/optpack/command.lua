@@ -10,34 +10,20 @@ function ReturnValue.list()
   return require("optpack.core.plugins").state():expose()
 end
 
-function ReturnError.install(raw_opts)
+function ReturnError.install_or_update(cmd_type, raw_opts)
   local opts, opts_err = require("optpack.core.option").InstallOrUpdateOption.new(raw_opts)
   if opts_err then
     return opts_err
   end
 
-  local outputters, err = require("optpack.view.outputter").new("install", opts.outputters)
+  local outputters, err = require("optpack.view.outputter").new(cmd_type, opts.outputters)
   if err then
     return err
   end
   local emitter = require("optpack.lib.event_emitter").new(outputters)
 
-  return require("optpack.core.plugins").state():install(emitter, opts.pattern, opts.parallel, opts.on_finished)
-end
-
-function ReturnError.update(raw_opts)
-  local opts, opts_err = require("optpack.core.option").InstallOrUpdateOption.new(raw_opts)
-  if opts_err then
-    return opts_err
-  end
-
-  local outputters, err = require("optpack.view.outputter").new("update", opts.outputters)
-  if err then
-    return err
-  end
-  local emitter = require("optpack.lib.event_emitter").new(outputters)
-
-  return require("optpack.core.plugins").state():update(emitter, opts.pattern, opts.parallel, opts.on_finished)
+  local state = require("optpack.core.plugins").state()
+  return state[cmd_type](state, emitter, opts.pattern, opts.parallel, opts.on_finished)
 end
 
 function ReturnError.load(plugin_name)
