@@ -59,6 +59,9 @@ require("genvdoc").generate(full_plugin_name, {
     default: %s]],
                 filetypes = [[(table | nil): file type pattern list,
     default: %s]],
+                keymaps = [[(function | nil): set keymap function. (The argument is patched vim object)
+    example: function(vim) vim.keymap.set("n", "S", "<Plug>(example)") end
+    default: function() end]],
               },
             },
             package_name = [[(string | nil): used as the package directory name.

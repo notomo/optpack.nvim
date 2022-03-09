@@ -31,7 +31,12 @@ function Plugins.add(self, full_name, opts)
   end
 
   self._plugins:add(plugin)
-  self._loaders:add(plugin, opts)
+
+  local loader_err = self._loaders:add(plugin, opts)
+  if loader_err then
+    return ("%s: %s"):format(plugin.name, loader_err)
+  end
+
   local ok, hook_err = pcall(opts.hooks.post_add, plugin:expose())
   if not ok then
     return ("%s: post_add: %s"):format(plugin.name, hook_err)

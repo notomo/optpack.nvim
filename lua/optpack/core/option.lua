@@ -10,7 +10,13 @@ AddOption.__index = AddOption
 M.AddOption = AddOption
 
 AddOption.default = {
-  load_on = { events = {}, modules = {}, cmds = {}, filetypes = {} },
+  load_on = {
+    events = {},
+    modules = {},
+    cmds = {},
+    filetypes = {},
+    keymaps = function() end,
+  },
   hooks = {
     post_add = function() end,
     pre_load = function() end,

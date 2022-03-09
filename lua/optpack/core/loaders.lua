@@ -12,7 +12,11 @@ function Loaders.new()
 end
 
 function Loaders.add(self, plugin, opts)
-  self._loaders[plugin.name] = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
+  local loader, err = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
+  if err then
+    return err
+  end
+  self._loaders[plugin.name] = loader
 end
 
 function Loaders.remove(self, plugin_name)

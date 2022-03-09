@@ -73,6 +73,38 @@ command! MyPluginTest echo ''
     assert.can_require(plugin_name1)
   end)
 
+  it("can set a plugin that is loaded by keymap with string", function()
+    local key = "F"
+    optpack.add(plugin1, {
+      load_on = {
+        keymaps = function(vim)
+          vim.keymap.set("n", key, [[<Cmd>let b:test = 8888<CR>]], { buffer = true })
+        end,
+      },
+    })
+    vim.api.nvim_feedkeys(key, "x", true)
+
+    assert.can_require(plugin_name1)
+    assert.equal(8888, vim.b.test)
+  end)
+
+  it("can set a plugin that is loaded by keymap with function", function()
+    local key = "F"
+    optpack.add(plugin1, {
+      load_on = {
+        keymaps = function(vim)
+          vim.keymap.set("n", key, function()
+            vim.b.test = 8888
+          end, { buffer = true })
+        end,
+      },
+    })
+    vim.api.nvim_feedkeys(key, "x", true)
+
+    assert.can_require(plugin_name1)
+    assert.equal(8888, vim.b.test)
+  end)
+
   it("can disable a plugin with enabled=false", function()
     optpack.add(plugin1)
     optpack.add(plugin1, { enabled = false })
@@ -348,5 +380,19 @@ describe("optpack.load()", function()
     optpack.load("invalid_plugin")
 
     assert.exists_message([[not found plugin: invalid_plugin]])
+  end)
+
+  it("show an error message if load_on.keymaps raises an error", function()
+    optpack.add(plugin1, {
+      load_on = {
+        keymaps = function()
+          error("test error", 0)
+        end,
+      },
+    })
+
+    optpack.load(plugin_name1)
+
+    assert.exists_message(plugin_name1 .. [[: load_on.keymaps: test error]])
   end)
 end)

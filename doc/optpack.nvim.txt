@@ -65,6 +65,9 @@ TYPES                                                     *optpack.nvim-TYPES*
       default: {}
   - {filetypes} (table | nil): file type pattern list,
       default: {}
+  - {keymaps} (function | nil): set keymap function. (The argument is patched vim object)
+      example: function(vim) vim.keymap.set("n", "S", "<Plug>(example)") end
+      default: function() end
   - {modules} (table | nil): for require() lua module name list,
       default: {}
 - {package_name} (string | nil): used as the package directory name.

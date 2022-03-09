@@ -2,6 +2,7 @@ local OnEvents = require("optpack.core.loader.event").OnEvents
 local OnFileTypes = require("optpack.core.loader.filetype").OnFileTypes
 local OnCommands = require("optpack.core.loader.cmd").OnCommands
 local OnModules = require("optpack.core.loader.module").OnModules
+local OnKeymaps = require("optpack.core.loader.keymap").OnKeymaps
 local pathlib = require("optpack.lib.path")
 
 local M = {}
@@ -19,6 +20,12 @@ function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
   })
 
   local plugin_name = plugin.name
+
+  local keymap_remover, err = OnKeymaps.set(plugin_name, load_on.keymaps)
+  if err then
+    return nil, err
+  end
+
   local group_name = "optpack_" .. plugin_name
   vim.api.nvim_create_augroup(group_name, {})
 
@@ -28,13 +35,14 @@ function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
   local autocmd_remover = function()
     vim.api.nvim_create_augroup(group_name, {})
   end
+
   local lua_loader_removers = OnModules.set(plugin_name, load_on.modules)
 
   local tbl = {
     _plugin = plugin,
     _pre_load_hook = pre_load_hook,
     _post_load_hook = post_load_hook,
-    _removers = { autocmd_remover, unpack(lua_loader_removers) },
+    _removers = { autocmd_remover, keymap_remover, unpack(lua_loader_removers) },
   }
   return setmetatable(tbl, Loader)
 end
