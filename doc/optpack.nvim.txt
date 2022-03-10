@@ -45,6 +45,9 @@ TYPES                                                     *optpack.nvim-TYPES*
 
 |optpack.add()| option                               *optpack.nvim-add-option*
 
+- {depends} (table | nil): dependency plugin (not full) names.
+    These will be loaded before.
+    default: {}
 - {enabled} (boolean | nil): if enabled=false, optpack ignores the plugin.
     default: true
 - {fetch} (table | nil): fetch setting

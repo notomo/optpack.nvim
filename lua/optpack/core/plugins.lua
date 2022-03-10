@@ -140,6 +140,14 @@ function Plugins.load(self, plugin_name)
   if not plugin then
     return "not found plugin: " .. plugin_name
   end
+
+  for _, depend in ipairs(plugin.depends) do
+    local err = self:load(depend)
+    if err then
+      return plugin_name .. " depends: " .. err
+    end
+  end
+
   return self._loaders:load(plugin)
 end
 

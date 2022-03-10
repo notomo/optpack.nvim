@@ -105,6 +105,16 @@ command! MyPluginTest echo ''
     assert.equal(8888, vim.b.test)
   end)
 
+  it("can set a plugin that depends other plugin", function()
+    optpack.add(plugin1)
+    optpack.add(plugin2, { depends = { plugin_name1 } })
+
+    optpack.load(plugin_name2)
+
+    assert.can_require(plugin_name1)
+    assert.can_require(plugin_name2)
+  end)
+
   it("can disable a plugin with enabled=false", function()
     optpack.add(plugin1)
     optpack.add(plugin1, { enabled = false })
@@ -394,5 +404,13 @@ describe("optpack.load()", function()
     optpack.load(plugin_name1)
 
     assert.exists_message(plugin_name1 .. [[: load_on.keymaps: test error]])
+  end)
+
+  it("show an error message if dependencies plugin loading fails", function()
+    optpack.add(plugin1, { depends = { "invalid" } })
+
+    optpack.load(plugin_name1)
+
+    assert.exists_message(plugin_name1 .. [[ depends: not found plugin: invalid]])
   end)
 end)

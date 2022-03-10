@@ -27,6 +27,7 @@ function Plugin.new(full_name, opts)
     full_name = full_name,
     directory = directory,
     url = url,
+    depends = opts.depends,
     _installer = Installer.new(git, directory, url, opts.fetch.depth),
     _post_install_hook = opts.hooks.post_install,
     _updater = Updater.new(git, directory),

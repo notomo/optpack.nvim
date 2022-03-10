@@ -29,6 +29,9 @@ require("genvdoc").generate(full_plugin_name, {
           local descriptions = {
             enabled = [[(boolean | nil): if enabled=false, optpack ignores the plugin.
     default: %s]],
+            depends = [[(table | nil): dependency plugin (not full) names.
+    These will be loaded before.
+    default: {}]],
             fetch = {
               text = [[(table | nil): fetch setting]],
               children = {

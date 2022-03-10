@@ -24,6 +24,7 @@ AddOption.default = {
     post_install = function() end,
     post_update = function() end,
   },
+  depends = {},
   fetch = { depth = 1, base_url = "https://github.com" },
   package_name = "optpack",
   select_packpath = function()
