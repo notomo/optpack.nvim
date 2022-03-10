@@ -1,13 +1,16 @@
 local ReturnValue = require("optpack.lib.error_handler").for_return_value()
 local ReturnError = require("optpack.lib.error_handler").for_return_error()
 
+local AddOption = require("optpack.core.option").AddOption
+local Plugins = require("optpack.core.plugins")
+
 function ReturnError.add(full_name, raw_opts)
-  local opts = require("optpack.core.option").AddOption.new(raw_opts)
-  return require("optpack.core.plugins").state():add(full_name, opts)
+  local opts = AddOption.new(raw_opts)
+  return Plugins.state():add(full_name, opts)
 end
 
 function ReturnValue.list()
-  return require("optpack.core.plugins").state():expose()
+  return Plugins.state():expose()
 end
 
 function ReturnError.install_or_update(cmd_type, raw_opts)
@@ -22,17 +25,11 @@ function ReturnError.install_or_update(cmd_type, raw_opts)
   end
   local emitter = require("optpack.lib.event_emitter").new(outputters)
 
-  return require("optpack.core.plugins").state():install_or_update(
-    cmd_type,
-    emitter,
-    opts.pattern,
-    opts.parallel,
-    opts.on_finished
-  )
+  return Plugins.state():install_or_update(cmd_type, emitter, opts.pattern, opts.parallel, opts.on_finished)
 end
 
 function ReturnError.load(plugin_name)
-  return require("optpack.core.plugins").state():load(plugin_name)
+  return Plugins.state():load(plugin_name)
 end
 
 function ReturnError.set_default(setting)

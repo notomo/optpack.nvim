@@ -1,36 +1,29 @@
 local Event = require("optpack.core.event").Event
 local Promise = require("optpack.lib.promise")
-
-local M = {}
+local JobFactory = require("optpack.lib.job_factory").JobFactory
+local Git = require("optpack.lib.git").Git
 
 local Installer = {}
 Installer.__index = Installer
-M.Installer = Installer
 
-function Installer.new(git, directory, url, depth)
-  vim.validate({
-    git = { git, "table" },
-    directory = { directory, "string" },
-    url = { url, "string" },
-    depth = { depth, "number" },
-  })
-  local tbl = { _git = git, _directory = directory, _url = url, _depth = depth }
+function Installer.new()
+  local tbl = { _git = Git.new(JobFactory.new()) }
   return setmetatable(tbl, Installer)
 end
 
-function Installer.already(self)
-  return vim.fn.isdirectory(self._directory) ~= 0
+function Installer.already(directory)
+  return vim.fn.isdirectory(directory) ~= 0
 end
 
-function Installer.start(self, emitter)
-  if self:already() then
+function Installer.start(self, emitter, directory, url, depth)
+  if Installer.already(directory) then
     return Promise.resolve(false)
   end
 
-  return self._git:clone(self._directory, self._url, self._depth):next(function()
+  return self._git:clone(directory, url, depth):next(function()
     emitter:emit(Event.Installed)
     return true
   end)
 end
 
-return M
+return Installer
