@@ -37,19 +37,24 @@ function Plugin.new(full_name, opts)
 end
 
 function Plugin.expose(self)
-  return { full_name = self.full_name, name = self.name, directory = self.directory, url = self.url }
+  return {
+    full_name = self.full_name,
+    name = self.name,
+    directory = self.directory,
+    url = self.url,
+  }
 end
 
-function Plugin.install_or_update(self, emitter)
+function Plugin.update(self, emitter)
   if not self:installed() then
     return self:install(emitter)
   end
-  return self:update(emitter):next(function()
+  return self:_update(emitter):next(function()
     return false
   end)
 end
 
-function Plugin.update(self, emitter)
+function Plugin._update(self, emitter)
   return self._updater:start(emitter):next(function(updated_now)
     if updated_now then
       self._post_update_hook(self:expose())

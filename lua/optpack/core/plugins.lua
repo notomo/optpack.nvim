@@ -1,15 +1,13 @@
-local PluginCollection = require("optpack.core.plugin_collection").PluginCollection
 local Plugin = require("optpack.core.plugin").Plugin
-local Loaders = require("optpack.core.loaders").Loaders
-local Event = require("optpack.core.event").Event
-local Counter = require("optpack.lib.counter").Counter
-local ParallelLimitter = require("optpack.lib.parallel_limitter").ParallelLimitter
 
 local Plugins = {}
 Plugins.__index = Plugins
 
 function Plugins.new()
-  local tbl = { _plugins = PluginCollection.new(), _loaders = Loaders.new() }
+  local tbl = {
+    _plugins = require("optpack.core.plugin_collection").new(),
+    _loaders = require("optpack.core.loaders").new(),
+  }
   return setmetatable(tbl, Plugins)
 end
 
@@ -47,21 +45,22 @@ function Plugins.expose(self)
   return self._plugins:expose()
 end
 
-function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
-  emitter:emit(Event.StartUpdate)
+function Plugins.install_or_update(self, cmd_type, emitter, pattern, parallel_opts, on_finished)
+  local Event = require("optpack.core.event").specific(cmd_type)
+
+  emitter:emit(Event.Start)
 
   local raw_plugins = self._plugins:collect(pattern)
-  local counter = Counter.new(#raw_plugins, function(finished_count, all_count)
+  local counter = require("optpack.lib.counter").new(#raw_plugins, function(finished_count, all_count)
     emitter:emit(Event.Progressed, finished_count, all_count)
   end)
 
-  local parallel = ParallelLimitter.new(parallel_opts.limit)
+  local parallel = require("optpack.lib.parallel_limitter").ParallelLimitter.new(parallel_opts.limit)
   local names = {}
   for _, plugin in ipairs(raw_plugins) do
     parallel:add(function()
       local plugin_emitter = emitter:with({ name = plugin.name })
-      return plugin
-        :install_or_update(plugin_emitter)
+      return plugin[cmd_type](plugin, plugin_emitter)
         :next(function(installed_now)
           if installed_now then
             table.insert(names, plugin.name)
@@ -83,51 +82,7 @@ function Plugins.update(self, emitter, pattern, parallel_opts, on_finished)
       if err then
         emitter:emit(Event.Error, err)
       end
-      emitter:emit(Event.FinishedUpdate)
-      on_finished()
-    end)
-    :catch(function(err)
-      emitter:emit(Event.Error, err)
-    end)
-end
-
-function Plugins.install(self, emitter, pattern, parallel_opts, on_finished)
-  emitter:emit(Event.StartInstall)
-
-  local raw_plugins = self._plugins:collect(pattern)
-  local counter = Counter.new(#raw_plugins, function(finished_count, all_count)
-    emitter:emit(Event.Progressed, finished_count, all_count)
-  end)
-
-  local parallel = ParallelLimitter.new(parallel_opts.limit)
-  local names = {}
-  for _, plugin in ipairs(raw_plugins) do
-    parallel:add(function()
-      local plugin_emitter = emitter:with({ name = plugin.name })
-      return plugin
-        :install(plugin_emitter)
-        :next(function(installed_now)
-          if installed_now then
-            table.insert(names, plugin.name)
-          end
-        end)
-        :catch(function(err)
-          plugin_emitter:emit(Event.Error, err)
-        end)
-        :finally(function()
-          counter = counter:increment()
-        end)
-    end)
-  end
-
-  parallel
-    :start()
-    :finally(function()
-      local err = self._loaders:load_installed(self._plugins:from(names))
-      if err then
-        emitter:emit(Event.Error, err)
-      end
-      emitter:emit(Event.FinishedInstall)
+      emitter:emit(Event.Finished)
       on_finished()
     end)
     :catch(function(err)

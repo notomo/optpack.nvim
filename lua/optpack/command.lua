@@ -22,8 +22,13 @@ function ReturnError.install_or_update(cmd_type, raw_opts)
   end
   local emitter = require("optpack.lib.event_emitter").new(outputters)
 
-  local state = require("optpack.core.plugins").state()
-  return state[cmd_type](state, emitter, opts.pattern, opts.parallel, opts.on_finished)
+  return require("optpack.core.plugins").state():install_or_update(
+    cmd_type,
+    emitter,
+    opts.pattern,
+    opts.parallel,
+    opts.on_finished
+  )
 end
 
 function ReturnError.load(plugin_name)

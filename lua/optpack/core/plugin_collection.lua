@@ -1,10 +1,7 @@
 local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
 
-local M = {}
-
 local PluginCollection = {}
 PluginCollection.__index = PluginCollection
-M.PluginCollection = PluginCollection
 
 function PluginCollection.new()
   local tbl = { _plugins = OrderedDict.new() }
@@ -55,4 +52,4 @@ function PluginCollection.expose(self)
   return values
 end
 
-return M
+return PluginCollection

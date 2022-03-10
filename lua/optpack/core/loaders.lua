@@ -1,10 +1,7 @@
 local Loader = require("optpack.core.loader").Loader
 
-local M = {}
-
 local Loaders = {}
 Loaders.__index = Loaders
-M.Loaders = Loaders
 
 function Loaders.new()
   local tbl = { _loaders = {}, _load_on_installed = {} }
@@ -57,4 +54,4 @@ function Loaders.load_installed(self, raw_plugins)
   end
 end
 
-return M
+return Loaders

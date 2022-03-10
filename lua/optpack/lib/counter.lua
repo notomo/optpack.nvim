@@ -1,8 +1,5 @@
-local M = {}
-
 local Counter = {}
 Counter.__index = Counter
-M.Counter = Counter
 
 function Counter.new(all_count, handler, initial_count)
   vim.validate({
@@ -19,4 +16,4 @@ function Counter.increment(self)
   return Counter.new(self._all_count, self._handler, self._initial_count + 1)
 end
 
-return M
+return Counter
