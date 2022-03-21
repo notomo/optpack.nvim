@@ -11,6 +11,10 @@ function M.warn(msg)
   vim.api.nvim_echo({ { M.wrap(msg), "WarningMsg" } }, true, {})
 end
 
+function M.info(msg)
+  vim.api.nvim_echo({ { M.wrap(msg) } }, true, {})
+end
+
 function M.wrap(msg)
   if type(msg) == "string" then
     return prefix .. msg

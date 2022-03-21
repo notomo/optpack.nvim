@@ -52,6 +52,7 @@ InstallOrUpdateOption.default = {
         vim.cmd("botright split | buffer" .. bufnr)
       end,
     },
+    echo = false,
   },
   parallel = { limit = 8 },
 }

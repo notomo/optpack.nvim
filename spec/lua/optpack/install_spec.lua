@@ -119,4 +119,36 @@ describe("optpack.install()", function()
     optpack.install({ pattern = [[\(test]] })
     assert.exists_message([[invalid pattern]])
   end)
+
+  it("can disable buffer outputter", function()
+    local on_finished = helper.on_finished()
+    optpack.install({
+      on_finished = on_finished,
+      outputters = {
+        buffer = false,
+      },
+    })
+    on_finished:wait()
+
+    assert.window_count(1)
+  end)
+
+  it("can use echo outputter", function()
+    helper.set_packpath()
+
+    optpack.add("account1/test1", { fetch = { base_url = git_server.url } })
+    optpack.add("account2/test2", { fetch = { base_url = git_server.url } })
+
+    local on_finished = helper.on_finished()
+    optpack.install({
+      on_finished = on_finished,
+      outputters = {
+        buffer = false,
+        echo = true,
+      },
+    })
+    on_finished:wait()
+
+    assert.exists_message([[%[optpack%] > Start installing.]])
+  end)
 end)

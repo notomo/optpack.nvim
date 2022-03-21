@@ -84,11 +84,14 @@ require("genvdoc").generate(full_plugin_name, {
           local descriptions = {
             on_finished = [[(function | nil): called on finished updating or installing]],
             outputters = {
-              text = [[(table | nil): outputter settings]],
+              text = [[(table | nil): outputter settings. if outputters.{key}=false, the outputter is disabled.]],
               children = {
                 buffer = {
-                  text = [[(table | nil): buffer output setting]],
+                  text = [[(table | boolean | nil): buffer output setting]],
                   children = { open = [[(function | nil) (bufnr) -> open buffer]] },
+                },
+                echo = {
+                  text = [[(table | boolean | nil): echo output setting: default: %s]],
                 },
               },
             },

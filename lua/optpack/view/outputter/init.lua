@@ -9,12 +9,21 @@ function Outputters.new(cmd_type, raw_outputters)
   local outputters = {}
   local errs = {}
   for outputter_typ, outputter_opts in pairs(raw_outputters) do
+    if not outputter_opts then
+      goto continue
+    end
+    if outputter_opts == true then
+      outputter_opts = {}
+    end
+
     local outputter, err = Outputters._new_one(cmd_type, outputter_typ, outputter_opts)
     if err then
       table.insert(errs, err)
     else
       table.insert(outputters, outputter)
     end
+
+    ::continue::
   end
   if #errs ~= 0 then
     return nil, table.concat(errs, "\n")
