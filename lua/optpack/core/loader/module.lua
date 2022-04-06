@@ -37,7 +37,12 @@ function OnModule._set(self, required_name)
     return
   end
 
-  local name = vim.split(required_name:gsub("/", "."), ".", true)[1]
+  required_name = required_name:gsub("/", ".")
+  local first_dot = required_name:find("%.")
+  local name = required_name
+  if first_dot then
+    name = required_name:sub(1, first_dot - 1)
+  end
   if self._module_name ~= name then
     return
   end
