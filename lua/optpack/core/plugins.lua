@@ -45,6 +45,15 @@ function Plugins.expose(self)
   return self._plugins:expose()
 end
 
+function Plugins.expose_one(self, plugin_name)
+  vim.validate({ plugin_name = { plugin_name, "string" } })
+  local plugin = self._plugins:find_by_name(plugin_name)
+  if not plugin then
+    return nil, "not found plugin: " .. plugin_name
+  end
+  return plugin:expose()
+end
+
 function Plugins.install_or_update(self, cmd_type, emitter, pattern, parallel_opts, on_finished)
   local Event = require("optpack.core.event").specific(cmd_type)
 

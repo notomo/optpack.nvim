@@ -13,6 +13,13 @@ function M.list()
   return require("optpack.command").list()
 end
 
+--- Returns a plugin.
+--- @param plugin_name string:
+--- @return table: |optpack.nvim-plugin|
+function M.get(plugin_name)
+  return require("optpack.command").get(plugin_name)
+end
+
 --- Install plugins.
 --- @param opts table|nil: |optpack.nvim-install-or-update-option|
 function M.install(opts)

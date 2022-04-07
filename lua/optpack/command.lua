@@ -13,6 +13,10 @@ function ReturnValue.list()
   return Plugins.state():expose()
 end
 
+function ReturnValue.get(plugin_name)
+  return Plugins.state():expose_one(plugin_name)
+end
+
 function ReturnError.install_or_update(cmd_type, raw_opts)
   local opts, opts_err = require("optpack.core.option").InstallOrUpdateOption.new(raw_opts)
   if opts_err then

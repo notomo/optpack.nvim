@@ -16,6 +16,15 @@ list()                                                        *optpack.list()*
   Return: ~
     (table) list of |optpack.nvim-plugin|
 
+get({plugin_name})                                             *optpack.get()*
+  Returns a plugin.
+
+  Parameters: ~
+    {plugin_name} (string) 
+
+  Return: ~
+    (table) |optpack.nvim-plugin|
+
 install({opts})                                            *optpack.install()*
   Install plugins.
 

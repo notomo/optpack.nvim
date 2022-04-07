@@ -283,6 +283,31 @@ describe("optpack.list()", function()
   end)
 end)
 
+describe("optpack.get()", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("show an error message if the plugin does not exist", function()
+    local plugin_name = "invalid"
+    optpack.get(plugin_name)
+    assert.exists_message("not found plugin: " .. plugin_name)
+  end)
+
+  it("returns a plugin", function()
+    helper.set_packpath()
+
+    optpack.add("account/test")
+
+    local got = optpack.get("test")
+    assert.is_same({
+      full_name = "account/test",
+      name = "test",
+      directory = vim.o.packpath .. "/pack/optpack/opt/test",
+      url = "https://github.com/account/test",
+    }, got)
+  end)
+end)
+
 describe("optpack.load()", function()
   local plugin_name1 = "myplugin_name1"
   local plugin1 = "account_name/" .. plugin_name1
