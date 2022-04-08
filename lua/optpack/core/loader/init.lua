@@ -33,7 +33,7 @@ function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
   OnFileTypes.set(plugin_name, group_name, load_on.filetypes)
   OnCommands.set(plugin_name, group_name, load_on.cmds)
   local autocmd_remover = function()
-    vim.api.nvim_create_augroup(group_name, {})
+    vim.api.nvim_clear_autocmds({ group = group_name })
   end
 
   local lua_loader_removers = OnModules.set(plugin_name, load_on.modules)
