@@ -92,11 +92,15 @@ TYPES                                                     *optpack.nvim-TYPES*
                                        *optpack.nvim-install-or-update-option*
 
 - {on_finished} (function | nil): called on finished updating or installing
-- {outputters} (table | nil): outputter settings. if outputters.{key}=false, the outputter is disabled.
-  - {buffer} (table | boolean | nil): buffer output setting
+- {outputters} (table | nil): outputter settings.
+  - {buffer} (table): buffer output setting
+    - {enabled} (boolean): used if true. default: true
     - {open} (function | nil) (bufnr) -> open buffer
-  - {echo} (table | boolean | nil): echo output setting: default: false
-
+  - {echo} (table): echo output setting
+    - {enabled} (boolean): used if true. default: false
+  - {log} (table): log output setting
+    - {enabled} (boolean): used if true. default: false
+    - {path} (string): log file path: default: vim.fn.stdpath("cache")/optpack-update.log
 - {parallel} (table | nil): parallel setting
   - {limit} max number for parallel job,  default: 8
 - {pattern} (string | nil): target plugin name pattern for vim regex,

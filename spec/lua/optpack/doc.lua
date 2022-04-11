@@ -84,14 +84,27 @@ require("genvdoc").generate(full_plugin_name, {
           local descriptions = {
             on_finished = [[(function | nil): called on finished updating or installing]],
             outputters = {
-              text = [[(table | nil): outputter settings. if outputters.{key}=false, the outputter is disabled.]],
+              text = [[(table | nil): outputter settings.]],
               children = {
                 buffer = {
-                  text = [[(table | boolean | nil): buffer output setting]],
-                  children = { open = [[(function | nil) (bufnr) -> open buffer]] },
+                  text = [[(table): buffer output setting]],
+                  children = {
+                    open = [[(function | nil) (bufnr) -> open buffer]],
+                    enabled = [[(boolean): used if true. default: %s]],
+                  },
                 },
                 echo = {
-                  text = [[(table | boolean | nil): echo output setting: default: %s]],
+                  text = [[(table): echo output setting]],
+                  children = {
+                    enabled = [[(boolean): used if true. default: %s]],
+                  },
+                },
+                log = {
+                  text = [[(table): log output setting]],
+                  children = {
+                    path = [[(string): log file path: default: vim.fn.stdpath("cache")/optpack-update.log]],
+                    enabled = [[(boolean): used if true. default: %s]],
+                  },
                 },
               },
             },

@@ -125,7 +125,7 @@ describe("optpack.install()", function()
     optpack.install({
       on_finished = on_finished,
       outputters = {
-        buffer = false,
+        buffer = { enabled = false },
       },
     })
     on_finished:wait()
@@ -143,12 +143,37 @@ describe("optpack.install()", function()
     optpack.install({
       on_finished = on_finished,
       outputters = {
-        buffer = false,
-        echo = true,
+        buffer = { enabled = false },
+        echo = { enabled = true },
       },
     })
     on_finished:wait()
 
     assert.exists_message([[%[optpack%] > Start installing.]])
+  end)
+
+  it("can use log outputter", function()
+    helper.set_packpath()
+
+    optpack.add("account1/test1", { fetch = { base_url = git_server.url } })
+    optpack.add("account2/test2", { fetch = { base_url = git_server.url } })
+
+    local log_path = helper.test_data_dir .. "test.log"
+
+    local on_finished = helper.on_finished()
+    optpack.install({
+      on_finished = on_finished,
+      outputters = {
+        buffer = { enabled = false },
+        log = {
+          enabled = true,
+          path = log_path,
+        },
+      },
+    })
+    on_finished:wait()
+
+    vim.cmd([[edit ]] .. log_path)
+    assert.exists_pattern([[> Start installing.]])
   end)
 end)

@@ -48,11 +48,18 @@ InstallOrUpdateOption.default = {
   pattern = ".*",
   outputters = {
     buffer = {
+      enabled = true,
       open = function(bufnr)
         vim.cmd("botright split | buffer" .. bufnr)
       end,
     },
-    echo = false,
+    echo = {
+      enabled = false,
+    },
+    log = {
+      enabled = false,
+      path = require("optpack.lib.path").join(vim.fn.stdpath("cache"), "optpack-update.log"),
+    },
   },
   parallel = { limit = 8 },
 }
