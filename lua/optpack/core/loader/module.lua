@@ -9,6 +9,7 @@ OnModules.__index = OnModules
 M.OnModules = OnModules
 
 function OnModules.set(plugin_name, module_names)
+  OnModules._cleanup(plugin_name)
   local removers = {}
   for _, module_name in ipairs(module_names) do
     table.insert(removers, OnModule.new(plugin_name, module_name))
@@ -16,13 +17,27 @@ function OnModules.set(plugin_name, module_names)
   return removers
 end
 
+function OnModules._cleanup(plugin_name)
+  local indexes = {}
+  for i, loader in ipairs(package.loaders) do
+    if type(loader) == "table" and loader.optpack_plugin_name == plugin_name then
+      table.insert(indexes, i)
+    end
+  end
+  for _, index in ipairs(vim.fn.reverse(indexes)) do
+    table.remove(package.loaders, index)
+  end
+end
+
 function OnModule.new(plugin_name, module_name)
   local tbl = { _plugin_name = plugin_name, _module_name = module_name, _loaded = false }
   local self = setmetatable(tbl, OnModule)
 
-  self._f = function(required_name)
-    self:_set(required_name)
-  end
+  self._f = setmetatable({ optpack_plugin_name = plugin_name }, {
+    __call = function(_, required_name)
+      self:_set(required_name)
+    end,
+  })
   table.insert(package.loaders, 1, self._f)
 
   return function()

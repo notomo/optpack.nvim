@@ -73,6 +73,15 @@ command! MyPluginTest echo ''
     assert.can_require(plugin_name1)
   end)
 
+  it("does not duplicate module loader", function()
+    optpack.add(plugin1, { load_on = { modules = { plugin_name1 } } })
+    local expected = #package.loaders
+    optpack.add(plugin1, { load_on = { modules = { plugin_name1 } } })
+    local actual = #package.loaders
+
+    assert.equal(expected, actual)
+  end)
+
   it("can set a plugin that is loaded by keymap with string", function()
     local key = "F"
     optpack.add(plugin1, {
