@@ -1,8 +1,5 @@
-local M = {}
-
 local OnEvents = {}
 OnEvents.__index = OnEvents
-M.OnEvents = OnEvents
 
 function OnEvents.set(plugin_name, group_name, events)
   for _, event in ipairs(events) do
@@ -24,4 +21,4 @@ function OnEvents.set(plugin_name, group_name, events)
   end
 end
 
-return M
+return OnEvents

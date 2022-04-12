@@ -1,8 +1,5 @@
-local M = {}
-
 local OnKeymaps = {}
 OnKeymaps.__index = OnKeymaps
-M.OnKeymaps = OnKeymaps
 
 function OnKeymaps.set(plugin_name, set_keymaps)
   local set = function(mode, lhs, rhs, opts)
@@ -43,4 +40,4 @@ function OnKeymaps.set(plugin_name, set_keymaps)
   end, nil
 end
 
-return M
+return OnKeymaps

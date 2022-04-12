@@ -1,12 +1,8 @@
-local M = {}
-
 local OnModule = {}
 OnModule.__index = OnModule
-M.OnModule = OnModule
 
 local OnModules = {}
 OnModules.__index = OnModules
-M.OnModules = OnModules
 
 function OnModules.set(plugin_name, module_names)
   OnModules._cleanup(plugin_name)
@@ -83,4 +79,4 @@ function OnModule._remove(self)
   end
 end
 
-return M
+return OnModules

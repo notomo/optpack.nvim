@@ -1,15 +1,11 @@
-local OnEvents = require("optpack.core.loader.event").OnEvents
-local OnFileTypes = require("optpack.core.loader.filetype").OnFileTypes
-local OnCommands = require("optpack.core.loader.cmd").OnCommands
-local OnModules = require("optpack.core.loader.module").OnModules
-local OnKeymaps = require("optpack.core.loader.keymap").OnKeymaps
-local pathlib = require("optpack.lib.path")
-
-local M = {}
+local OnEvents = require("optpack.core.loader.event")
+local OnFileTypes = require("optpack.core.loader.filetype")
+local OnCommands = require("optpack.core.loader.cmd")
+local OnModules = require("optpack.core.loader.module")
+local OnKeymaps = require("optpack.core.loader.keymap")
 
 local Loader = {}
 Loader.__index = Loader
-M.Loader = Loader
 
 function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
   vim.validate({
@@ -83,6 +79,8 @@ function Loader.load(self)
   end
 end
 
+local pathlib = require("optpack.lib.path")
+
 function Loader._validate_after_loading(self)
   local paths = vim.tbl_map(function(path)
     return pathlib.adjust_sep(path)
@@ -103,4 +101,4 @@ function Loader._validate_after_loading(self)
   end
 end
 
-return M
+return Loader

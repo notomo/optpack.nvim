@@ -1,4 +1,4 @@
-local Loader = require("optpack.core.loader").Loader
+local Loader = require("optpack.core.loader")
 
 local Loaders = {}
 Loaders.__index = Loaders
