@@ -2,11 +2,8 @@ local Promise = require("optpack.lib.promise")
 local Output = require("optpack.lib.output").Output
 local pathlib = require("optpack.lib.path")
 
-local M = {}
-
 local Git = {}
 Git.__index = Git
-M.Git = Git
 
 function Git.new(job_factory)
   vim.validate({ job_factory = { job_factory, "table" } })
@@ -85,4 +82,4 @@ function Git._start(self, cmd, opts)
   end)
 end
 
-return M
+return Git

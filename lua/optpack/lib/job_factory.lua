@@ -1,8 +1,5 @@
-local M = {}
-
 local Job = {}
 Job.__index = Job
-M.Job = Job
 
 function Job.new(id)
   vim.validate({ id = { id, "number" } })
@@ -16,7 +13,6 @@ end
 
 local JobFactory = {}
 JobFactory.__index = JobFactory
-M.JobFactory = JobFactory
 
 function JobFactory.new()
   local tbl = {}
@@ -31,4 +27,4 @@ function JobFactory.create(_, cmd, opts)
   return Job.new(id_or_err)
 end
 
-return M
+return JobFactory
