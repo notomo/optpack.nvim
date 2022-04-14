@@ -38,6 +38,12 @@ function M.load(plugin_name)
   require("optpack.command").load(plugin_name)
 end
 
+-- helper
+function M.load_by_expr_keymap(...)
+  M.load(...)
+  return ""
+end
+
 --- Set default setting.
 --- @param setting table: |optpack.nvim-setting|
 function M.set_default(setting)

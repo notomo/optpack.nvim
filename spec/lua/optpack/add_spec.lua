@@ -97,6 +97,26 @@ command! MyPluginTest echo ''
     assert.equal(8888, vim.b.test)
   end)
 
+  it("can set a plugin that is loaded by operator-pending expr keymap with string", function()
+    helper.set_lines([[
+1
+2
+3]])
+
+    local key = "F"
+    optpack.add(plugin1, {
+      load_on = {
+        keymaps = function(vim)
+          vim.keymap.set("o", key, [["j"]], { buffer = true, expr = true })
+        end,
+      },
+    })
+    vim.api.nvim_feedkeys("d" .. key, "x", true)
+
+    assert.can_require(plugin_name1)
+    assert.current_line("3")
+  end)
+
   it("can set a plugin that is loaded by keymap with function", function()
     local key = "F"
     optpack.add(plugin1, {

@@ -11,6 +11,12 @@ function OnKeymaps.set(plugin_name, set_keymaps)
     end
 
     opts = opts or {}
+
+    if opts.expr then
+      local load_cmd = ([[v:lua.require("optpack").load_by_expr_keymap(%q) .. ]]):format(plugin_name)
+      return vim.keymap.set(mode, lhs, load_cmd .. rhs, opts)
+    end
+
     opts.expr = true
     vim.keymap.set(mode, lhs, function()
       require("optpack").load(plugin_name)
