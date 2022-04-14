@@ -6,7 +6,7 @@ function OnKeymaps.set(plugin_name, set_keymaps)
     if type(rhs) == "function" then
       return vim.keymap.set(mode, lhs, function()
         require("optpack").load(plugin_name)
-        rhs()
+        return rhs()
       end, opts)
     end
 

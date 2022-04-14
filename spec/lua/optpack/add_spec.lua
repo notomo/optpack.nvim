@@ -114,6 +114,27 @@ command! MyPluginTest echo ''
     assert.equal(8888, vim.b.test)
   end)
 
+  it("can set a plugin that is loaded by expr keymap with function", function()
+    helper.set_lines([[
+
+2]])
+
+    local key = "F"
+    optpack.add(plugin1, {
+      load_on = {
+        keymaps = function(vim)
+          vim.keymap.set("n", key, function()
+            return "j"
+          end, { buffer = true, expr = true })
+        end,
+      },
+    })
+    vim.api.nvim_feedkeys(key, "x", true)
+
+    assert.can_require(plugin_name1)
+    assert.current_line("2")
+  end)
+
   it("can set a plugin that depends other plugin", function()
     optpack.add(plugin1)
     optpack.add(plugin2, { depends = { plugin_name1 } })

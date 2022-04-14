@@ -44,6 +44,10 @@ function M.delete(path)
   vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
+function M.set_lines(lines)
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
+end
+
 function M.git_server()
   local cgi_root_dir = M.root .. "/spec/lua/optpack"
   local git_root_dir = M.root .. "/spec/lua/optpack/git"
