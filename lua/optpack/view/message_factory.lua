@@ -1,5 +1,5 @@
 local Event = require("optpack.core.event").Event
-local HighlightedLines = require("optpack.lib.highlighted_line").HighlightedLines
+local HighlightedLines = require("optpack.lib.highlighted_lines")
 
 local M = {}
 

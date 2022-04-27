@@ -1,8 +1,5 @@
-local M = {}
-
 local Output = {}
 Output.__index = Output
-M.Output = Output
 
 function Output.new()
   local tbl = { _lines = { "" } }
@@ -27,4 +24,4 @@ function Output.str(self)
   return table.concat(self:lines(), "")
 end
 
-return M
+return Output

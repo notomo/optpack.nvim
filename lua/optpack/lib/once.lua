@@ -1,8 +1,5 @@
-local M = {}
-
 local Once = {}
 Once.__index = Once
-M.Once = Once
 
 function Once.new(f)
   vim.validate({ f = { f, "function" } })
@@ -18,4 +15,4 @@ function Once.__call(self, ...)
   self._f(...)
 end
 
-return M
+return Once

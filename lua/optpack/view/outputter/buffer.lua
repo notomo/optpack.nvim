@@ -1,6 +1,6 @@
 local Event = require("optpack.core.event").Event
 local MessageFactory = require("optpack.view.message_factory").MessageFactory
-local Once = require("optpack.lib.once").Once
+local Once = require("optpack.lib.once")
 local bufferlib = require("optpack.lib.buffer")
 local vim = vim
 

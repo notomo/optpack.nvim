@@ -1,11 +1,8 @@
 local Promise = require("optpack.vendor.promise")
 local vim = vim
 
-local M = {}
-
 local ParallelLimitter = {}
 ParallelLimitter.__index = ParallelLimitter
-M.ParallelLimitter = ParallelLimitter
 
 function ParallelLimitter.new(limit)
   vim.validate({ limit = { limit, "number" } })
@@ -45,4 +42,4 @@ function ParallelLimitter._start(self, resolve, reject, count)
   return Promise.all_settled(started)
 end
 
-return M
+return ParallelLimitter

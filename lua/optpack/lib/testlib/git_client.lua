@@ -1,12 +1,9 @@
-local Output = require("optpack.lib.output").Output
+local Output = require("optpack.lib.output")
 local pathlib = require("optpack.lib.path")
 local logger = require("optpack.lib.testlib.logger").logger:add_prefix("[git_client]")
 
-local M = {}
-
 local GitClient = {}
 GitClient.__index = GitClient
-M.GitClient = GitClient
 
 function GitClient.new(server_url)
   local tbl = { _server_url = server_url }
@@ -60,4 +57,4 @@ function GitClient.execute(_, args, opts)
   error(stderr:str())
 end
 
-return M
+return GitClient

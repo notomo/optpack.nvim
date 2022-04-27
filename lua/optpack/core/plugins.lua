@@ -64,7 +64,7 @@ function Plugins.install_or_update(self, cmd_type, emitter, pattern, parallel_op
     emitter:emit(Event.Progressed, finished_count, all_count)
   end)
 
-  local parallel = require("optpack.lib.parallel_limitter").ParallelLimitter.new(parallel_opts.limit)
+  local parallel = require("optpack.lib.parallel_limitter").new(parallel_opts.limit)
   local names = {}
   for _, plugin in ipairs(raw_plugins) do
     parallel:add(function()

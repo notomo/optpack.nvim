@@ -52,7 +52,7 @@ function M.git_server()
   local cgi_root_dir = M.root .. "/spec/lua/optpack"
   local git_root_dir = M.root .. "/spec/lua/optpack/git"
   local tmp_dir = M.root .. "/spec/lua/optpack/tmp"
-  return require("optpack.lib.testlib.git_server").GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
+  return require("optpack.lib.testlib.git_server").new(cgi_root_dir, git_root_dir, tmp_dir)
 end
 
 function M.print_buffer()

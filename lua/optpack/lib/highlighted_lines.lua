@@ -1,8 +1,5 @@
-local M = {}
-
 local HighlightedLines = {}
 HighlightedLines.__index = HighlightedLines
-M.HighlightedLines = HighlightedLines
 
 local HighlightedLine = {}
 HighlightedLine.__index = HighlightedLine
@@ -61,4 +58,4 @@ function HighlightedLine.add_highlight(self, bufnr, ns, row)
   end
 end
 
-return M
+return HighlightedLines

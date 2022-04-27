@@ -1,14 +1,11 @@
-local GitClient = require("optpack.lib.testlib.git_client").GitClient
+local GitClient = require("optpack.lib.testlib.git_client")
 local pathlib = require("optpack.lib.path")
 local log = require("optpack.lib.testlib.logger")
 local logger = log.logger:add_prefix("[git_server]")
 local log_file_path = log.path
 
-local M = {}
-
 local GitServer = {}
 GitServer.__index = GitServer
-M.GitServer = GitServer
 
 function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   local port = 8888
@@ -97,4 +94,4 @@ function GitServer._health_check(self)
   end
 end
 
-return M
+return GitServer
