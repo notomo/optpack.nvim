@@ -1,5 +1,5 @@
 local MessageFactory = require("optpack.view.message_factory").MessageFactory
-local messagelib = require("optpack.lib.message")
+local messagelib = require("optpack.vendor.misclib.message")
 
 local M = {}
 M.__index = M

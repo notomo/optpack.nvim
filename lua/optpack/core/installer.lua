@@ -14,7 +14,7 @@ end
 
 function Installer.start(self, emitter, directory, url, depth)
   if Installer.already(directory) then
-    return require("optpack.lib.promise").resolve(false)
+    return require("optpack.vendor.promise").resolve(false)
   end
 
   return self._git:clone(directory, url, depth):next(function()

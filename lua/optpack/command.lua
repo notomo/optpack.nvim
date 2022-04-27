@@ -1,10 +1,10 @@
-local ReturnValue = require("optpack.lib.error_handler").for_return_value()
-local ReturnError = require("optpack.lib.error_handler").for_return_error()
+local ReturnValue = require("optpack.vendor.misclib.error_handler").for_return_value()
+local ShowError = require("optpack.vendor.misclib.error_handler").for_show_error()
 
 local AddOption = require("optpack.core.option").AddOption
 local Plugins = require("optpack.core.plugins")
 
-function ReturnError.add(full_name, raw_opts)
+function ShowError.add(full_name, raw_opts)
   local opts = AddOption.new(raw_opts)
   return Plugins.state():add(full_name, opts)
 end
@@ -17,7 +17,7 @@ function ReturnValue.get(plugin_name)
   return Plugins.state():expose_one(plugin_name)
 end
 
-function ReturnError.install_or_update(cmd_type, raw_opts)
+function ShowError.install_or_update(cmd_type, raw_opts)
   local opts, opts_err = require("optpack.core.option").InstallOrUpdateOption.new(raw_opts)
   if opts_err then
     return opts_err
@@ -32,12 +32,12 @@ function ReturnError.install_or_update(cmd_type, raw_opts)
   return Plugins.state():install_or_update(cmd_type, emitter, opts.pattern, opts.parallel, opts.on_finished)
 end
 
-function ReturnError.load(plugin_name)
+function ShowError.load(plugin_name)
   return Plugins.state():load(plugin_name)
 end
 
-function ReturnError.set_default(setting)
+function ShowError.set_default(setting)
   return require("optpack.core.option").set_default(setting)
 end
 
-return vim.tbl_extend("force", ReturnValue:methods(), ReturnError:methods())
+return vim.tbl_extend("force", ReturnValue:methods(), ShowError:methods())

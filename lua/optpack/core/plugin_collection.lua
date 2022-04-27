@@ -1,10 +1,8 @@
-local OrderedDict = require("optpack.lib.ordered_dict").OrderedDict
-
 local PluginCollection = {}
 PluginCollection.__index = PluginCollection
 
 function PluginCollection.new()
-  local tbl = { _plugins = OrderedDict.new() }
+  local tbl = { _plugins = require("optpack.vendor.misclib.collection.ordered_dict").new() }
   return setmetatable(tbl, PluginCollection)
 end
 

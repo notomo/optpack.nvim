@@ -1,4 +1,4 @@
-local modulelib = require("optpack.lib.module")
+local modulelib = require("optpack.vendor.misclib.module")
 
 local Outputters = {}
 Outputters.__index = Outputters
