@@ -390,12 +390,12 @@ describe("optpack.load()", function()
     helper.create_plugin_dir(plugin_name1, { opt_path = unexpected_packpath .. "/pack/optpack/opt/" })
 
     optpack.add(plugin1)
-    vim.o.packpath = helper.test_data_dir .. unexpected_packpath
+    vim.o.packpath = helper.test_data.full_path .. unexpected_packpath
 
     optpack.load(plugin_name1)
 
     assert.exists_message(
-      [[failed to load expected directory: ]] .. helper.test_data_dir .. helper.opt_path .. plugin_name1
+      [[failed to load expected directory: ]] .. helper.test_data.full_path .. helper.opt_path .. plugin_name1
     )
   end)
 
@@ -407,7 +407,7 @@ describe("optpack.load()", function()
 
     optpack.load(plugin_name1)
 
-    local another_plugin_path = helper.test_data_dir .. another_opt_path .. plugin_name1
+    local another_plugin_path = helper.test_data.full_path .. another_opt_path .. plugin_name1
     assert.exists_message([[loaded, but the same and prior plugin exists in 'runtimepath': ]] .. another_plugin_path)
   end)
 
