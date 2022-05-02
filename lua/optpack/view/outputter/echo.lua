@@ -25,7 +25,7 @@ function M.handle(self, event_name, ctx, ...)
   end
 
   for _, line in ipairs(lines) do
-    messagelib.info(line)
+    messagelib.info(line .. "\n")
   end
 end
 
