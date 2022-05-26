@@ -50,6 +50,8 @@ function GitServer.create_repository(self, full_name, commits)
   vim.fn.mkdir(tmp_path, "p")
 
   self.client:execute({ "init" }, { cwd = tmp_path })
+  self.client:execute({ "config", "--local", "user.email", "notomo@example.com" }, { cwd = tmp_path })
+  self.client:execute({ "config", "--local", "user.name", "notomo" }, { cwd = tmp_path })
 
   self:_add_commit(tmp_path, "init")
   for _, msg in ipairs(commits or {}) do
