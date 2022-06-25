@@ -33,6 +33,8 @@ AddOption.default = {
   enabled = true,
 }
 
+--- @return table: option
+--- @return string|nil: error
 function AddOption.new(raw_opts)
   vim.validate({ raw_opts = { raw_opts, "table", true } })
   raw_opts = raw_opts or {}
@@ -64,6 +66,8 @@ InstallOrUpdateOption.default = {
   parallel = { limit = 8 },
 }
 
+--- @return table: option
+--- @return string|nil: error
 function InstallOrUpdateOption.new(raw_opts)
   vim.validate({ raw_opts = { raw_opts, "table", true } })
   raw_opts = raw_opts or {}

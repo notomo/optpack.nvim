@@ -6,6 +6,8 @@ local Plugin = {}
 Plugin.__index = Plugin
 M.Plugin = Plugin
 
+--- @return table: plugin
+--- @return string|nil: error
 function Plugin.new(full_name, opts)
   vim.validate({ name = { full_name, "string" }, opts = { opts, "table" } })
 
