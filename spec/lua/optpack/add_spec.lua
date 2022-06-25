@@ -73,6 +73,12 @@ command! MyPluginTest echo ''
     assert.can_require(plugin_name1)
   end)
 
+  it("can set a plugin that is loaded by requiring sub module", function()
+    optpack.add(plugin1, { load_on = { modules = { plugin_name1 .. ".sub" } } })
+
+    assert.can_require(plugin_name1 .. ".sub")
+  end)
+
   it("does not duplicate module loader", function()
     optpack.add(plugin1, { load_on = { modules = { plugin_name1 } } })
     local expected = #package.loaders

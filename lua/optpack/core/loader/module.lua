@@ -49,12 +49,16 @@ function OnModule._set(self, required_name)
   end
 
   required_name = required_name:gsub("/", ".")
-  local first_dot = required_name:find("%.")
-  local name = required_name
-  if first_dot then
-    name = required_name:sub(1, first_dot - 1)
+  local splitted = vim.split(required_name, ".", true)
+  local ok = false
+  for i in ipairs(splitted) do
+    local module_name = table.concat(vim.list_slice(splitted, 1, i), ".")
+    if module_name == self._module_name then
+      ok = true
+      break
+    end
   end
-  if self._module_name ~= name then
+  if not ok then
     return
   end
   self._loaded = true

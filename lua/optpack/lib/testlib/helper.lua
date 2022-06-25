@@ -74,6 +74,8 @@ function helper.create_plugin_dir(name, opts)
   local lua_dir = ("%s/lua/%s/"):format(root_dir, name)
   helper.test_data:create_dir(lua_dir)
   helper.test_data:create_file(lua_dir .. "init.lua")
+  helper.test_data:create_dir(lua_dir .. "sub")
+  helper.test_data:create_file(lua_dir .. "sub/init.lua")
 end
 
 function helper.set_packpath()
