@@ -20,7 +20,11 @@ function M.setup(root_path, opts)
 end
 
 function M.create_file(self, path, content)
-  local f = io.open(self.full_path .. path, "w")
+  local file_path = self.full_path .. path
+  local f = io.open(file_path, "w")
+  if not f then
+    error("cannot open: " .. file_path)
+  end
   if content then
     f:write(content)
   end

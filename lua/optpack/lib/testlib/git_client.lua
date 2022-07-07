@@ -1,4 +1,4 @@
-local Output = require("optpack.lib.output")
+local Output = require("optpack.vendor.misclib.job.output")
 local pathlib = require("optpack.lib.path")
 local logger = require("optpack.lib.testlib.logger").logger:add_prefix("[git_client]")
 

@@ -15,7 +15,7 @@ end
 
 function Output.lines(self)
   if self._lines[#self._lines] ~= "" then
-    return self._lines
+    return vim.list_slice(self._lines, 1, #self._lines)
   end
   return vim.list_slice(self._lines, 1, #self._lines - 1)
 end
