@@ -22,7 +22,7 @@ command! MyPluginTest echo ''
 
   it("can set a plugin that is loaded by `packadd`", function()
     optpack.add(plugin1)
-    vim.cmd("packadd " .. plugin_name1)
+    vim.cmd.packadd(plugin_name1)
 
     assert.can_require(plugin_name1)
   end)
@@ -45,14 +45,14 @@ command! MyPluginTest echo ''
 
   it("can set a plugin that is loaded by command", function()
     optpack.add(plugin1, { load_on = { cmds = { "MyPlugin*" } } })
-    vim.cmd("MyPluginTest")
+    vim.cmd.MyPluginTest()
 
     assert.can_require(plugin_name1)
   end)
 
   it("can set a plugin that is loaded by event only", function()
     optpack.add(plugin1, { load_on = { events = { "TabNew" } } })
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
 
     assert.can_require(plugin_name1)
   end)
@@ -60,10 +60,10 @@ command! MyPluginTest echo ''
   it("can set a plugin that is loaded by event with pattern", function()
     optpack.add(plugin1, { load_on = { events = { { "BufNewFile", "*.txt" } } } })
 
-    vim.cmd("edit test")
+    vim.cmd.edit("test")
     assert.no.can_require(plugin_name1)
 
-    vim.cmd("edit test.txt")
+    vim.cmd.edit("test.txt")
     assert.can_require(plugin_name1)
   end)
 
@@ -270,7 +270,7 @@ command! MyPluginTest echo ''
       load_on = { filetypes = { "lua" }, events = { "TabNew" } },
     })
     vim.bo.filetype = "lua"
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
 
     assert.is_same(1, called)
   end)

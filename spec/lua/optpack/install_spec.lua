@@ -173,7 +173,7 @@ describe("optpack.install()", function()
     })
     on_finished:wait()
 
-    vim.cmd([[edit ]] .. log_path)
+    vim.cmd.edit(log_path)
     assert.exists_pattern([[> Start installing.]])
   end)
 end)

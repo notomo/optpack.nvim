@@ -3,7 +3,7 @@ vim.opt.packpath:prepend(pack_dir)
 local manager_dir = pack_dir .. "/pack/optpack/opt/optpack.nvim"
 local initializing = vim.fn.isdirectory(manager_dir) ~= 1
 if initializing then
-  vim.cmd([[!git clone https://github.com/notomo/optpack.nvim ]] .. manager_dir)
+  vim.cmd["!"]({ args = { "git", "clone", "https://github.com/notomo/optpack.nvim", manager_dir } })
 end
 
 local optpack = require("optpack")

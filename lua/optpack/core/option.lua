@@ -52,7 +52,8 @@ InstallOrUpdateOption.default = {
     buffer = {
       enabled = true,
       open = function(bufnr)
-        vim.cmd("botright split | buffer" .. bufnr)
+        vim.cmd.split({ mods = { split = "botright" } })
+        vim.cmd.buffer({ count = bufnr })
       end,
     },
     echo = {

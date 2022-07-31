@@ -57,7 +57,7 @@ function Loader.load(self)
     end
   end
 
-  vim.cmd("packadd " .. self._plugin.name)
+  vim.cmd.packadd(self._plugin.name)
 
   local errs = {}
   do
