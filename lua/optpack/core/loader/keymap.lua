@@ -18,9 +18,10 @@ function OnKeymaps.set(plugin_name, set_keymaps)
     end
 
     opts.expr = true
-    vim.keymap.set(mode, lhs, function()
+    return vim.keymap.set(mode, lhs, function()
       require("optpack").load(plugin_name)
-      return rhs
+      -- workaround?
+      return vim.api.nvim_replace_termcodes(rhs, true, true, true)
     end, opts)
   end
 
