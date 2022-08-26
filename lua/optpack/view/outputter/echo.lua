@@ -5,8 +5,10 @@ local M = {}
 M.__index = M
 
 function M.new()
+  local is_headless = vim.tbl_contains(vim.v.argv, "--headless")
   local tbl = {
     _message_factory = MessageFactory.new(M.handlers),
+    _suffix = is_headless and "\n" or "",
   }
   return setmetatable(tbl, M), nil
 end
@@ -25,7 +27,7 @@ function M.handle(self, event_name, ctx, ...)
   end
 
   for _, line in ipairs(lines) do
-    messagelib.info(line .. "\n")
+    messagelib.info(line .. self._suffix)
   end
 end
 
