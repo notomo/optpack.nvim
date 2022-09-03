@@ -42,16 +42,26 @@ function Git.get_revision(self, directory)
   })
 end
 
-function Git.log(self, directory, revision)
+function Git.log(self, directory, target_revision)
   local cmd = {
     "git",
     "--git-dir",
     pathlib.join(directory, ".git"),
     "log",
     [[--pretty=format:%h %s]],
-    revision,
+    target_revision,
   }
-  return self:_start(cmd, { cwd = directory })
+  return self:_start(cmd, { cwd = directory }):next(function(outputs)
+    return vim.tbl_map(function(output)
+      local index = output:find(" ")
+      local revision = output:sub(1, index)
+      local message = output:sub(index + 1)
+      return {
+        revision = revision,
+        message = message,
+      }
+    end, outputs)
+  end)
 end
 
 function Git._start(self, cmd, opts)

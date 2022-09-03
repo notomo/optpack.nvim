@@ -24,11 +24,11 @@ MessageFactory.default_handlers = {
   [Event.Updated] = function(self, ctx, revision_range)
     return { { self:_prefix(ctx), { "Updated. " }, { revision_range, "OptpackUpdatedRevisionRange" } } }
   end,
-  [Event.GitCommitLog] = function(self, ctx, output)
+  [Event.GitCommitLog] = function(self, ctx, outputs)
     local prefix = self:_prefix(ctx)
-    return vim.tbl_map(function(line)
-      return { prefix, { line, "OptpackGitCommitLog" } }
-    end, output)
+    return vim.tbl_map(function(commit)
+      return { prefix, { commit.revision, "OptpackGitCommitRevision" }, { commit.message, "OptpackGitCommitLog" } }
+    end, outputs)
   end,
   [Event.FinishedUpdate] = function(self, ctx)
     return { { self:_prefix(ctx), { "Finished updating." } } }
@@ -81,6 +81,7 @@ local highlightlib = require("optpack.lib.highlight")
 local force = false
 M.hl_groups = {
   highlightlib.link("OptpackGitCommitLog", force, "Comment"),
+  highlightlib.link("OptpackGitCommitRevision", force, "Comment"),
   highlightlib.link("OptpackUpdatedRevisionRange", force, "Comment"),
   highlightlib.link("OptpackProgressed", force, "Comment"),
   highlightlib.link("OptpackError", force, "WarningMsg"),

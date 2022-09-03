@@ -29,11 +29,11 @@ function Updater.start(self, emitter, directory)
       emitter:emit(Event.Updated, revision_range)
       return self._git:log(directory, revision_range)
     end)
-    :next(function(output)
-      if not output then
+    :next(function(outputs)
+      if not outputs then
         return false
       end
-      emitter:emit(Event.GitCommitLog, output)
+      emitter:emit(Event.GitCommitLog, outputs)
       return true
     end)
 end
