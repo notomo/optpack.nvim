@@ -77,14 +77,25 @@ function MessageFactory._prefix(_, ctx)
   return { ("%s > "):format(ctx.name) }
 end
 
-local highlightlib = require("optpack.lib.highlight")
-local force = false
-M.hl_groups = {
-  highlightlib.link("OptpackGitCommitLog", force, "Comment"),
-  highlightlib.link("OptpackGitCommitRevision", force, "Comment"),
-  highlightlib.link("OptpackUpdatedRevisionRange", force, "Comment"),
-  highlightlib.link("OptpackProgressed", force, "Comment"),
-  highlightlib.link("OptpackError", force, "WarningMsg"),
-}
+local setup_highlight_groups = function()
+  local highlightlib = require("optpack.lib.highlight")
+  local force = false
+  return {
+    highlightlib.link("OptpackGitCommitLog", force, "Comment"),
+    highlightlib.link("OptpackGitCommitRevision", force, "Comment"),
+    highlightlib.link("OptpackUpdatedRevisionRange", force, "Comment"),
+    highlightlib.link("OptpackProgressed", force, "Comment"),
+    highlightlib.link("OptpackError", force, "WarningMsg"),
+  }
+end
+
+local group = vim.api.nvim_create_augroup("optpack", {})
+vim.api.nvim_create_autocmd({ "ColorScheme" }, {
+  group = group,
+  pattern = { "*" },
+  callback = setup_highlight_groups,
+})
+
+M.hl_groups = setup_highlight_groups()
 
 return M
