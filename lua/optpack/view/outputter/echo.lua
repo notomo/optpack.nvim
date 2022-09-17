@@ -21,13 +21,8 @@ function M.handle(self, event_name, ctx, ...)
     return
   end
 
-  local lines = normal:lines()
-  if #lines == 0 then
-    return
-  end
-
-  for _, line in ipairs(lines) do
-    messagelib.info(line .. self._suffix)
+  for _, line in normal:iter() do
+    vim.api.nvim_echo({ { messagelib.wrap("") }, unpack(line:all()) }, true, {})
   end
 end
 

@@ -20,6 +20,10 @@ function HighlightedLines.lines(self)
   end, self._lines)
 end
 
+function HighlightedLines.iter(self)
+  return ipairs(self._lines)
+end
+
 function HighlightedLines.add_highlight(self, bufnr, ns, end_row)
   local row = end_row - #self._lines
   for _, line in ipairs(self._lines) do
@@ -31,6 +35,10 @@ end
 function HighlightedLine.new(text_hl_pairs)
   local tbl = { _pairs = text_hl_pairs }
   return setmetatable(tbl, HighlightedLine)
+end
+
+function HighlightedLine.all(self)
+  return self._pairs
 end
 
 function HighlightedLine.str(self)
