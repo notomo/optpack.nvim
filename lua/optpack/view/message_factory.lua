@@ -78,14 +78,13 @@ function MessageFactory._prefix(_, ctx)
 end
 
 local setup_highlight_groups = function()
-  local highlightlib = require("optpack.lib.highlight")
-  local force = false
+  local highlightlib = require("optpack.vendor.misclib.highlight")
   return {
-    highlightlib.link("OptpackGitCommitLog", force, "Comment"),
-    highlightlib.link("OptpackGitCommitRevision", force, "Comment"),
-    highlightlib.link("OptpackUpdatedRevisionRange", force, "Comment"),
-    highlightlib.link("OptpackProgressed", force, "Comment"),
-    highlightlib.link("OptpackError", force, "WarningMsg"),
+    highlightlib.link("OptpackGitCommitLog", "Comment"),
+    highlightlib.link("OptpackGitCommitRevision", "Comment"),
+    highlightlib.link("OptpackUpdatedRevisionRange", "Comment"),
+    highlightlib.link("OptpackProgressed", "Comment"),
+    highlightlib.link("OptpackError", "WarningMsg"),
   }
 end
 
