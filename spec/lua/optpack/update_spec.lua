@@ -99,7 +99,7 @@ describe("optpack.update()", function()
       optpack.update({ on_finished = on_finished })
       on_finished:wait()
     end
-    assert.buffer_name("optpack://optpack-update")
+    assert.buffer_full_name("optpack://optpack-update")
   end)
 
   it("can set default option by optpack.set_default()", function()

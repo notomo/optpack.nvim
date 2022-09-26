@@ -79,7 +79,7 @@ describe("optpack.install()", function()
       optpack.install({ on_finished = on_finished })
       on_finished:wait()
     end
-    assert.buffer_name("optpack://optpack-install")
+    assert.buffer_full_name("optpack://optpack-install")
   end)
 
   it("can set default option by optpack.set_default()", function()
