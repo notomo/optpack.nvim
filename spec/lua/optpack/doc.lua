@@ -129,10 +129,8 @@ require("genvdoc").generate(full_plugin_name, {
             name = [[(string): plugin name]],
             url = [[(string): git repository url]],
           }
-          local default = require("optpack.core.plugin").Plugin.new(
-            "doc",
-            require("optpack.core.option").AddOption.new()
-          ):expose()
+          local default =
+            require("optpack.core.plugin").Plugin.new("doc", require("optpack.core.option").AddOption.new()):expose()
           local keys = vim.tbl_keys(default)
           local lines = util.each_keys_description(keys, descriptions)
           plugin_text = table.concat(lines, "\n")

@@ -69,7 +69,8 @@ function Plugins.install_or_update(self, cmd_type, emitter, pattern, parallel_op
   for _, plugin in ipairs(raw_plugins) do
     parallel:add(function()
       local plugin_emitter = emitter:with({ name = plugin.name })
-      return plugin[cmd_type](plugin, plugin_emitter)
+      return plugin
+        [cmd_type](plugin, plugin_emitter)
         :next(function(installed_now)
           if installed_now then
             table.insert(names, plugin.name)

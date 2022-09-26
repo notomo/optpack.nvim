@@ -60,7 +60,8 @@ function Plugin._update(self, emitter)
 end
 
 function Plugin.install(self, emitter)
-  return require("optpack.core.installer").new()
+  return require("optpack.core.installer")
+    .new()
     :start(emitter, self.directory, self.url, self._depth)
     :next(function(installed_now)
       if installed_now then
