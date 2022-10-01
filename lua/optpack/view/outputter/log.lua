@@ -1,4 +1,5 @@
 local MessageFactory = require("optpack.view.message_factory").MessageFactory
+local message_converter = require("optpack.view.message_converter")
 
 local M = {}
 M.__index = M
@@ -16,12 +17,12 @@ end
 M.handlers = {}
 
 function M.handle(self, event_name, ctx, ...)
-  local normal = self._message_factory:create(event_name, ctx, ...)
-  if not normal then
+  local messages = self._message_factory:create(event_name, ctx, ...)
+  if not messages then
     return
   end
 
-  local lines = normal:lines()
+  local lines = message_converter.to_lines(messages)
   if #lines == 0 then
     return
   end

@@ -16,13 +16,13 @@ end
 M.handlers = {}
 
 function M.handle(self, event_name, ctx, ...)
-  local normal = self._message_factory:create(event_name, ctx, ...)
-  if not normal then
+  local messages = self._message_factory:create(event_name, ctx, ...)
+  if not messages then
     return
   end
 
-  for _, line in normal:iter() do
-    vim.api.nvim_echo({ { messagelib.wrap("") }, unpack(line:all()) }, true, {})
+  for _, chunks in ipairs(messages) do
+    vim.api.nvim_echo({ { messagelib.wrap("") }, unpack(chunks) }, true, {})
   end
 end
 

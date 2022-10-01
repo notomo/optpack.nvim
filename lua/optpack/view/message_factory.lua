@@ -1,5 +1,4 @@
 local Event = require("optpack.core.event").Event
-local HighlightedLines = require("optpack.lib.highlighted_lines")
 
 local M = {}
 
@@ -60,9 +59,9 @@ function MessageFactory.create(self, event_name, ctx, ...)
   if not handler or type(handler) ~= "function" then
     return nil
   end
-  local normal, info = handler(self, ctx, ...)
-  if normal then
-    return HighlightedLines.new(normal)
+  local messages, info = handler(self, ctx, ...)
+  if messages then
+    return messages
   end
   if info then
     return nil, info

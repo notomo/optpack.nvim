@@ -1,5 +1,6 @@
 local Event = require("optpack.core.event").Event
 local MessageFactory = require("optpack.view.message_factory").MessageFactory
+local message_converter = require("optpack.view.message_converter")
 local Once = require("optpack.lib.once")
 local bufferlib = require("optpack.lib.buffer")
 local vim = vim
@@ -16,13 +17,13 @@ function M.new(cmd_type, opts)
   opts.open(bufnr)
   local tbl = {
     _bufnr = bufnr,
-    _ns = vim.api.nvim_create_namespace("optpack"),
     _delete_first_line = Once.new(function()
       vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, {})
     end),
     _message_factory = MessageFactory.new(M.handlers),
     _progress_ns = vim.api.nvim_create_namespace("optpack-progress"),
     _progress_lines = {},
+    _decorator = require("optpack.vendor.misclib.decorator").factory("optpack", bufnr):create(),
   }
   return setmetatable(tbl, M), nil
 end
@@ -40,21 +41,22 @@ function M.handle(self, event_name, ctx, ...)
     return
   end
 
-  local normal, info = self._message_factory:create(event_name, ctx, ...)
-  if not (normal or info) then
+  local messages, info = self._message_factory:create(event_name, ctx, ...)
+  if not (messages or info) then
     return
   end
 
   local output_follower = bufferlib.OutputFollower.new(self._bufnr)
 
-  if normal then
+  if messages then
     vim.bo[self._bufnr].modifiable = true
-    vim.api.nvim_buf_set_lines(self._bufnr, -1, -1, false, normal:lines())
+    local lines = message_converter.to_lines(messages)
+    vim.api.nvim_buf_set_lines(self._bufnr, -1, -1, false, lines)
     self._delete_first_line()
     vim.bo[self._bufnr].modifiable = false
 
     local end_row = vim.api.nvim_buf_line_count(self._bufnr)
-    normal:add_highlight(self._bufnr, self._ns, end_row)
+    message_converter.highlight(self._decorator, messages, end_row - 1)
     self:_redraw_progress(end_row)
   end
   if info then
