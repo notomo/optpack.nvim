@@ -56,7 +56,7 @@ function M.handle(self, event_name, ctx, ...)
     vim.bo[self._bufnr].modifiable = false
 
     local end_row = vim.api.nvim_buf_line_count(self._bufnr)
-    message_converter.highlight(self._decorator, messages, end_row - 1)
+    message_converter.highlight(self._decorator, messages, end_row - #messages)
     self:_redraw_progress(end_row)
   end
   if info then

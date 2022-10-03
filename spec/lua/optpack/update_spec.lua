@@ -51,6 +51,8 @@ describe("optpack.update()", function()
     on_finished:wait()
 
     assert.exists_pattern([[test1 > Updated.]])
+    assert.exists_pattern([[test1 > ....... commit1]])
+    assert.exists_pattern([[test1 > ....... commit2]])
     assert.no.exists_pattern([[test2 > Updated.]])
   end)
 
