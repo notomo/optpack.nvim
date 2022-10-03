@@ -53,7 +53,7 @@ InstallOrUpdateOption.default = {
       enabled = true,
       open = function(bufnr)
         vim.cmd.split({ mods = { split = "botright" } })
-        vim.cmd.buffer({ count = bufnr })
+        vim.cmd.buffer(bufnr)
       end,
     },
     echo = {
