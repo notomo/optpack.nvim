@@ -25,7 +25,7 @@ function helper.git_server()
   local cgi_root_dir = helper.root .. "/spec/lua/optpack"
   local git_root_dir = helper.root .. "/spec/lua/optpack/git"
   local tmp_dir = helper.root .. "/spec/lua/optpack/tmp"
-  return require("optpack.lib.testlib.git_server").new(cgi_root_dir, git_root_dir, tmp_dir)
+  return require("optpack.test.git_server").new(cgi_root_dir, git_root_dir, tmp_dir)
 end
 
 function helper.print_buffer()

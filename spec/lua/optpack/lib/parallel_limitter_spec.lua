@@ -1,4 +1,4 @@
-local helper = require("optpack.lib.testlib.helper")
+local helper = require("optpack.test.helper")
 local ParallelLimitter = require("optpack.lib.parallel_limitter")
 local Promise = require("optpack.vendor.promise")
 

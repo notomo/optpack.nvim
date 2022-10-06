@@ -1,6 +1,6 @@
 local Output = require("optpack.vendor.misclib.job.output")
 local pathlib = require("optpack.lib.path")
-local logger = require("optpack.lib.testlib.logger").logger:add_prefix("[git_client]")
+local logger = require("optpack.test.logger").logger:add_prefix("[git_client]")
 
 local GitClient = {}
 GitClient.__index = GitClient

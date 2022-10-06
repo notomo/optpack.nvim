@@ -1,4 +1,4 @@
-local helper = require("optpack.lib.testlib.helper")
+local helper = require("optpack.test.helper")
 local optpack = helper.require("optpack")
 
 describe("optpack.add()", function()
