@@ -1,10 +1,5 @@
-local pathlib = require("optpack.lib.path")
-local path = pathlib.join(vim.fn.stdpath("cache"), "optpack", "test.log")
-vim.fn.mkdir(pathlib.dir(path), "p")
-local file = io.open(path, "a+")
-file:write("\n")
-file:close()
+local output, _, path = require("optpack.vendor.misclib.logger.file").output("optpack/test.log")
 return {
-  logger = require("optpack.lib.logger").Logger.new(require("optpack.lib.logger").file_output(path)),
+  logger = require("optpack.vendor.misclib.logger").new(output),
   path = path,
 }
