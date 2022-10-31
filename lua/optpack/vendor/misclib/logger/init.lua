@@ -14,7 +14,11 @@ function Logger.new(output, opts)
   opts = opts or {}
   opts.level = opts.level or Logger.levels.INFO
   opts.prefix = opts.prefix or ""
-  local tbl = { _level = opts.level, _output = output, _prefix = opts.prefix }
+  local tbl = {
+    _level = opts.level,
+    _output = output,
+    _prefix = opts.prefix,
+  }
   return setmetatable(tbl, Logger)
 end
 

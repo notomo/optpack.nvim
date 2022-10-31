@@ -8,7 +8,7 @@ vim.o.runtimepath = vim.fn.getcwd() .. "," .. vim.o.runtimepath
 dofile(example_path)
 
 require("genvdoc").generate(full_plugin_name, {
-  sources = { { name = "lua", pattern = ("lua/%s/init.lua"):format(plugin_name) } },
+  source = { patterns = { ("lua/%s/init.lua"):format(plugin_name) } },
   chapters = {
     {
       name = function(group)
