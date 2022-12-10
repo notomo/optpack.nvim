@@ -1,4 +1,4 @@
-local pack_dir = vim.fn.expand("~/example-packages")
+local pack_dir = vim.fn.stdpath("data") .. "/optpack.nvim"
 vim.opt.packpath:prepend(pack_dir)
 local manager_dir = pack_dir .. "/pack/optpack/opt/optpack.nvim"
 local initializing = vim.fn.isdirectory(manager_dir) ~= 1
