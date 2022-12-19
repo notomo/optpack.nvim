@@ -1,4 +1,4 @@
-local pathlib = require("optpack.lib.path")
+local pathlib = require("optpack.vendor.misclib.path")
 
 local M = {}
 

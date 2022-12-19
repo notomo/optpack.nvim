@@ -1,5 +1,5 @@
 local GitClient = require("optpack.test.git_client")
-local pathlib = require("optpack.lib.path")
+local pathlib = require("optpack.vendor.misclib.path")
 local log = require("optpack.test.logger")
 local logger = log.logger:add_prefix("[git_server]")
 local log_file_path = log.path

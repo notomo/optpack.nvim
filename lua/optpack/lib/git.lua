@@ -1,6 +1,6 @@
 local Promise = require("optpack.vendor.promise")
 local Output = require("optpack.vendor.misclib.job.output")
-local pathlib = require("optpack.lib.path")
+local pathlib = require("optpack.vendor.misclib.path")
 
 local Git = {}
 Git.__index = Git

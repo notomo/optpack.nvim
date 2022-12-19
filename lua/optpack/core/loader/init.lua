@@ -79,11 +79,11 @@ function Loader.load(self)
   end
 end
 
-local pathlib = require("optpack.lib.path")
+local pathlib = require("optpack.vendor.misclib.path")
 
 function Loader._validate_after_loading(self)
   local paths = vim.tbl_map(function(path)
-    return pathlib.adjust_sep(path)
+    return pathlib.normalize(path)
   end, vim.api.nvim_list_runtime_paths())
 
   if not vim.tbl_contains(paths, self._plugin.directory) then
