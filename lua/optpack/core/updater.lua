@@ -4,8 +4,7 @@ local Updater = {}
 Updater.__index = Updater
 
 function Updater.new()
-  local job_factory = require("optpack.lib.job_factory").new()
-  local git = require("optpack.lib.git").new(job_factory)
+  local git = require("optpack.lib.git").new()
   local tbl = { _git = git }
   return setmetatable(tbl, Updater)
 end

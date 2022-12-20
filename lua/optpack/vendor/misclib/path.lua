@@ -41,6 +41,13 @@ function M.tail(path)
   return factors[#factors] .. "/"
 end
 
+function M.trim_slash(path)
+  if not vim.endswith(path, "/") or path == "/" then
+    return path
+  end
+  return path:sub(1, #path - 1)
+end
+
 local _normalize
 if vim.loop.os_uname().version:match("Windows") then
   _normalize = function(path)

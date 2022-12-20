@@ -12,6 +12,7 @@ return {
   "notomo/misclib.nvim/lua/misclib/decorator.lua",
   "notomo/misclib.nvim/lua/misclib/error_handler.lua",
   "notomo/misclib.nvim/lua/misclib/highlight.lua",
+  "notomo/misclib.nvim/lua/misclib/job/init.lua",
   "notomo/misclib.nvim/lua/misclib/job/output.lua",
   "notomo/misclib.nvim/lua/misclib/logger/file.lua",
   "notomo/misclib.nvim/lua/misclib/logger/init.lua",

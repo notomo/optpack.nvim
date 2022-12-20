@@ -5,9 +5,8 @@ local pathlib = require("optpack.vendor.misclib.path")
 local Git = {}
 Git.__index = Git
 
-function Git.new(job_factory)
-  vim.validate({ job_factory = { job_factory, "table" } })
-  local tbl = { _job_factory = job_factory }
+function Git.new()
+  local tbl = {}
   return setmetatable(tbl, Git)
 end
 
@@ -64,7 +63,7 @@ function Git.log(self, directory, target_revision)
   end)
 end
 
-function Git._start(self, cmd, opts)
+function Git._start(_, cmd, opts)
   opts = opts or {}
   opts.handle_stdout = opts.handle_stdout or function(stdout)
     return stdout:lines()
@@ -72,7 +71,7 @@ function Git._start(self, cmd, opts)
   local stdout = Output.new()
   local stderr = Output.new()
   return Promise.new(function(resolve, reject)
-    local _, err = self._job_factory:create(cmd, {
+    local _, err = require("optpack.vendor.misclib.job").start(cmd, {
       on_exit = function(_, code)
         if code ~= 0 then
           local err = { table.concat(cmd, " "), unpack(stderr:lines()) }
