@@ -4,6 +4,7 @@ function M.join(...)
   local items = {}
   local slash = false
   for _, item in ipairs({ ... }) do
+    item = M.normalize(item)
     if vim.endswith(item, "/") then
       item = item:sub(1, #item - 1)
       slash = true
@@ -22,6 +23,7 @@ function M.join(...)
 end
 
 function M.parent(path)
+  path = M.normalize(path)
   if vim.endswith(path, "/") then
     local index = path:reverse():find("/", 2) or 0
     path = path:sub(1, #path - index + 1)
@@ -33,6 +35,7 @@ function M.parent(path)
 end
 
 function M.tail(path)
+  path = M.normalize(path)
   if not vim.endswith(path, "/") then
     local factors = vim.split(path, "/", true)
     return factors[#factors]
@@ -42,6 +45,7 @@ function M.tail(path)
 end
 
 function M.trim_slash(path)
+  path = M.normalize(path)
   if not vim.endswith(path, "/") or path == "/" then
     return path
   end
