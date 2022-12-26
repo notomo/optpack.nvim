@@ -37,10 +37,10 @@ end
 function M.tail(path)
   path = M.normalize(path)
   if not vim.endswith(path, "/") then
-    local factors = vim.split(path, "/", true)
+    local factors = vim.split(path, "/", { plain = true })
     return factors[#factors]
   end
-  local factors = vim.split(path:sub(1, #path - 1), "/", true)
+  local factors = vim.split(path:sub(1, #path - 1), "/", { plain = true })
   return factors[#factors] .. "/"
 end
 
