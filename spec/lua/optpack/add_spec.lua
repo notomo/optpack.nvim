@@ -345,8 +345,11 @@ describe("optpack.get()", function()
 
   it("show an error message if the plugin does not exist", function()
     local plugin_name = "invalid"
-    optpack.get(plugin_name)
-    assert.exists_message("not found plugin: " .. plugin_name)
+    local ok, err = pcall(function()
+      optpack.get(plugin_name)
+    end)
+    assert.is_false(ok)
+    assert.match("not found plugin: " .. plugin_name, err)
   end)
 
   it("returns a plugin", function()
@@ -398,10 +401,13 @@ describe("optpack.load()", function()
     optpack.add(plugin1)
     vim.o.packpath = helper.test_data.full_path .. unexpected_packpath
 
-    optpack.load(plugin_name1)
-
-    assert.exists_message(
-      [[failed to load expected directory: ]] .. helper.test_data.full_path .. helper.opt_path .. plugin_name1
+    local ok, err = pcall(function()
+      optpack.load(plugin_name1)
+    end)
+    assert.is_false(ok)
+    assert.match(
+      [[failed to load expected directory: ]] .. helper.test_data.full_path .. helper.opt_path .. plugin_name1,
+      err
     )
   end)
 
@@ -411,22 +417,27 @@ describe("optpack.load()", function()
 
     optpack.add(plugin1)
 
-    optpack.load(plugin_name1)
+    local ok, err = pcall(function()
+      optpack.load(plugin_name1)
+    end)
+    assert.is_false(ok)
 
     local another_plugin_path = helper.test_data.full_path .. another_opt_path .. plugin_name1
-    assert.exists_message([[loaded, but the same and prior plugin exists in 'runtimepath': ]] .. another_plugin_path)
+    assert.match([[loaded, but the same and prior plugin exists in 'runtimepath': ]] .. another_plugin_path, err)
   end)
 
   it("show an error message if hooks.post_add raises an error", function()
-    optpack.add(plugin1, {
-      hooks = {
-        post_add = function()
-          error("test error", 0)
-        end,
-      },
-    })
-
-    assert.exists_message(plugin_name1 .. [[: post_add: test error]])
+    local ok, err = pcall(function()
+      optpack.add(plugin1, {
+        hooks = {
+          post_add = function()
+            error("test error", 0)
+          end,
+        },
+      })
+    end)
+    assert.is_false(ok)
+    assert.match(plugin_name1 .. [[: post_add: test error]], err)
   end)
 
   it("show an error message if hooks.pre_load raises an error", function()
@@ -438,9 +449,11 @@ describe("optpack.load()", function()
       },
     })
 
-    optpack.load(plugin_name1)
-
-    assert.exists_message(plugin_name1 .. [[: pre_load: test error]])
+    local ok, err = pcall(function()
+      optpack.load(plugin_name1)
+    end)
+    assert.is_false(ok)
+    assert.match(plugin_name1 .. [[: pre_load: test error]], err)
   end)
 
   it("show an error message if hooks.post_load raises an error", function()
@@ -452,46 +465,54 @@ describe("optpack.load()", function()
       },
     })
 
-    optpack.load(plugin_name1)
-
-    assert.exists_message(plugin_name1 .. [[: post_load: test error]])
+    local ok, err = pcall(function()
+      optpack.load(plugin_name1)
+    end)
+    assert.is_false(ok)
+    assert.match(plugin_name1 .. [[: post_load: test error]], err)
   end)
 
   it("show an error message if there is no packpath", function()
-    optpack.add(plugin1, {
-      select_packpath = function()
-        return nil
-      end,
-    })
-
-    assert.exists_message(plugin1 .. [[: `select_packpath` should return non%-empty string]])
+    local ok, err = pcall(function()
+      optpack.add(plugin1, {
+        select_packpath = function()
+          return nil
+        end,
+      })
+    end)
+    assert.is_false(ok)
+    assert.match(plugin1 .. [[: `select_packpath` should return non%-empty string]], err)
   end)
 
   it("show an error message if there is no plugin", function()
-    optpack.load("invalid_plugin")
-
-    assert.exists_message([[not found plugin: invalid_plugin]])
+    local ok, err = pcall(function()
+      optpack.load("invalid_plugin")
+    end)
+    assert.is_false(ok)
+    assert.match([[not found plugin: invalid_plugin]], err)
   end)
 
   it("show an error message if load_on.keymaps raises an error", function()
-    optpack.add(plugin1, {
-      load_on = {
-        keymaps = function()
-          error("test error", 0)
-        end,
-      },
-    })
-
-    optpack.load(plugin_name1)
-
-    assert.exists_message(plugin_name1 .. [[: load_on.keymaps: test error]])
+    local ok, err = pcall(function()
+      optpack.add(plugin1, {
+        load_on = {
+          keymaps = function()
+            error("test error", 0)
+          end,
+        },
+      })
+    end)
+    assert.is_false(ok)
+    assert.match(plugin_name1 .. [[: load_on.keymaps: test error]], err)
   end)
 
   it("show an error message if dependencies plugin loading fails", function()
     optpack.add(plugin1, { depends = { "invalid" } })
 
-    optpack.load(plugin_name1)
-
-    assert.exists_message(plugin_name1 .. [[ depends: not found plugin: invalid]])
+    local ok, err = pcall(function()
+      optpack.load(plugin_name1)
+    end)
+    assert.is_false(ok)
+    assert.match(plugin_name1 .. [[ depends: not found plugin: invalid]], err)
   end)
 end)

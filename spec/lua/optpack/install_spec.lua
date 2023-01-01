@@ -116,8 +116,11 @@ describe("optpack.install()", function()
   end)
 
   it("raises an error if pattern is invalid", function()
-    optpack.install({ pattern = [[\(test]] })
-    assert.exists_message([[invalid pattern]])
+    local ok, err = pcall(function()
+      optpack.install({ pattern = [[\(test]] })
+    end)
+    assert.is_false(ok)
+    assert.match([[invalid pattern]], err)
   end)
 
   it("can disable buffer outputter", function()
