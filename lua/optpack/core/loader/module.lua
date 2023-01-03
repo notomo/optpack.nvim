@@ -49,7 +49,7 @@ function OnModule._set(self, required_name)
   end
 
   required_name = required_name:gsub("/", ".")
-  local splitted = vim.split(required_name, ".", true)
+  local splitted = vim.split(required_name, ".", { plain = true })
   local ok = false
   for i in ipairs(splitted) do
     local module_name = table.concat(vim.list_slice(splitted, 1, i), ".")

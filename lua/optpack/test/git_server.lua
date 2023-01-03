@@ -58,7 +58,7 @@ function GitServer.create_repository(self, full_name, commits)
     self:_add_commit(tmp_path, msg)
   end
 
-  local account_name = vim.split(full_name, "/", true)[1]
+  local account_name = vim.split(full_name, "/", { plain = true })[1]
   local path = pathlib.join(self._git_root_dir, account_name)
   vim.fn.mkdir(path, "p")
   self.client:execute({ "clone", "--bare", "--local", tmp_path }, { cwd = path })
