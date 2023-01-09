@@ -67,14 +67,11 @@ function helper.create_plugin_dir(name, opts)
   local root_dir = opts.opt_path .. name
 
   local plugin_dir = ("%s/plugin/"):format(root_dir)
-  helper.test_data:create_dir(plugin_dir)
   opts.plugin_vim_content = opts.plugin_vim_content or ""
   helper.test_data:create_file(plugin_dir .. name .. ".vim", opts.plugin_vim_content)
 
   local lua_dir = ("%s/lua/%s/"):format(root_dir, name)
-  helper.test_data:create_dir(lua_dir)
   helper.test_data:create_file(lua_dir .. "init.lua")
-  helper.test_data:create_dir(lua_dir .. "sub")
   helper.test_data:create_file(lua_dir .. "sub/init.lua")
 end
 

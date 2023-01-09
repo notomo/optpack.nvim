@@ -20,6 +20,8 @@ function M.setup(root_path, opts)
 end
 
 function M.create_file(self, path, content)
+  self:create_dir(vim.fs.dirname(path))
+
   local file_path = self.full_path .. path
   local f = io.open(file_path, "w")
   if not f then
