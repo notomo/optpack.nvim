@@ -14,7 +14,6 @@ function helper.after_each()
   helper.cleanup_loaded_modules(plugin_name)
   helper.test_data:teardown()
   collectgarbage("collect") -- for unhandled rejection
-  print(" ")
 end
 
 function helper.set_lines(lines)
