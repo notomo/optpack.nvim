@@ -144,7 +144,7 @@ require("genvdoc").generate(full_plugin_name, {
             install_or_update = [[(table | nil): |optpack.nvim-install-or-update-option|
     default: %s]],
           }
-          local default = require("optpack.core.option").user_default
+          local default = require("optpack.core.option").default
           local keys = vim.tbl_keys(default)
           local lines = util.each_keys_description(keys, descriptions, default)
           setting_text = table.concat(lines, "\n")

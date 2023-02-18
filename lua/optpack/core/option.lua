@@ -1,6 +1,7 @@
 local M = {}
 
-M.user_default = { add = {}, install_or_update = {} }
+M.default = { add = {}, install_or_update = {} }
+M.user_default = vim.deepcopy(M.default)
 function M.set_default(setting)
   M.user_default = vim.tbl_deep_extend("force", M.user_default, setting)
 end
