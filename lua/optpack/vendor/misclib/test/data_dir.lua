@@ -31,10 +31,14 @@ function M.create_file(self, path, content)
     f:write(content)
   end
   f:close()
+
+  return file_path
 end
 
 function M.create_dir(self, path)
-  vim.fn.mkdir(self.full_path .. path, "p")
+  local dir_path = self.full_path .. path
+  vim.fn.mkdir(dir_path, "p")
+  return dir_path
 end
 
 function M.cd(self, path)
