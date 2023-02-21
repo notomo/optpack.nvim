@@ -128,6 +128,7 @@ require("genvdoc").generate(full_plugin_name, {
             full_name = [[(string): {account_name}/{plugin_name} format plugin name]],
             name = [[(string): plugin name]],
             url = [[(string): git repository url]],
+            opts = [[(table): |optpack.nvim-add-option|]],
           }
           local default =
             require("optpack.core.plugin").Plugin.new("doc", require("optpack.core.option").AddOption.new()):expose()

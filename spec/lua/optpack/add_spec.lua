@@ -335,7 +335,13 @@ describe("optpack.list()", function()
       name = "test",
       directory = vim.o.packpath .. "/pack/optpack/opt/test",
       url = "https://github.com/account/test",
-    }, got)
+    }, {
+      full_name = got.full_name,
+      name = got.name,
+      directory = got.directory,
+      url = got.url,
+    })
+    assert.is_same({}, got.opts.load_on.events)
   end)
 end)
 
@@ -363,7 +369,13 @@ describe("optpack.get()", function()
       name = "test",
       directory = vim.o.packpath .. "/pack/optpack/opt/test",
       url = "https://github.com/account/test",
-    }, got)
+    }, {
+      full_name = got.full_name,
+      name = got.name,
+      directory = got.directory,
+      url = got.url,
+    })
+    assert.is_same({}, got.opts.load_on.events)
   end)
 end)
 

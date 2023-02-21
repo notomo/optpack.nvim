@@ -111,6 +111,7 @@ Plugin                                                   *optpack.nvim-plugin*
 - {directory} (string): full path of the plugin directory
 - {full_name} (string): {account_name}/{plugin_name} format plugin name
 - {name} (string): plugin name
+- {opts} (table): |optpack.nvim-add-option|
 - {url} (string): git repository url
 
 |optpack.set_default()| setting                         *optpack.nvim-setting*

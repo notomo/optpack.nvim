@@ -28,6 +28,7 @@ function Plugin.new(full_name, opts)
     _post_install_hook = opts.hooks.post_install,
     _post_update_hook = opts.hooks.post_update,
     _depth = opts.fetch.depth,
+    _opts = opts,
   }
   return setmetatable(tbl, Plugin), nil
 end
@@ -38,6 +39,7 @@ function Plugin.expose(self)
     name = self.name,
     directory = self.directory,
     url = self.url,
+    opts = self._opts,
   }
 end
 
