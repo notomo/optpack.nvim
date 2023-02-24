@@ -8,13 +8,13 @@ add({full_name}, {opts})                                       *optpack.add()*
 
   Parameters: ~
     {full_name} (string) {account_name}/{plugin_name} format
-    {opts} (table|nil) |optpack.nvim-add-option|
+    {opts} (OptpackAddOption?) |OptpackAddOption|
 
 list()                                                        *optpack.list()*
   Returns list of plugins.
 
   Return: ~
-    (table) list of |optpack.nvim-plugin|
+    (OptpackPlugin[]) list of |OptpackPlugin|
 
 get({plugin_name})                                             *optpack.get()*
   Returns a plugin.
@@ -23,19 +23,19 @@ get({plugin_name})                                             *optpack.get()*
     {plugin_name} (string) 
 
   Return: ~
-    (table) |optpack.nvim-plugin|
+    (OptpackPlugin) |OptpackPlugin|
 
 install({opts})                                            *optpack.install()*
   Install plugins.
 
   Parameters: ~
-    {opts} (table|nil) |optpack.nvim-install-or-update-option|
+    {opts} (OptpackInstallOrUpdateOption?) |OptpackInstallOrUpdateOption|
 
 update({opts})                                              *optpack.update()*
   Update plugins.
 
   Parameters: ~
-    {opts} (table|nil) |optpack.nvim-install-or-update-option|
+    {opts} (OptpackInstallOrUpdateOption?) |OptpackInstallOrUpdateOption|
 
 load({plugin_name})                                           *optpack.load()*
   Load a plugin.
@@ -47,79 +47,87 @@ set_default({setting})                                 *optpack.set_default()*
   Set default setting.
 
   Parameters: ~
-    {setting} (table) |optpack.nvim-setting|
+    {setting} (OptpackSetting) |OptpackSetting|
 
 ==============================================================================
-TYPES                                                     *optpack.nvim-TYPES*
+STRUCTURE                                             *optpack.nvim-STRUCTURE*
 
-|optpack.add()| option                               *optpack.nvim-add-option*
+OptpackAddOption                                            *OptpackAddOption*
 
-- {depends} (table | nil): dependency plugin (not full) names.
-    These will be loaded before.
-    default: {}
-- {enabled} (boolean | nil): if enabled=false, optpack ignores the plugin.
-    default: true
-- {fetch} (table | nil): fetch setting
-  - {base_url} A git server base url,
-      default: "https://github.com"
-  - {depth} for shallow clone depth. Used full clone if depth < 1.
-      default: 1
-- {hooks} (table | nil): hook functions for some timings
-  - {post_add} (function | nil) called on after |optpack.add()|
-  - {post_install} (function | nil) called on after installing
-  - {post_load} (function | nil) called on after loading
-  - {post_update} (function | nil) called on after updating
-  - {pre_load} (function | nil) called on before loading
-- {load_on} (table | nil): setting for lazy loading
-  - {cmds} (table | nil): EX command pattern list,
-      default: {}
-  - {events} (table | nil): autocmd event name or [name, pattern] list,
-      default: {}
-  - {filetypes} (table | nil): file type pattern list,
-      default: {}
-  - {keymaps} (function | nil): set keymap function. (The argument is patched vim object)
-      example: function(vim) vim.keymap.set("n", "S", "<Plug>(example)") end
-      default: function() end
-  - {modules} (table | nil): for require() lua module name list,
-      default: {}
-- {package_name} (string | nil): used as the package directory name.
-    your-packpath/pack/{package_name}/opt
-    default: "optpack"
-- {select_packpath} (function | nil): returns a directory path.
-    default: returns the first element of 'packpath'
+- {depends} (string[]?) dependency plugin (not full) names. These will be loaded before. default: {}
+- {enabled} (boolean?) if enabled=false, optpack ignores the plugin. default: true
+- {package_name} (string?) used as the package directory name. your-packpath/pack/{package_name}/opt default: "optpack"
+- {select_packpath} ((fun():string)?) returns a directory path. default: returns the first element of 'packpath'
+- {fetch} (OptpackAddOptionFetch?) |OptpackAddOptionFetch|
+- {hooks} (OptpackAddOptionHooks?) |OptpackAddOptionHooks|
+- {load_on} (OptpackAddOptionLoadOn?) |OptpackAddOptionLoadOn|
 
-|optpack.install()| or |optpack.update()| option
-                                       *optpack.nvim-install-or-update-option*
+OptpackAddOptionFetch                                  *OptpackAddOptionFetch*
 
-- {on_finished} (function | nil): called on finished updating or installing
-- {outputters} (table | nil): outputter settings.
-  - {buffer} (table): buffer output setting
-    - {enabled} (boolean): used if true. default: true
-    - {open} (function | nil) (bufnr) -> open buffer
-  - {echo} (table): echo output setting
-    - {enabled} (boolean): used if true. default: false
-  - {log} (table): log output setting
-    - {enabled} (boolean): used if true. default: false
-    - {path} (string): log file path: default: vim.fn.stdpath("cache")/optpack-update.log
-- {parallel} (table | nil): parallel setting
-  - {limit} max number for parallel job,  default: 8
-- {pattern} (string | nil): target plugin name pattern for vim regex,
-    default: ".*"
+- {base_url} (string?) A git server base url, default: "https://github.com"
+- {depth} (integer?) for shallow clone depth. Used full clone if depth < 1. default: 1
 
-Plugin                                                   *optpack.nvim-plugin*
+OptpackAddOptionHooks                                  *OptpackAddOptionHooks*
 
-- {directory} (string): full path of the plugin directory
-- {full_name} (string): {account_name}/{plugin_name} format plugin name
-- {name} (string): plugin name
-- {opts} (table): |optpack.nvim-add-option|
-- {url} (string): git repository url
+- {post_add} (fun(plugin:OptpackPlugin)?) called on after |optpack.add()|
+- {pre_load} (fun(plugin:OptpackPlugin)?) called on before loading
+- {post_install} (fun(plugin:OptpackPlugin)?) called on after installing
+- {post_update} (fun(plugin:OptpackPlugin)?) called on after updating
+- {post_load} (fun(plugin:OptpackPlugin)?) called on after loading
 
-|optpack.set_default()| setting                         *optpack.nvim-setting*
+OptpackAddOptionLoadOn                                *OptpackAddOptionLoadOn*
 
-- {add} (table | nil): |optpack.nvim-add-option|
-    default: {}
-- {install_or_update} (table | nil): |optpack.nvim-install-or-update-option|
-    default: {}
+- {cmds} (string[]?) EX command pattern list, default: {}
+- {events} ((string|string[])[]?) autocmd event name or [name, pattern] list, default: {}
+- {filetypes} (string[]?) file type pattern list, default: {}
+- {keymaps} (fun(vim:table)?) set keymap function. (The argument is patched vim object)
+    example: function(vim) vim.keymap.set("n", "S", "<Plug>(example)") end
+    default: function() end
+- {modules} (string[]?) for require() lua module name list, default: {}
+
+OptpackPlugin                                                  *OptpackPlugin*
+
+- {directory} (string) full path of the plugin directory
+- {full_name} (string) {account_name}/{plugin_name} format plugin name
+- {name} (string) plugin name
+- {url} (string) git repository url
+- {opts} (OptpackAddOption) |OptpackAddOption|
+
+OptpackInstallOrUpdateOption                    *OptpackInstallOrUpdateOption*
+
+- {on_finished} (fun(plugin:OptpackPlugin)?) called on finished updating or installing
+- {outputters} (OptpackOutputters?) outputter settings
+- {parallel} (OptpackParallelOption?) parallel setting
+- {pattern} (string?) target plugin name pattern for vim regex, default: ".*"
+
+OptpackOutputters                                          *OptpackOutputters*
+
+- {buffer} (OptpackBufferOutputter?) |OptpackBufferOutputter|
+- {echo} (OptpackEchoOutputter?) |OptpackEchoOutputter|
+- {log} (OptpackLogOutputter?) |OptpackLogOutputter|
+
+OptpackBufferOutputter                                *OptpackBufferOutputter*
+
+- {enabled} (boolean?) used if true. default: true
+- {open} (fun(bufnr:integer)?) open buffer
+
+OptpackEchoOutputter                                    *OptpackEchoOutputter*
+
+- {enabled} (boolean?) used if true. default: true
+
+OptpackLogOutputter                                      *OptpackLogOutputter*
+
+- {enabled} (boolean?) used if true. default: true
+- {path} (string?) log file path: default: vim.fn.stdpath("cache")/optpack-update.log
+
+OptpackParallelOption                                  *OptpackParallelOption*
+
+- {limit} (integer?) max number for parallel job, default: 8
+
+OptpackSetting                                                *OptpackSetting*
+
+- {add} (OptpackAddOption?) |OptpackAddOption|
+- {install_or_update} (OptpackInstallOrUpdateOption?) |OptpackInstallOrUpdateOption|
 
 ==============================================================================
 EXAMPLES                                               *optpack.nvim-EXAMPLES*
