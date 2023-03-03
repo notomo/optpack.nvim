@@ -14,17 +14,17 @@ local M = {}
 --- @field depth integer? for shallow clone depth. Used full clone if depth < 1. default: 1
 
 --- @class OptpackAddOptionHooks
---- @field post_add fun(plugin:OptpackPlugin)? called on after |optpack.add()|
---- @field pre_load fun(plugin:OptpackPlugin)? called on before loading
---- @field post_install fun(plugin:OptpackPlugin)? called on after installing
---- @field post_update fun(plugin:OptpackPlugin)? called on after updating
---- @field post_load fun(plugin:OptpackPlugin)? called on after loading
+--- @field post_add (fun(plugin:OptpackPlugin)|table)? called on after |optpack.add()|
+--- @field pre_load (fun(plugin:OptpackPlugin)|table)? called on before loading
+--- @field post_install (fun(plugin:OptpackPlugin)|table)? called on after installing
+--- @field post_update (fun(plugin:OptpackPlugin)|table)? called on after updating
+--- @field post_load (fun(plugin:OptpackPlugin)|table)? called on after loading
 
 --- @class OptpackAddOptionLoadOn
 --- @field cmds string[]? EX command pattern list, default: {}
 --- @field events (string|string[])[]? autocmd event name or [name, pattern] list, default: {}
 --- @field filetypes string[]? file type pattern list, default: {}
---- @field keymaps fun(vim:table)? set keymap function. (The argument is patched vim object)
+--- @field keymaps (fun(vim:table)|table)? set keymap function. (The argument is patched vim object)
 ---   example: function(vim) vim.keymap.set("n", "S", "<Plug>(example)") end
 ---   default: function() end
 --- @field modules string[]? for require() lua module name list, default: {}
@@ -57,7 +57,7 @@ function M.get(plugin_name)
 end
 
 --- @class OptpackInstallOrUpdateOption
---- @field on_finished fun(plugin:OptpackPlugin)? called on finished updating or installing
+--- @field on_finished (fun(plugin:OptpackPlugin)|table)? called on finished updating or installing
 --- @field outputters OptpackOutputters? outputter settings
 --- @field parallel OptpackParallelOption? parallel setting
 --- @field pattern string? target plugin name pattern for vim regex, default: ".*"
@@ -69,7 +69,7 @@ end
 
 --- @class OptpackBufferOutputter
 --- @field enabled boolean? used if true. default: true
---- @field open fun(bufnr:integer)? open buffer
+--- @field open (fun(bufnr:integer)|table)? open buffer
 
 --- @class OptpackEchoOutputter
 --- @field enabled boolean? used if true. default: true

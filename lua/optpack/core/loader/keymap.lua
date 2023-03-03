@@ -3,7 +3,7 @@ OnKeymaps.__index = OnKeymaps
 
 function OnKeymaps.set(plugin_name, set_keymaps)
   local set = function(mode, lhs, rhs, opts)
-    if type(rhs) == "function" then
+    if type(rhs) == "function" or vim.is_callable(rhs) then
       return vim.keymap.set(mode, lhs, function()
         require("optpack").load(plugin_name)
         return rhs()
