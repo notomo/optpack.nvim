@@ -13,6 +13,7 @@ function M.new(cmd_type, opts)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "optpack"
   vim.bo[bufnr].modifiable = false
+  vim.b[bufnr].optpack_updates = {}
   bufferlib.set_name_by_force(bufnr, "optpack://optpack-" .. cmd_type)
   opts.open(bufnr)
   local tbl = {
@@ -32,7 +33,8 @@ M.handlers = {
   [Event.Progressed] = function(_, _, finished_count, all_count)
     local digit = #tostring(all_count)
     local fmt = ("[ %%%dd / %%%dd ]"):format(digit, digit)
-    return nil, { { { (fmt):format(finished_count, all_count), "OptpackProgressed" } } }
+    local progress = { { { (fmt):format(finished_count, all_count), "OptpackProgressed" } } }
+    return nil, { progress = progress }
   end,
 }
 
@@ -59,10 +61,15 @@ function M.handle(self, event_name, ctx, ...)
     message_converter.highlight(self._decorator, messages, end_row - #messages)
     self:_redraw_progress(end_row)
   end
-  if info then
-    self._progress_lines = info
+  if info and info.progress then
+    self._progress_lines = info.progress
     local end_row = vim.api.nvim_buf_line_count(self._bufnr)
     self:_redraw_progress(end_row)
+  end
+  if info and info.update then
+    local updates = vim.b[self._bufnr].optpack_updates
+    updates[tostring(vim.fn.line("$"))] = info.update
+    vim.b[self._bufnr].optpack_updates = updates
   end
 
   output_follower:follow()

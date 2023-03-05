@@ -21,7 +21,14 @@ MessageFactory.default_handlers = {
     return { { self:_prefix(ctx), { "Start updating." } } }
   end,
   [Event.Updated] = function(self, ctx, revision_range)
-    return { { self:_prefix(ctx), { "Updated. " }, { revision_range, "OptpackUpdatedRevisionRange" } } }
+    local message = { { self:_prefix(ctx), { "Updated. " }, { revision_range, "OptpackUpdatedRevisionRange" } } }
+    local info = {
+      update = {
+        revision_range = revision_range,
+        directory = ctx.directory,
+      },
+    }
+    return message, info
   end,
   [Event.GitCommitLog] = function(self, ctx, outputs)
     local prefix = self:_prefix(ctx)
@@ -59,14 +66,7 @@ function MessageFactory.create(self, event_name, ctx, ...)
   if not handler or type(handler) ~= "function" then
     return nil
   end
-  local messages, info = handler(self, ctx, ...)
-  if messages then
-    return messages
-  end
-  if info then
-    return nil, info
-  end
-  return nil
+  return handler(self, ctx, ...)
 end
 
 function MessageFactory._prefix(_, ctx)

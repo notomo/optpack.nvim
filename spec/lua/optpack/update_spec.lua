@@ -54,6 +54,9 @@ describe("optpack.update()", function()
     assert.exists_pattern([[test1 > ....... commit1]])
     assert.exists_pattern([[test1 > ....... commit2]])
     assert.no.exists_pattern([[test2 > Updated.]])
+
+    assert.matches(".......%.%.%.......", vim.b.optpack_updates["2"].revision_range)
+    assert.equal(helper.plugin_dir("test1"), vim.b.optpack_updates["2"].directory)
   end)
 
   it("can update plugins that are matched with pattern", function()
