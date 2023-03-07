@@ -48,8 +48,14 @@ describe("optpack.update()", function()
 
     local on_finished = helper.on_finished()
     optpack.update({ on_finished = on_finished })
+
+    -- to test work with other buffer
+    local bufnr = vim.api.nvim_get_current_buf()
+    vim.cmd.tabedit()
+
     on_finished:wait()
 
+    vim.cmd.buffer(bufnr)
     assert.exists_pattern([[test1 > Updated.]])
     assert.exists_pattern([[test1 > ....... commit1]])
     assert.exists_pattern([[test1 > ....... commit2]])
