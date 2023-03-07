@@ -44,14 +44,14 @@ end
 --- @field opts OptpackAddOption |OptpackAddOption|
 
 --- Returns list of plugins.
---- @return OptpackPlugin[]: list of |OptpackPlugin|
+--- @return OptpackPlugin[] # list of |OptpackPlugin|
 function M.list()
   return require("optpack.command").list()
 end
 
 --- Returns a plugin.
 --- @param plugin_name string:
---- @return OptpackPlugin: |OptpackPlugin|
+--- @return OptpackPlugin # |OptpackPlugin|
 function M.get(plugin_name)
   return require("optpack.command").get(plugin_name)
 end
