@@ -68,8 +68,12 @@ function M.handle(self, event_name, ctx, ...)
   end
   if info and info.update then
     local updates = vim.b[self._bufnr].optpack_updates
-    updates[tostring(vim.fn.line("$"))] = info.update
-    vim.b[self._bufnr].optpack_updates = updates
+    local window_id = vim.fn.win_findbuf(self._bufnr)[1]
+    if window_id then
+      local row = vim.api.nvim_win_get_cursor(window_id)[1] + 1
+      updates[tostring(row)] = info.update
+      vim.b[self._bufnr].optpack_updates = updates
+    end
   end
 
   output_follower:follow()
