@@ -16,7 +16,7 @@ function M.highlight(decorator, messages, row)
       local text = chunk[1]
       local hl_group = chunk[2]
       local end_col = start_col + #text
-      decorator:highlight(hl_group, row + i - 1, start_col, end_col)
+      decorator:highlight(hl_group, row + i - 1, start_col, end_col, { priority = vim.highlight.priorities.user - 1 })
       start_col = end_col
     end
   end
