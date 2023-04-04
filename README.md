@@ -13,6 +13,7 @@ if initializing then
   vim.cmd["!"]({ args = { "git", "clone", "https://github.com/notomo/optpack.nvim", manager_dir } })
 end
 
+vim.cmd.packadd("optpack.nvim")
 local optpack = require("optpack")
 
 -- add some plugins

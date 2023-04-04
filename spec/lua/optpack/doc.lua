@@ -4,7 +4,6 @@ local full_plugin_name = plugin_name .. ".nvim"
 
 local example_path = ("./spec/lua/%s/example.lua"):format(plugin_name)
 
-vim.o.runtimepath = vim.fn.getcwd() .. "," .. vim.o.runtimepath
 dofile(example_path)
 
 require("genvdoc").generate(full_plugin_name, {
