@@ -1,3 +1,5 @@
+local uv = vim.uv or vim.loop
+
 local M = {}
 
 function M.join(...)
@@ -53,7 +55,7 @@ function M.trim_slash(path)
 end
 
 local _normalize
-if vim.loop.os_uname().version:match("Windows") then
+if uv.os_uname().version:match("Windows") then
   _normalize = function(path)
     path = path:gsub("\\", "/")
     return path
