@@ -39,7 +39,11 @@ AddOption.default = {
 function AddOption.new(raw_opts)
   vim.validate({ raw_opts = { raw_opts, "table", true } })
   raw_opts = raw_opts or {}
-  return vim.tbl_deep_extend("force", AddOption.default, M.user_default.add, raw_opts)
+  local opts = vim.tbl_deep_extend("force", AddOption.default, M.user_default.add, raw_opts)
+  if vim.endswith(opts.fetch.base_url, "/") then
+    opts.fetch.base_url = opts.fetch.base_url[#opts.fetch.base_url - 1]
+  end
+  return opts
 end
 
 local InstallOrUpdateOption = {}
@@ -62,7 +66,7 @@ InstallOrUpdateOption.default = {
     },
     log = {
       enabled = false,
-      path = require("optpack.vendor.misclib.path").join(vim.fn.stdpath("log"), "optpack-update.log"),
+      path = vim.fs.joinpath(vim.fn.stdpath("log"), "optpack-update.log"),
     },
   },
   parallel = { limit = 8 },

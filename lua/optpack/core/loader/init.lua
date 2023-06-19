@@ -79,11 +79,9 @@ function Loader.load(self)
   end
 end
 
-local pathlib = require("optpack.vendor.misclib.path")
-
 function Loader._validate_after_loading(self)
   local paths = vim.tbl_map(function(path)
-    return pathlib.normalize(path)
+    return vim.fs.normalize(path)
   end, vim.api.nvim_list_runtime_paths())
 
   if not vim.tbl_contains(paths, self._plugin.directory) then
@@ -91,7 +89,7 @@ function Loader._validate_after_loading(self)
   end
 
   for _, path in ipairs(paths) do
-    local name = pathlib.tail(path)
+    local name = vim.fs.basename(path)
     if self._plugin.name == name and self._plugin.directory ~= path then
       return ([[loaded, but the same and prior plugin exists in 'runtimepath': %s]]):format(path)
     end

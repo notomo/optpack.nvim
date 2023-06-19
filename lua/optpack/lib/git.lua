@@ -1,6 +1,5 @@
 local Promise = require("optpack.vendor.promise")
 local Output = require("optpack.vendor.misclib.job.output")
-local pathlib = require("optpack.vendor.misclib.path")
 
 local Git = {}
 Git.__index = Git
@@ -23,7 +22,7 @@ function Git.pull(self, directory)
   local cmd = {
     "git",
     "--git-dir",
-    pathlib.join(directory, ".git"),
+    vim.fs.joinpath(directory, ".git"),
     "pull",
     "--ff-only",
     "--rebase=false",
@@ -32,7 +31,7 @@ function Git.pull(self, directory)
 end
 
 function Git.get_revision(self, directory)
-  local cmd = { "git", "--git-dir", pathlib.join(directory, ".git"), "rev-parse", "--short", "HEAD" }
+  local cmd = { "git", "--git-dir", vim.fs.joinpath(directory, ".git"), "rev-parse", "--short", "HEAD" }
   return self:_start(cmd, {
     cwd = directory,
     handle_stdout = function(stdout)
@@ -45,7 +44,7 @@ function Git.log(self, directory, target_revision)
   local cmd = {
     "git",
     "--git-dir",
-    pathlib.join(directory, ".git"),
+    vim.fs.joinpath(directory, ".git"),
     "log",
     [[--pretty=format:%h %s]],
     target_revision,

@@ -1,5 +1,3 @@
-local pathlib = require("optpack.vendor.misclib.path")
-
 local M = {}
 
 local Plugin = {}
@@ -11,13 +9,13 @@ M.Plugin = Plugin
 function Plugin.new(full_name, opts)
   vim.validate({ name = { full_name, "string" }, opts = { opts, "table" } })
 
-  local name = pathlib.tail(full_name)
+  local name = vim.fs.basename(full_name)
   local packpath = opts.select_packpath()
   if not packpath or packpath == "" then
     return nil, "`select_packpath` should return non-empty string"
   end
-  local directory = pathlib.join(packpath, "pack", opts.package_name, "opt", name)
-  local url = pathlib.join(opts.fetch.base_url, full_name)
+  local directory = vim.fs.joinpath(packpath, "pack", opts.package_name, "opt", name)
+  local url = opts.fetch.base_url .. "/" .. full_name
 
   local tbl = {
     name = name,

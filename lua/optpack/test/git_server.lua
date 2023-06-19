@@ -1,5 +1,4 @@
 local GitClient = require("optpack.test.git_client")
-local pathlib = require("optpack.vendor.misclib.path")
 local log = require("optpack.test.logger")
 local logger = log.logger:add_prefix("[git_server]")
 local log_file_path = log.path
@@ -30,7 +29,7 @@ function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   vim.fn.mkdir(tmp_dir, "p")
 
   local cgi_url = ("http://127.0.0.1:%d/cgi-bin"):format(port)
-  local url = pathlib.join(cgi_url, "git-http-backend")
+  local url = cgi_url .. "/git-http-backend"
   local client = GitClient.new(url)
   local tbl = {
     url = url,
@@ -46,7 +45,7 @@ function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
 end
 
 function GitServer.create_repository(self, full_name, commits)
-  local tmp_path = pathlib.join(self._tmp_dir, full_name)
+  local tmp_path = vim.fs.joinpath(self._tmp_dir, full_name)
   vim.fn.mkdir(tmp_path, "p")
 
   self.client:execute({ "init" }, { cwd = tmp_path })
@@ -59,14 +58,14 @@ function GitServer.create_repository(self, full_name, commits)
   end
 
   local account_name = vim.split(full_name, "/", { plain = true })[1]
-  local path = pathlib.join(self._git_root_dir, account_name)
+  local path = vim.fs.joinpath(self._git_root_dir, account_name)
   vim.fn.mkdir(path, "p")
   self.client:execute({ "clone", "--bare", "--local", tmp_path }, { cwd = path })
 end
 
 function GitServer._add_commit(self, tmp_path, msg)
   local name = ("%s_file"):format(msg)
-  local file = pathlib.join(tmp_path, name)
+  local file = vim.fs.joinpath(tmp_path, name)
   io.open(file, "w"):close()
   self.client:execute({ "add", "." }, { cwd = tmp_path })
   self.client:execute({ "commit", "-m", msg }, { cwd = tmp_path })
@@ -83,7 +82,7 @@ end
 function GitServer._health_check(self)
   local ok = vim.wait(1000, function()
     local exit_code
-    local job_id = vim.fn.jobstart({ "curl", pathlib.join(self._cgi_url, "ready.py") }, {
+    local job_id = vim.fn.jobstart({ "curl", self._cgi_url .. "/ready.py" }, {
       on_exit = function(_, code)
         exit_code = code
       end,

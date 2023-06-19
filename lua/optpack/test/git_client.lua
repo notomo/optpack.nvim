@@ -1,5 +1,4 @@
 local Output = require("optpack.vendor.misclib.job.output")
-local pathlib = require("optpack.vendor.misclib.path")
 local logger = require("optpack.test.logger").logger:add_prefix("[git_client]")
 
 local GitClient = {}
@@ -11,7 +10,7 @@ function GitClient.new(server_url)
 end
 
 function GitClient.clone(self, full_name, directory, args)
-  local url = pathlib.join(self._server_url, full_name .. ".git")
+  local url = self._server_url .. "/" .. full_name .. ".git"
   local cmd = { "clone", unpack(args or {}) }
   vim.list_extend(cmd, { url, directory })
   self:execute(cmd)
