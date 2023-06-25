@@ -11,6 +11,7 @@ end
 
 function Updater.start(self, emitter, directory)
   local before_revision
+  local revision_range
   return self._git
     :get_revision(directory)
     :next(function(revision)
@@ -24,11 +25,13 @@ function Updater.start(self, emitter, directory)
       if before_revision == revision then
         return
       end
-      local revision_range = before_revision .. "..." .. revision
-      emitter:emit(Event.Updated, revision_range)
+      revision_range = before_revision .. "..." .. revision
       return self._git:log(directory, revision_range)
     end)
     :next(function(outputs)
+      if revision_range then
+        emitter:emit(Event.Updated, revision_range) -- to output in sync with GitCommitLog
+      end
       if not outputs then
         return false
       end
