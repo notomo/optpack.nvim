@@ -55,7 +55,7 @@ helper.packpath_name = "mypackpath"
 helper.opt_path = helper.packpath_name .. "/pack/optpack/opt/"
 
 function helper.plugin_dir(name)
-  return helper.test_data.full_path .. helper.opt_path .. name
+  return helper.test_data:path(helper.opt_path .. name)
 end
 
 function helper.create_plugin_dir(name, opts)
@@ -75,7 +75,7 @@ function helper.create_plugin_dir(name, opts)
 end
 
 function helper.set_packpath()
-  vim.o.packpath = helper.test_data.full_path .. helper.packpath_name
+  vim.o.packpath = helper.test_data:path(helper.packpath_name)
 end
 
 local asserts = require("vusted.assert").asserts
@@ -84,7 +84,7 @@ require(plugin_name .. ".vendor.misclib.test.assert").register(asserts.create, a
 
 asserts.create("exists_dir"):register(function(self)
   return function(_, args)
-    local path = helper.test_data.full_path .. args[1]
+    local path = helper.test_data:path(args[1])
     self:set_positive(("`%s` not found dir"):format(path))
     self:set_negative(("`%s` found dir"):format(path))
     return vim.fn.isdirectory(path) == 1

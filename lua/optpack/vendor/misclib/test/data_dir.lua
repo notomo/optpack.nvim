@@ -5,11 +5,11 @@ function M.setup(root_path, opts)
   opts = opts or {}
   local base_dir = opts.base_dir or "test_data/"
   local base_path = vim.fs.joinpath(root_path, base_dir)
-  local relative_path = base_dir .. math.random(1, 2 ^ 30) .. "/"
+  local relative_path = vim.fs.joinpath(base_dir, math.random(1, 2 ^ 30))
   local full_path = vim.fs.joinpath(root_path, relative_path)
   local tbl = {
-    relative_path = relative_path,
     full_path = full_path,
+    _relative_path = relative_path,
     _base_path = base_path,
   }
   local self = setmetatable(tbl, M)
@@ -39,6 +39,14 @@ function M.create_dir(self, path)
   local dir_path = vim.fs.joinpath(self.full_path, path)
   vim.fn.mkdir(dir_path, "p")
   return dir_path
+end
+
+function M.path(self, path)
+  return vim.fs.joinpath(self.full_path, path)
+end
+
+function M.relative_path(self, path)
+  return vim.fs.joinpath(self._relative_path, path)
 end
 
 function M.cd(self, path)

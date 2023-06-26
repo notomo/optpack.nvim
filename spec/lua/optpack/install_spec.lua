@@ -161,7 +161,7 @@ describe("optpack.install()", function()
     optpack.add("account1/test1", { fetch = { base_url = git_server.url } })
     optpack.add("account2/test2", { fetch = { base_url = git_server.url } })
 
-    local log_path = helper.test_data.full_path .. "test.log"
+    local log_path = helper.test_data:path("test.log")
 
     local on_finished = helper.on_finished()
     optpack.install({

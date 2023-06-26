@@ -411,16 +411,13 @@ describe("optpack.load()", function()
     helper.create_plugin_dir(plugin_name1, { opt_path = unexpected_packpath .. "/pack/optpack/opt/" })
 
     optpack.add(plugin1)
-    vim.o.packpath = helper.test_data.full_path .. unexpected_packpath
+    vim.o.packpath = helper.test_data:path(unexpected_packpath)
 
     local ok, err = pcall(function()
       optpack.load(plugin_name1)
     end)
     assert.is_false(ok)
-    assert.match(
-      [[failed to load expected directory: ]] .. helper.test_data.full_path .. helper.opt_path .. plugin_name1,
-      err
-    )
+    assert.match([[failed to load expected directory: ]] .. helper.test_data:path(helper.opt_path .. plugin_name1), err)
   end)
 
   it("show an error message if the same another plugin is prior in 'runtimepath'", function()
@@ -434,7 +431,7 @@ describe("optpack.load()", function()
     end)
     assert.is_false(ok)
 
-    local another_plugin_path = helper.test_data.full_path .. another_opt_path .. plugin_name1
+    local another_plugin_path = helper.test_data:path(another_opt_path .. plugin_name1)
     assert.match([[loaded, but the same and prior plugin exists in 'runtimepath': ]] .. another_plugin_path, err)
   end)
 
