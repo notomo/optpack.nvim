@@ -22,7 +22,9 @@ function M.handle(self, event_name, ctx, ...)
   end
 
   for _, chunks in ipairs(messages) do
-    vim.api.nvim_echo({ { messagelib.wrap("") }, unpack(chunks) }, true, {})
+    local msg = { { messagelib.wrap("") }, unpack(chunks) }
+    table.insert(msg, { self._suffix })
+    vim.api.nvim_echo(msg, true, {})
   end
 end
 
