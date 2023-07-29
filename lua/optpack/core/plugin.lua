@@ -14,7 +14,7 @@ function Plugin.new(full_name, opts)
   if not packpath or packpath == "" then
     return nil, "`select_packpath` should return non-empty string"
   end
-  local directory = vim.fs.joinpath(packpath, "pack", opts.package_name, "opt", name)
+  local directory = vim.fs.normalize(vim.fs.joinpath(packpath, "pack", opts.package_name, "opt", name))
   local url = opts.fetch.base_url .. "/" .. full_name
 
   local tbl = {
