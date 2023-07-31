@@ -8,9 +8,9 @@ function Outputters.new(cmd_type, raw_outputters)
 
   local outputters = {}
   local errs = {}
-  for outputter_typ, outputter_opts in pairs(raw_outputters) do
+  vim.iter(raw_outputters):each(function(outputter_typ, outputter_opts)
     if not outputter_opts.enabled then
-      goto continue
+      return
     end
 
     local outputter, err = Outputters._new_one(cmd_type, outputter_typ, outputter_opts)
@@ -19,9 +19,7 @@ function Outputters.new(cmd_type, raw_outputters)
     else
       table.insert(outputters, outputter)
     end
-
-    ::continue::
-  end
+  end)
   if #errs ~= 0 then
     return nil, table.concat(errs, "\n")
   end
