@@ -10,6 +10,9 @@ add({full_name}, {opts})                                       *optpack.add()*
     {full_name} (string) {account_name}/{plugin_name} format
     {opts} (OptpackAddOption?) |OptpackAddOption|
 
+  Return: ~
+    (OptpackPlugin) added |OptpackPlugin|
+
 list()                                                        *optpack.list()*
   Returns list of plugins.
 

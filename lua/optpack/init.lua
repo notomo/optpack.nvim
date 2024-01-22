@@ -32,8 +32,9 @@ local M = {}
 --- Add a plugin.
 --- @param full_name string: {account_name}/{plugin_name} format
 --- @param opts OptpackAddOption?: |OptpackAddOption|
+--- @return OptpackPlugin # added |OptpackPlugin|
 function M.add(full_name, opts)
-  require("optpack.command").add(full_name, opts)
+  return require("optpack.command").add(full_name, opts)
 end
 
 --- @class OptpackPlugin

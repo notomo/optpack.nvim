@@ -5,10 +5,11 @@ local Plugins = require("optpack.core.plugins")
 
 function M.add(full_name, raw_opts)
   local opts = AddOption.new(raw_opts)
-  local err = Plugins.state():add(full_name, opts)
+  local plugin, err = Plugins.state():add(full_name, opts)
   if err then
     require("optpack.vendor.misclib.message").error(err)
   end
+  return plugin
 end
 
 function M.list()

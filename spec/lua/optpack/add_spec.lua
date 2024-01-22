@@ -313,6 +313,12 @@ command! MyPluginTest echo ''
 
     assert.is_true(called)
   end)
+
+  it("returns added plugin", function()
+    local got = optpack.add(plugin1)
+
+    assert.is_same(plugin_name1, got.name)
+  end)
 end)
 
 describe("optpack.list()", function()

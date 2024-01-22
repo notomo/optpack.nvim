@@ -19,26 +19,28 @@ end
 function Plugins.add(self, full_name, opts)
   local plugin, err = Plugin.new(full_name, opts)
   if err then
-    return ("%s: %s"):format(full_name, err)
+    return nil, ("%s: %s"):format(full_name, err)
   end
 
   if not opts.enabled then
     self._plugins:remove(plugin.name)
     self._loaders:remove(plugin.name)
-    return
+    return plugin:expose(), nil
   end
 
   self._plugins:add(plugin)
 
   local loader_err = self._loaders:add(plugin, opts)
   if loader_err then
-    return ("%s: %s"):format(plugin.name, loader_err)
+    return nil, ("%s: %s"):format(plugin.name, loader_err)
   end
 
   local ok, hook_err = pcall(opts.hooks.post_add, plugin:expose())
   if not ok then
-    return ("%s: post_add: %s"):format(plugin.name, hook_err)
+    return nil, ("%s: post_add: %s"):format(plugin.name, hook_err)
   end
+
+  return plugin:expose(), nil
 end
 
 function Plugins.expose(self)
