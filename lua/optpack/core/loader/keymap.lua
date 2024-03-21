@@ -1,5 +1,4 @@
 local OnKeymaps = {}
-OnKeymaps.__index = OnKeymaps
 
 function OnKeymaps.set(plugin_name, set_keymaps)
   local set = function(mode, lhs, rhs, opts)

@@ -2,7 +2,6 @@ local OnModule = {}
 OnModule.__index = OnModule
 
 local OnModules = {}
-OnModules.__index = OnModules
 
 function OnModules.set(plugin_name, module_names)
   OnModules._cleanup(plugin_name)

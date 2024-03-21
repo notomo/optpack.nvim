@@ -1,7 +1,6 @@
 local OnEvents = require("optpack.core.loader.event")
 
 local OnCommands = {}
-OnCommands.__index = OnCommands
 
 function OnCommands.set(plugin_name, group_name, cmds)
   local events = vim.tbl_map(function(cmd)

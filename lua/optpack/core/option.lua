@@ -7,7 +7,6 @@ function M.set_default(setting)
 end
 
 local AddOption = {}
-AddOption.__index = AddOption
 M.AddOption = AddOption
 
 AddOption.default = {
@@ -47,7 +46,6 @@ function AddOption.new(raw_opts)
 end
 
 local InstallOrUpdateOption = {}
-InstallOrUpdateOption.__index = InstallOrUpdateOption
 M.InstallOrUpdateOption = InstallOrUpdateOption
 
 InstallOrUpdateOption.default = {

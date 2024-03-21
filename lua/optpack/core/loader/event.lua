@@ -1,5 +1,4 @@
 local OnEvents = {}
-OnEvents.__index = OnEvents
 
 function OnEvents.set(plugin_name, group_name, events)
   for _, event in ipairs(events) do

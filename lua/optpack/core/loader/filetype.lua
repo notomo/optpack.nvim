@@ -1,7 +1,6 @@
 local OnEvents = require("optpack.core.loader.event")
 
 local OnFileTypes = {}
-OnFileTypes.__index = OnFileTypes
 
 function OnFileTypes.set(plugin_name, group_name, filetypes)
   local events = vim.tbl_map(function(filetype)
