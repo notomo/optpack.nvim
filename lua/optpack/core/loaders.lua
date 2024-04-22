@@ -38,9 +38,12 @@ function Loaders.load(self, plugin)
 end
 
 function Loaders.load_installed(self, raw_plugins)
-  raw_plugins = vim.tbl_filter(function(plugin)
-    return self._load_on_installed[plugin.name]
-  end, raw_plugins)
+  raw_plugins = vim
+    .iter(raw_plugins)
+    :filter(function(plugin)
+      return self._load_on_installed[plugin.name]
+    end)
+    :totable()
 
   local errs = {}
   for _, plugin in ipairs(raw_plugins) do

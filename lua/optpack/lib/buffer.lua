@@ -21,9 +21,12 @@ function OutputFollower.new(bufnr)
 
   local last_row = vim.api.nvim_buf_line_count(bufnr)
   local tbl = {
-    _windows = vim.tbl_filter(function(e)
-      return e.row == last_row
-    end, windows),
+    _windows = vim
+      .iter(windows)
+      :filter(function(e)
+        return e.row == last_row
+      end)
+      :totable(),
     _bufnr = bufnr,
   }
   return setmetatable(tbl, OutputFollower)
