@@ -32,9 +32,12 @@ MessageFactory.default_handlers = {
   end,
   [Event.GitCommitLog] = function(self, ctx, outputs)
     local prefix = self:_prefix(ctx)
-    return vim.tbl_map(function(commit)
-      return { prefix, { commit.revision, "OptpackGitCommitRevision" }, { commit.message, "OptpackGitCommitLog" } }
-    end, outputs)
+    return vim
+      .iter(outputs)
+      :map(function(commit)
+        return { prefix, { commit.revision, "OptpackGitCommitRevision" }, { commit.message, "OptpackGitCommitLog" } }
+      end)
+      :totable()
   end,
   [Event.FinishedUpdate] = function(self, ctx)
     return { { self:_prefix(ctx), { "Finished updating." } } }
@@ -47,9 +50,12 @@ MessageFactory.default_handlers = {
   [Event.Error] = function(self, ctx, err)
     local prefix = self:_prefix(ctx)
     if type(err) == "table" then
-      return vim.tbl_map(function(e)
-        return { prefix, { e, "OptpackError" } }
-      end, err)
+      return vim
+        .iter(err)
+        :map(function(e)
+          return { prefix, { e, "OptpackError" } }
+        end)
+        :totable()
     end
     return { { prefix, { err, "OptpackError" } } }
   end,

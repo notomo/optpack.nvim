@@ -50,15 +50,18 @@ function Git.log(self, directory, target_revision)
     target_revision,
   }
   return self:_start(cmd, { cwd = directory }):next(function(outputs)
-    return vim.tbl_map(function(output)
-      local index = output:find(" ")
-      local revision = output:sub(1, index)
-      local message = output:sub(index + 1)
-      return {
-        revision = revision,
-        message = message,
-      }
-    end, outputs)
+    return vim
+      .iter(outputs)
+      :map(function(output)
+        local index = output:find(" ")
+        local revision = output:sub(1, index)
+        local message = output:sub(index + 1)
+        return {
+          revision = revision,
+          message = message,
+        }
+      end)
+      :totable()
   end)
 end
 

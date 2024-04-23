@@ -1,12 +1,18 @@
 local M = {}
 
 function M.to_lines(messages)
-  return vim.tbl_map(function(chunks)
-    local strs = vim.tbl_map(function(chunk)
-      return chunk[1]
-    end, chunks)
-    return table.concat(strs, "")
-  end, messages)
+  return vim
+    .iter(messages)
+    :map(function(chunks)
+      local strs = vim
+        .iter(chunks)
+        :map(function(chunk)
+          return chunk[1]
+        end)
+        :totable()
+      return table.concat(strs, "")
+    end)
+    :totable()
 end
 
 function M.highlight(decorator, messages, row)

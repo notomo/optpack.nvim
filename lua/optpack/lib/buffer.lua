@@ -14,10 +14,13 @@ OutputFollower.__index = OutputFollower
 M.OutputFollower = OutputFollower
 
 function OutputFollower.new(bufnr)
-  local windows = vim.tbl_map(function(window_id)
-    local pos = vim.api.nvim_win_get_cursor(window_id)
-    return { id = window_id, row = pos[1], column = pos[2] }
-  end, vim.fn.win_findbuf(bufnr))
+  local windows = vim
+    .iter(vim.fn.win_findbuf(bufnr))
+    :map(function(window_id)
+      local pos = vim.api.nvim_win_get_cursor(window_id)
+      return { id = window_id, row = pos[1], column = pos[2] }
+    end)
+    :totable()
 
   local last_row = vim.api.nvim_buf_line_count(bufnr)
   local tbl = {

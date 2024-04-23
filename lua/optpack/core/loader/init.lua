@@ -80,9 +80,12 @@ function Loader.load(self)
 end
 
 function Loader._validate_after_loading(self)
-  local paths = vim.tbl_map(function(path)
-    return vim.fs.normalize(path)
-  end, vim.api.nvim_list_runtime_paths())
+  local paths = vim
+    .iter(vim.api.nvim_list_runtime_paths())
+    :map(function(path)
+      return vim.fs.normalize(path)
+    end)
+    :totable()
 
   if not vim.tbl_contains(paths, self._plugin.directory) then
     return ([[failed to load expected directory: %s]]):format(self._plugin.directory)
