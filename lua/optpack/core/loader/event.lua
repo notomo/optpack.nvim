@@ -14,7 +14,7 @@ function OnEvents.set(plugin_name, group_name, events)
       group = group_name,
       pattern = { pattern },
       callback = function()
-        require("optpack").load(plugin_name)
+        require("optpack.command").sync_load(plugin_name)
       end,
     })
   end

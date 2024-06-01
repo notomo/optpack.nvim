@@ -92,11 +92,10 @@ function Plugins.install_or_update(self, cmd_type, emitter, pattern, parallel_op
 
   parallel
     :start()
+    :next(function()
+      return self._loaders:load_installed(self._plugins:from(names))
+    end)
     :finally(function()
-      local err = self._loaders:load_installed(self._plugins:from(names))
-      if err then
-        emitter:emit(Event.Error, err)
-      end
       emitter:emit(Event.Finished)
       on_finished()
     end)
@@ -105,20 +104,39 @@ function Plugins.install_or_update(self, cmd_type, emitter, pattern, parallel_op
     end)
 end
 
-function Plugins.load(self, plugin_name)
+function Plugins.sync_load(self, plugin_name)
   local plugin = self._plugins:find_by_name(plugin_name)
   if not plugin then
     return "not found plugin: " .. plugin_name
   end
 
   for _, depend in ipairs(plugin.depends) do
-    local err = self:load(depend)
+    local err = self:sync_load(depend)
     if err then
       return plugin_name .. " depends: " .. err
     end
   end
 
-  return self._loaders:load(plugin)
+  return self._loaders:sync_load(plugin)
+end
+
+function Plugins.load(self, plugin_name)
+  local plugin = self._plugins:find_by_name(plugin_name)
+  if not plugin then
+    return require("optpack.vendor.promise").reject("not found plugin: " .. plugin_name)
+  end
+
+  local promises = vim
+    .iter(plugin.depends)
+    :map(function(depend)
+      return self:load(depend):catch(function(err)
+        return require("optpack.vendor.promise").reject(plugin_name .. " depends: " .. err)
+      end)
+    end)
+    :totable()
+  return require("optpack.vendor.promise").all(promises):next(function()
+    return self._loaders:load(plugin)
+  end)
 end
 
 return Plugins

@@ -1,6 +1,10 @@
 local M = {}
 
-M.default = { add = {}, install_or_update = {} }
+M.default = {
+  add = {},
+  install_or_update = {},
+  load = {},
+}
 M.user_default = vim.deepcopy(M.default)
 function M.set_default(setting)
   M.user_default = vim.tbl_deep_extend("force", M.user_default, setting)
@@ -81,6 +85,20 @@ function InstallOrUpdateOption.new(raw_opts)
     return nil, ([[invalid pattern `%s`: %s]]):format(opts.pattern, err)
   end
   return opts, nil
+end
+
+local LoadOption = {}
+M.LoadOption = LoadOption
+
+LoadOption.default = {
+  on_finished = function() end,
+}
+
+--- @return table: option
+function LoadOption.new(raw_opts)
+  vim.validate({ raw_opts = { raw_opts, "table", true } })
+  raw_opts = raw_opts or {}
+  return vim.tbl_deep_extend("force", LoadOption.default, M.user_default.load, raw_opts)
 end
 
 return M

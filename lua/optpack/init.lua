@@ -94,15 +94,19 @@ function M.update(opts)
   require("optpack.command").install_or_update("update", opts)
 end
 
+--- @class OptpackLoadOption
+--- @field on_finished (fun(plugin:OptpackPlugin)|table)? called on finished updating or installing
+
 --- Load a plugin.
 --- @param plugin_name string:
-function M.load(plugin_name)
-  require("optpack.command").load(plugin_name)
+--- @param opts OptpackLoadOption?: |OptpackLoadOption|
+function M.load(plugin_name, opts)
+  require("optpack.command").load(plugin_name, opts)
 end
 
 -- helper
 function M.load_by_expr_keymap(...)
-  M.load(...)
+  require("optpack.command").sync_load(...)
   return ""
 end
 

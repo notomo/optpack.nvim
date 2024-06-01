@@ -21,7 +21,7 @@ function Loaders.remove(self, plugin_name)
   self._load_on_installed[plugin_name] = nil
 end
 
-function Loaders.load(self, plugin)
+function Loaders._load(self, plugin)
   local loader = self._loaders[plugin.name]
   if not loader then
     return nil
@@ -34,34 +34,62 @@ function Loaders.load(self, plugin)
 
   self:remove(plugin.name)
 
-  if vim.in_fast_event() then
-    -- temporary workaround for `must not be called in a lua loop callback` error
-    vim.schedule(function()
-      loader:load()
-    end)
+  if not vim.in_fast_event() then
+    local err = loader:load()
+    return err
+  end
+
+  local async = true
+  return nil, async
+end
+
+function Loaders.sync_load(self, plugin)
+  local err, async = self:_load(plugin)
+  if err then
+    return err
+  end
+  if not async then
     return nil
   end
-  return loader:load()
+
+  -- fallback
+  self:load(plugin)
+  return nil
+end
+
+function Loaders.load(self, plugin)
+  local err, async = self:_load(plugin)
+  if err then
+    return require("optpack.vendor.promise").reject(err)
+  end
+  if not async then
+    return require("optpack.vendor.promise").resolve()
+  end
+
+  local loader = self._loaders[plugin.name]
+  return require("optpack.vendor.promise").new(function(resolve, reject)
+    vim.schedule(function()
+      local load_err = loader:load()
+      if load_err then
+        reject(load_err)
+        return
+      end
+      resolve()
+    end)
+  end)
 end
 
 function Loaders.load_installed(self, raw_plugins)
-  raw_plugins = vim
+  local promises = vim
     .iter(raw_plugins)
     :filter(function(plugin)
       return self._load_on_installed[plugin.name]
     end)
+    :map(function(plugin)
+      return self:load(plugin)
+    end)
     :totable()
-
-  local errs = {}
-  for _, plugin in ipairs(raw_plugins) do
-    local err = self:load(plugin)
-    if err then
-      table.insert(errs, err)
-    end
-  end
-  if #errs ~= 0 then
-    return table.concat(errs, "\n")
-  end
+  return require("optpack.vendor.promise").all(promises)
 end
 
 return Loaders

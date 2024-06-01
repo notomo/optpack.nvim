@@ -165,7 +165,9 @@ command! MyPluginTest echo ''
     optpack.add(plugin1)
     optpack.add(plugin2, { depends = { plugin_name1 } })
 
-    optpack.load(plugin_name2)
+    local on_finished = helper.on_finished()
+    optpack.load(plugin_name2, { on_finished = on_finished })
+    on_finished:wait()
 
     assert.can_require(plugin_name1)
     assert.can_require(plugin_name2)
@@ -284,7 +286,10 @@ command! MyPluginTest echo ''
         end,
       },
     })
-    optpack.load("not_exist")
+
+    local on_finished = helper.on_finished()
+    optpack.load("not_exist", { on_finished = on_finished })
+    on_finished:wait()
 
     assert.is_false(called)
   end)
@@ -406,7 +411,9 @@ describe("optpack.load()", function()
       },
     })
 
-    optpack.load(plugin_name1)
+    local on_finished = helper.on_finished()
+    optpack.load(plugin_name1, { on_finished = on_finished })
+    on_finished:wait()
 
     assert.can_require(plugin_name1)
     assert.is_true(called)
@@ -419,11 +426,13 @@ describe("optpack.load()", function()
     optpack.add(plugin1)
     vim.o.packpath = helper.test_data:path(unexpected_packpath)
 
-    local ok, err = pcall(function()
-      optpack.load(plugin_name1)
-    end)
-    assert.is_false(ok)
-    assert.match([[failed to load expected directory: ]] .. helper.test_data:path(helper.opt_path .. plugin_name1), err)
+    local on_finished = helper.on_finished()
+    optpack.load(plugin_name1, { on_finished = on_finished })
+    on_finished:wait()
+
+    assert.exists_message(
+      [[failed to load expected directory: ]] .. helper.test_data:path(helper.opt_path .. plugin_name1)
+    )
   end)
 
   it("show an error message if the same another plugin is prior in 'runtimepath'", function()
@@ -432,13 +441,12 @@ describe("optpack.load()", function()
 
     optpack.add(plugin1)
 
-    local ok, err = pcall(function()
-      optpack.load(plugin_name1)
-    end)
-    assert.is_false(ok)
+    local on_finished = helper.on_finished()
+    optpack.load(plugin_name1, { on_finished = on_finished })
+    on_finished:wait()
 
     local another_plugin_path = helper.test_data:path(another_opt_path .. plugin_name1)
-    assert.match([[loaded, but the same and prior plugin exists in 'runtimepath': ]] .. another_plugin_path, err)
+    assert.exists_message([[loaded, but the same and prior plugin exists in 'runtimepath': ]] .. another_plugin_path)
   end)
 
   it("show an error message if hooks.post_add raises an error", function()
@@ -464,11 +472,11 @@ describe("optpack.load()", function()
       },
     })
 
-    local ok, err = pcall(function()
-      optpack.load(plugin_name1)
-    end)
-    assert.is_false(ok)
-    assert.match(plugin_name1 .. [[: pre_load: test error]], err)
+    local on_finished = helper.on_finished()
+    optpack.load(plugin_name1, { on_finished = on_finished })
+    on_finished:wait()
+
+    assert.exists_message(plugin_name1 .. [[: pre_load: test error]])
   end)
 
   it("show an error message if hooks.post_load raises an error", function()
@@ -480,11 +488,11 @@ describe("optpack.load()", function()
       },
     })
 
-    local ok, err = pcall(function()
-      optpack.load(plugin_name1)
-    end)
-    assert.is_false(ok)
-    assert.match(plugin_name1 .. [[: post_load: test error]], err)
+    local on_finished = helper.on_finished()
+    optpack.load(plugin_name1, { on_finished = on_finished })
+    on_finished:wait()
+
+    assert.exists_message(plugin_name1 .. [[: post_load: test error]])
   end)
 
   it("show an error message if there is no packpath", function()
@@ -500,11 +508,11 @@ describe("optpack.load()", function()
   end)
 
   it("show an error message if there is no plugin", function()
-    local ok, err = pcall(function()
-      optpack.load("invalid_plugin")
-    end)
-    assert.is_false(ok)
-    assert.match([[not found plugin: invalid_plugin]], err)
+    local on_finished = helper.on_finished()
+    optpack.load("invalid_plugin", { on_finished = on_finished })
+    on_finished:wait()
+
+    assert.exists_message([[not found plugin: invalid_plugin]])
   end)
 
   it("show an error message if load_on.keymaps raises an error", function()
@@ -524,10 +532,10 @@ describe("optpack.load()", function()
   it("show an error message if dependencies plugin loading fails", function()
     optpack.add(plugin1, { depends = { "invalid" } })
 
-    local ok, err = pcall(function()
-      optpack.load(plugin_name1)
-    end)
-    assert.is_false(ok)
-    assert.match(plugin_name1 .. [[ depends: not found plugin: invalid]], err)
+    local on_finished = helper.on_finished()
+    optpack.load(plugin_name1, { on_finished = on_finished })
+    on_finished:wait()
+
+    assert.exists_message(plugin_name1 .. [[ depends: not found plugin: invalid]])
   end)
 end)

@@ -43,8 +43,20 @@ function M.install_or_update(cmd_type, raw_opts)
   return Plugins.state():install_or_update(cmd_type, emitter, opts.pattern, opts.parallel, opts.on_finished)
 end
 
-function M.load(plugin_name)
-  local err = Plugins.state():load(plugin_name)
+function M.load(plugin_name, raw_opts)
+  local opts = require("optpack.core.option").LoadOption.new(raw_opts)
+  Plugins.state()
+    :load(plugin_name)
+    :catch(function(err)
+      require("optpack.vendor.misclib.message").warn(err)
+    end)
+    :finally(function()
+      opts.on_finished()
+    end)
+end
+
+function M.sync_load(plugin_name)
+  local err = Plugins.state():sync_load(plugin_name)
   if err then
     require("optpack.vendor.misclib.message").error(err)
   end

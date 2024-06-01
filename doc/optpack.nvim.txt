@@ -40,11 +40,12 @@ update({opts})                                              *optpack.update()*
   Parameters: ~
     {opts} (OptpackInstallOrUpdateOption?) |OptpackInstallOrUpdateOption|
 
-load({plugin_name})                                           *optpack.load()*
+load({plugin_name}, {opts})                                   *optpack.load()*
   Load a plugin.
 
   Parameters: ~
     {plugin_name} (string) 
+    {opts} (OptpackLoadOption?) |OptpackLoadOption|
 
 set_default({setting})                                 *optpack.set_default()*
   Set default setting.
@@ -126,6 +127,10 @@ OptpackLogOutputter                                      *OptpackLogOutputter*
 OptpackParallelOption                                  *OptpackParallelOption*
 
 - {limit} (integer?) max number for parallel job, default: 8
+
+OptpackLoadOption                                          *OptpackLoadOption*
+
+- {on_finished} ((fun(plugin:OptpackPlugin)|table)?) called on finished updating or installing
 
 OptpackSetting                                                *OptpackSetting*
 

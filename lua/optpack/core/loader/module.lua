@@ -62,7 +62,7 @@ function OnModule._set(self, required_name)
   end
   self._loaded = true
 
-  require("optpack").load(self._plugin_name)
+  require("optpack.command").sync_load(self._plugin_name)
 
   vim.schedule(function()
     self:_remove()
