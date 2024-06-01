@@ -34,6 +34,13 @@ function Loaders.load(self, plugin)
 
   self:remove(plugin.name)
 
+  if vim.in_fast_event() then
+    -- temporary workaround for `must not be called in a lua loop callback` error
+    vim.schedule(function()
+      loader:load()
+    end)
+    return nil
+  end
   return loader:load()
 end
 
