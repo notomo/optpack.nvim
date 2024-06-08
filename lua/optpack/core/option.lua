@@ -74,17 +74,16 @@ InstallOrUpdateOption.default = {
   parallel = { limit = 8 },
 }
 
---- @return table: option
---- @return string|nil: error
+--- @return table|string: option
 function InstallOrUpdateOption.new(raw_opts)
   vim.validate({ raw_opts = { raw_opts, "table", true } })
   raw_opts = raw_opts or {}
   local opts = vim.tbl_deep_extend("force", InstallOrUpdateOption.default, M.user_default.install_or_update, raw_opts)
   local ok, err = pcall(vim.regex, opts.pattern)
   if not ok then
-    return nil, ([[invalid pattern `%s`: %s]]):format(opts.pattern, err)
+    return ([[invalid pattern `%s`: %s]]):format(opts.pattern, err)
   end
-  return opts, nil
+  return opts
 end
 
 local LoadOption = {}

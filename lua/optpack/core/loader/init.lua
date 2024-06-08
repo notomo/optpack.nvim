@@ -4,6 +4,7 @@ local OnCommands = require("optpack.core.loader.cmd")
 local OnModules = require("optpack.core.loader.module")
 local OnKeymaps = require("optpack.core.loader.keymap")
 
+--- @class OptpackLoader
 local Loader = {}
 Loader.__index = Loader
 
@@ -17,9 +18,10 @@ function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
 
   local plugin_name = plugin.name
 
-  local keymap_remover, err = OnKeymaps.set(plugin_name, load_on.keymaps)
-  if err then
-    return nil, err
+  local keymap_remover = OnKeymaps.set(plugin_name, load_on.keymaps)
+  if type(keymap_remover) == "string" then
+    local err = keymap_remover
+    return err
   end
 
   local group_name = "optpack_" .. plugin_name

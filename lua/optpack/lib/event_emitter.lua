@@ -1,3 +1,4 @@
+--- @class OptpackEventEmitter
 local EventEmitter = {}
 EventEmitter.__index = EventEmitter
 

@@ -2,23 +2,17 @@ local Promise = require("optpack.vendor.promise")
 local Output = require("optpack.vendor.misclib.job.output")
 
 local Git = {}
-Git.__index = Git
 
-function Git.new()
-  local tbl = {}
-  return setmetatable(tbl, Git)
-end
-
-function Git.clone(self, directory, url, depth)
+function Git.clone(directory, url, depth)
   local cmd = { "git", "clone", "--no-single-branch" }
   if depth > 0 then
     vim.list_extend(cmd, { "--depth", depth })
   end
   vim.list_extend(cmd, { "--", url .. ".git", directory })
-  return self:_start(cmd)
+  return Git._start(cmd)
 end
 
-function Git.pull(self, directory)
+function Git.pull(directory)
   local cmd = {
     "git",
     "--git-dir",
@@ -27,12 +21,12 @@ function Git.pull(self, directory)
     "--ff-only",
     "--rebase=false",
   }
-  return self:_start(cmd, { cwd = directory })
+  return Git._start(cmd, { cwd = directory })
 end
 
-function Git.get_revision(self, directory)
+function Git.get_revision(directory)
   local cmd = { "git", "--git-dir", vim.fs.joinpath(directory, ".git"), "rev-parse", "--short", "HEAD" }
-  return self:_start(cmd, {
+  return Git._start(cmd, {
     cwd = directory,
     handle_stdout = function(stdout)
       return stdout:str()
@@ -40,7 +34,7 @@ function Git.get_revision(self, directory)
   })
 end
 
-function Git.log(self, directory, target_revision)
+function Git.log(directory, target_revision)
   local cmd = {
     "git",
     "--git-dir",
@@ -49,7 +43,7 @@ function Git.log(self, directory, target_revision)
     [[--pretty=format:%h %s]],
     target_revision,
   }
-  return self:_start(cmd, { cwd = directory }):next(function(outputs)
+  return Git._start(cmd, { cwd = directory }):next(function(outputs)
     return vim
       .iter(outputs)
       :map(function(output)
@@ -65,7 +59,7 @@ function Git.log(self, directory, target_revision)
   end)
 end
 
-function Git._start(_, cmd, opts)
+function Git._start(cmd, opts)
   opts = opts or {}
   opts.handle_stdout = opts.handle_stdout or function(stdout)
     return stdout:lines()

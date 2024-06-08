@@ -1,3 +1,5 @@
+--- @class OptpackPluginCollection
+--- @field _plugins table
 local PluginCollection = {}
 PluginCollection.__index = PluginCollection
 

@@ -13,16 +13,19 @@ function Outputters.new(cmd_type, raw_outputters)
       return
     end
 
-    local outputter, err = Outputters._new_one(cmd_type, outputter_typ, outputter_opts)
-    if err then
+    local outputter = Outputters._new_one(cmd_type, outputter_typ, outputter_opts)
+    if type(outputter) == "string" then
+      local err = outputter
       table.insert(errs, err)
-    else
-      table.insert(outputters, outputter)
+      return
     end
+
+    table.insert(outputters, outputter)
   end)
   if #errs ~= 0 then
-    return nil, table.concat(errs, "\n")
+    return table.concat(errs, "\n")
   end
+
   return outputters
 end
 
@@ -35,7 +38,7 @@ function Outputters._new_one(cmd_type, typ, outputter_opts)
   outputter_opts = outputter_opts or {}
   local Outputter = modulelib.find("optpack.view.outputter." .. typ)
   if not Outputter then
-    return nil, "not found outputter: " .. typ
+    return "not found outputter: " .. typ
   end
   return Outputter.new(cmd_type, outputter_opts)
 end

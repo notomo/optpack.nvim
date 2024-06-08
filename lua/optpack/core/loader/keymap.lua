@@ -12,7 +12,7 @@ function OnKeymaps.set(plugin_name, set_keymaps)
     opts = opts or {}
 
     if opts.expr then
-      local load_cmd = ([[v:lua.require("optpack").load_by_expr_keymap(%q) .. ]]):format(plugin_name)
+      local load_cmd = ([[v:lua.require("optpack.command").sync_load_by_expr_keymap(%q) .. ]]):format(plugin_name)
       return vim.keymap.set(mode, lhs, load_cmd .. rhs, opts)
     end
 
@@ -37,7 +37,7 @@ function OnKeymaps.set(plugin_name, set_keymaps)
 
   local ok, err = pcall(set_keymaps, vim)
   if not ok then
-    return nil, ("load_on.keymaps: %s"):format(err)
+    return ("load_on.keymaps: %s"):format(err)
   end
 
   return function()

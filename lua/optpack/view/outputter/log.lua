@@ -27,8 +27,13 @@ function M.handle(self, event_name, ctx, ...)
     return
   end
 
-  local time = os.date()
   local f = io.open(self._path, "a")
+  if not f then
+    require("optpack.vendor.misclib.message").error("failed to open: " .. self._path)
+    return
+  end
+
+  local time = os.date()
   for _, line in ipairs(lines) do
     f:write(("[%s] %s\n"):format(time, line))
   end

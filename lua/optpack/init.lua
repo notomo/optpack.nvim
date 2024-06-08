@@ -104,12 +104,6 @@ function M.load(plugin_name, opts)
   require("optpack.command").load(plugin_name, opts)
 end
 
--- helper
-function M.load_by_expr_keymap(...)
-  require("optpack.command").sync_load(...)
-  return ""
-end
-
 --- @class OptpackSetting
 --- @field add OptpackAddOption? |OptpackAddOption|
 --- @field install_or_update OptpackInstallOrUpdateOption? |OptpackInstallOrUpdateOption|

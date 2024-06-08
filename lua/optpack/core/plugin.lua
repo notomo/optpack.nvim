@@ -1,18 +1,18 @@
 local M = {}
 
+--- @class OptpackInternalPlugin
 local Plugin = {}
 Plugin.__index = Plugin
 M.Plugin = Plugin
 
---- @return table: plugin
---- @return string|nil: error
+--- @return OptpackInternalPlugin|string
 function Plugin.new(full_name, opts)
   vim.validate({ name = { full_name, "string" }, opts = { opts, "table" } })
 
   local name = vim.fs.basename(full_name)
   local packpath = opts.select_packpath()
   if not packpath or packpath == "" then
-    return nil, "`select_packpath` should return non-empty string"
+    return "`select_packpath` should return non-empty string"
   end
   local directory = vim.fs.normalize(vim.fs.joinpath(packpath, "pack", opts.package_name, "opt", name))
   local url = opts.fetch.base_url .. "/" .. full_name
@@ -28,9 +28,10 @@ function Plugin.new(full_name, opts)
     _depth = opts.fetch.depth,
     _opts = opts,
   }
-  return setmetatable(tbl, Plugin), nil
+  return setmetatable(tbl, Plugin)
 end
 
+--- @return OptpackPlugin
 function Plugin.expose(self)
   return {
     full_name = self.full_name,
@@ -51,7 +52,7 @@ function Plugin.update(self, emitter)
 end
 
 function Plugin._update(self, emitter)
-  return require("optpack.core.updater").new():start(emitter, self.directory):next(function(updated_now)
+  return require("optpack.core.updater").start(emitter, self.directory):next(function(updated_now)
     if updated_now then
       self._post_update_hook(self:expose())
     end
@@ -61,8 +62,7 @@ end
 
 function Plugin.install(self, emitter)
   return require("optpack.core.installer")
-    .new()
-    :start(emitter, self.directory, self.url, self._depth)
+    .start(emitter, self.directory, self.url, self._depth)
     :next(function(installed_now)
       if installed_now then
         self._post_install_hook(self:expose())

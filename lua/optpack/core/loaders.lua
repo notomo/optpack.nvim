@@ -1,16 +1,23 @@
 local Loader = require("optpack.core.loader")
 
+--- @class OptpackLoaders
+--- @field _loaders table<string,OptpackLoader>
+--- @field _load_on_installed table<string,boolean>
 local Loaders = {}
 Loaders.__index = Loaders
 
 function Loaders.new()
-  local tbl = { _loaders = {}, _load_on_installed = {} }
+  local tbl = {
+    _loaders = {},
+    _load_on_installed = {},
+  }
   return setmetatable(tbl, Loaders)
 end
 
 function Loaders.add(self, plugin, opts)
-  local loader, err = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
-  if err then
+  local loader = Loader.new(plugin, opts.load_on, opts.hooks.pre_load, opts.hooks.post_load)
+  if type(loader) == "string" then
+    local err = loader
     return err
   end
   self._loaders[plugin.name] = loader

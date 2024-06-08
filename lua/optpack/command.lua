@@ -5,37 +5,37 @@ local Plugins = require("optpack.core.plugins")
 
 function M.add(full_name, raw_opts)
   local opts = AddOption.new(raw_opts)
-  local plugin, err = Plugins.state():add(full_name, opts)
-  if err then
+  local plugin = Plugins.state():add(full_name, opts)
+  if type(plugin) == "string" then
+    local err = plugin
     require("optpack.vendor.misclib.message").error(err)
   end
   return plugin
 end
 
 function M.list()
-  local plugins, err = Plugins.state():expose()
-  if err then
-    require("optpack.vendor.misclib.message").error(err)
-  end
-  return plugins
+  return Plugins.state():expose()
 end
 
 function M.get(plugin_name)
-  local plugin, err = Plugins.state():expose_one(plugin_name)
-  if err then
+  local plugin = Plugins.state():expose_one(plugin_name)
+  if type(plugin) == "string" then
+    local err = plugin
     require("optpack.vendor.misclib.message").error(err)
   end
   return plugin
 end
 
 function M.install_or_update(cmd_type, raw_opts)
-  local opts, opts_err = require("optpack.core.option").InstallOrUpdateOption.new(raw_opts)
-  if opts_err then
-    require("optpack.vendor.misclib.message").error(opts_err)
+  local opts = require("optpack.core.option").InstallOrUpdateOption.new(raw_opts)
+  if type(opts) == "string" then
+    local err = opts
+    require("optpack.vendor.misclib.message").error(err)
   end
 
-  local outputters, err = require("optpack.view.outputter").new(cmd_type, opts.outputters)
-  if err then
+  local outputters = require("optpack.view.outputter").new(cmd_type, opts.outputters)
+  if type(outputters) == "string" then
+    local err = outputters
     require("optpack.vendor.misclib.message").error(err)
   end
   local emitter = require("optpack.lib.event_emitter").new(outputters)
@@ -60,6 +60,11 @@ function M.sync_load(plugin_name)
   if err then
     require("optpack.vendor.misclib.message").error(err)
   end
+end
+
+function M.sync_load_by_expr_keymap(plugin_name)
+  require("optpack.command").sync_load(plugin_name)
+  return ""
 end
 
 function M.set_default(setting)

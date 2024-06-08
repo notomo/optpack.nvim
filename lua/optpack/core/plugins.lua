@@ -1,5 +1,8 @@
 local Plugin = require("optpack.core.plugin").Plugin
 
+--- @class OptpackPlugins
+--- @field _plugins OptpackPluginCollection
+--- @field _loaders OptpackLoaders
 local Plugins = {}
 Plugins.__index = Plugins
 
@@ -17,30 +20,31 @@ function Plugins.state()
 end
 
 function Plugins.add(self, full_name, opts)
-  local plugin, err = Plugin.new(full_name, opts)
-  if err then
-    return nil, ("%s: %s"):format(full_name, err)
+  local plugin = Plugin.new(full_name, opts)
+  if type(plugin) == "string" then
+    local err = plugin
+    return ("%s: %s"):format(full_name, err)
   end
 
   if not opts.enabled then
     self._plugins:remove(plugin.name)
     self._loaders:remove(plugin.name)
-    return plugin:expose(), nil
+    return plugin:expose()
   end
 
   self._plugins:add(plugin)
 
   local loader_err = self._loaders:add(plugin, opts)
   if loader_err then
-    return nil, ("%s: %s"):format(plugin.name, loader_err)
+    return ("%s: %s"):format(plugin.name, loader_err)
   end
 
   local ok, hook_err = pcall(opts.hooks.post_add, plugin:expose())
   if not ok then
-    return nil, ("%s: post_add: %s"):format(plugin.name, hook_err)
+    return ("%s: post_add: %s"):format(plugin.name, hook_err)
   end
 
-  return plugin:expose(), nil
+  return plugin:expose()
 end
 
 function Plugins.expose(self)
@@ -51,11 +55,12 @@ function Plugins.expose_one(self, plugin_name)
   vim.validate({ plugin_name = { plugin_name, "string" } })
   local plugin = self._plugins:find_by_name(plugin_name)
   if not plugin then
-    return nil, "not found plugin: " .. plugin_name
+    return "not found plugin: " .. plugin_name
   end
   return plugin:expose()
 end
 
+--- @param emitter OptpackEventEmitter
 function Plugins.install_or_update(self, cmd_type, emitter, pattern, parallel_opts, on_finished)
   local Event = require("optpack.core.event").specific(cmd_type)
 
