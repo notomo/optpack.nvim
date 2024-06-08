@@ -95,7 +95,7 @@ function M.update(opts)
 end
 
 --- @class OptpackLoadOption
---- @field on_finished (fun(plugin:OptpackPlugin)|table)? called on finished updating or installing
+--- @field on_finished (fun(plugin:OptpackPlugin)|table)? called on finished loading plugin
 
 --- Load a plugin.
 --- @param plugin_name string:

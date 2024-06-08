@@ -130,7 +130,7 @@ OptpackParallelOption                                  *OptpackParallelOption*
 
 OptpackLoadOption                                          *OptpackLoadOption*
 
-- {on_finished} ((fun(plugin:OptpackPlugin)|table)?) called on finished updating or installing
+- {on_finished} ((fun(plugin:OptpackPlugin)|table)?) called on finished loading plugin
 
 OptpackSetting                                                *OptpackSetting*
 
