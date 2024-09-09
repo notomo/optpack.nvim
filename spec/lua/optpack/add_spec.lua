@@ -1,5 +1,6 @@
 local helper = require("optpack.test.helper")
 local optpack = helper.require("optpack")
+local assert = helper.typed_assert(assert)
 
 describe("optpack.add()", function()
   local plugin_name1 = "myplugin_name1"
@@ -178,7 +179,7 @@ command! MyPluginTest echo ''
     optpack.add(plugin1, { enabled = false })
 
     local got = optpack.list()
-    assert.is_same({}, got)
+    assert.same({}, got)
   end)
 
   it("can set a hook pre_load by module loading", function()
@@ -274,7 +275,7 @@ command! MyPluginTest echo ''
     vim.bo.filetype = "lua"
     vim.cmd.tabedit()
 
-    assert.is_same(1, called)
+    assert.same(1, called)
   end)
 
   it("does not execute hooks if plugin does not exist", function()
@@ -299,7 +300,7 @@ command! MyPluginTest echo ''
     optpack.add("account2/test")
 
     local got = optpack.list()[1]
-    assert.is_same("account2/test", got.full_name)
+    assert.same("account2/test", got.full_name)
   end)
 
   it("can set default option by optpack.set_default()", function()
@@ -322,7 +323,7 @@ command! MyPluginTest echo ''
   it("returns added plugin", function()
     local got = optpack.add(plugin1)
 
-    assert.is_same(plugin_name1, got.name)
+    assert.same(plugin_name1, got.name)
   end)
 end)
 
@@ -332,7 +333,7 @@ describe("optpack.list()", function()
 
   it("returns empty table if there is no plugins", function()
     local got = optpack.list()
-    assert.is_same({}, got)
+    assert.same({}, got)
   end)
 
   it("returns plugins", function()
@@ -341,7 +342,7 @@ describe("optpack.list()", function()
     optpack.add("account/test")
 
     local got = optpack.list()[1]
-    assert.is_same({
+    assert.same({
       full_name = "account/test",
       name = "test",
       directory = vim.o.packpath .. "/pack/optpack/opt/test",
@@ -352,7 +353,7 @@ describe("optpack.list()", function()
       directory = got.directory,
       url = got.url,
     })
-    assert.is_same({}, got.opts.load_on.events)
+    assert.same({}, got.opts.load_on.events)
   end)
 end)
 
@@ -375,7 +376,7 @@ describe("optpack.get()", function()
     optpack.add("account/test")
 
     local got = optpack.get("test")
-    assert.is_same({
+    assert.same({
       full_name = "account/test",
       name = "test",
       directory = vim.o.packpath .. "/pack/optpack/opt/test",
@@ -386,7 +387,7 @@ describe("optpack.get()", function()
       directory = got.directory,
       url = got.url,
     })
-    assert.is_same({}, got.opts.load_on.events)
+    assert.same({}, got.opts.load_on.events)
   end)
 end)
 

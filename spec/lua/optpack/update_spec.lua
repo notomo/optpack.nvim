@@ -1,5 +1,6 @@
 local helper = require("optpack.test.helper")
 local optpack = helper.require("optpack")
+local assert = helper.typed_assert(assert)
 
 describe("optpack.update()", function()
   local git_server
@@ -61,7 +62,7 @@ describe("optpack.update()", function()
     assert.exists_pattern([[test1 > ....... commit2]])
     assert.no.exists_pattern([[test2 > Updated.]])
 
-    assert.matches(".......%.%.%.......", vim.b.optpack_updates["2"].revision_range)
+    assert.match(".......%.%.%.......", vim.b.optpack_updates["2"].revision_range)
     assert.equal(helper.plugin_dir("test1"), vim.b.optpack_updates["2"].directory)
   end)
 

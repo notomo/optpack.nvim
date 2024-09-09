@@ -1,5 +1,6 @@
 local helper = require("optpack.test.helper")
 local optpack = helper.require("optpack")
+local assert = helper.typed_assert(assert)
 
 describe("optpack.install()", function()
   local git_server

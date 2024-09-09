@@ -102,4 +102,10 @@ asserts.create("can_require"):register(function(self)
   end
 end)
 
+function helper.typed_assert(assert)
+  local x = require("assertlib").typed(assert)
+  ---@cast x +{exists_dir:fun(path),can_require:fun(want)}
+  return x
+end
+
 return helper
