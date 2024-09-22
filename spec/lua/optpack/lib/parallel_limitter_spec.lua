@@ -1,4 +1,5 @@
 local helper = require("optpack.test.helper")
+local assert = helper.typed_assert(assert)
 local ParallelLimitter = require("optpack.lib.parallel_limitter")
 local Promise = require("optpack.vendor.promise")
 

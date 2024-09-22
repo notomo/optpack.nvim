@@ -8,7 +8,7 @@ function M.add(full_name, raw_opts)
   local plugin = Plugins.state():add(full_name, opts)
   if type(plugin) == "string" then
     local err = plugin
-    require("optpack.vendor.misclib.message").error(err)
+    error(require("optpack.vendor.misclib.message").wrap(err), 0)
   end
   return plugin
 end
@@ -21,7 +21,7 @@ function M.get(plugin_name)
   local plugin = Plugins.state():expose_one(plugin_name)
   if type(plugin) == "string" then
     local err = plugin
-    require("optpack.vendor.misclib.message").error(err)
+    error(require("optpack.vendor.misclib.message").wrap(err), 0)
   end
   return plugin
 end
@@ -30,13 +30,13 @@ function M.install_or_update(cmd_type, raw_opts)
   local opts = require("optpack.core.option").InstallOrUpdateOption.new(raw_opts)
   if type(opts) == "string" then
     local err = opts
-    require("optpack.vendor.misclib.message").error(err)
+    error(require("optpack.vendor.misclib.message").wrap(err), 0)
   end
 
   local outputters = require("optpack.view.outputter").new(cmd_type, opts.outputters)
   if type(outputters) == "string" then
     local err = outputters
-    require("optpack.vendor.misclib.message").error(err)
+    error(require("optpack.vendor.misclib.message").wrap(err), 0)
   end
   local emitter = require("optpack.lib.event_emitter").new(outputters)
 
@@ -58,7 +58,7 @@ end
 function M.sync_load(plugin_name)
   local err = Plugins.state():sync_load(plugin_name)
   if err then
-    require("optpack.vendor.misclib.message").error(err)
+    error(require("optpack.vendor.misclib.message").wrap(err), 0)
   end
 end
 

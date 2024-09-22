@@ -11,6 +11,9 @@ function M.output(path_suffix, base_dir_path)
   vim.fn.mkdir(dir_path, "p")
 
   local file = io.open(file_path, "a+")
+  if not file then
+    error("cannot open file: " .. file_path)
+  end
   local output = function(msg)
     file:write(msg)
   end

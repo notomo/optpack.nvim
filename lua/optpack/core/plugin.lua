@@ -1,6 +1,14 @@
 local M = {}
 
 --- @class OptpackInternalPlugin
+--- @field name string
+--- @field full_name string
+--- @field directory string
+--- @field url string
+--- @field private _opts table
+--- @field private _depth integer
+--- @field private _post_update_hook fun(plugin:OptpackPlugin)
+--- @field private _post_install_hook fun(plugin:OptpackPlugin)
 local Plugin = {}
 Plugin.__index = Plugin
 M.Plugin = Plugin
@@ -54,6 +62,7 @@ end
 function Plugin._update(self, emitter)
   return require("optpack.core.updater").start(emitter, self.directory):next(function(updated_now)
     if updated_now then
+      ---@diagnostic disable-next-line: invisible
       self._post_update_hook(self:expose())
     end
     return updated_now
@@ -65,6 +74,7 @@ function Plugin.install(self, emitter)
     .start(emitter, self.directory, self.url, self._depth)
     :next(function(installed_now)
       if installed_now then
+        ---@diagnostic disable-next-line: invisible
         self._post_install_hook(self:expose())
       end
       return installed_now

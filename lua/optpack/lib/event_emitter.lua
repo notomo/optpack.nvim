@@ -1,4 +1,6 @@
 --- @class OptpackEventEmitter
+--- @field private _ctx table
+--- @field private _handlers table
 local EventEmitter = {}
 EventEmitter.__index = EventEmitter
 

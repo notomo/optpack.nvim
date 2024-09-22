@@ -5,6 +5,10 @@ local OnModules = require("optpack.core.loader.module")
 local OnKeymaps = require("optpack.core.loader.keymap")
 
 --- @class OptpackLoader
+--- @field private _plugin OptpackInternalPlugin
+--- @field private _removers fun()[]
+--- @field private _pre_load_hook fun(plugin:OptpackPlugin)
+--- @field private _post_load_hook fun(plugin:OptpackPlugin)
 local Loader = {}
 Loader.__index = Loader
 
