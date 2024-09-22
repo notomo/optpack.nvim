@@ -24,9 +24,9 @@ function helper.set_lines(lines)
 end
 
 function helper.git_server()
-  local cgi_root_dir = helper.root .. "/spec/lua/optpack"
-  local git_root_dir = helper.root .. "/spec/lua/optpack/git"
-  local tmp_dir = helper.root .. "/spec/lua/optpack/tmp"
+  local cgi_root_dir = vim.fs.joinpath(helper.root, "/spec/lua/optpack")
+  local git_root_dir = vim.fs.joinpath(helper.root, "/spec/lua/optpack/git")
+  local tmp_dir = vim.fs.joinpath(helper.root, "/spec/lua/optpack/tmp")
   return require("optpack.test.git_server").new(cgi_root_dir, git_root_dir, tmp_dir)
 end
 
@@ -55,10 +55,10 @@ function helper.on_finished()
 end
 
 helper.packpath_name = "mypackpath"
-helper.opt_path = helper.packpath_name .. "/pack/optpack/opt/"
+helper.opt_path = vim.fs.joinpath(helper.packpath_name, "/pack/optpack/opt/")
 
 function helper.plugin_dir(name)
-  return helper.test_data:path(helper.opt_path .. name)
+  return helper.test_data:path(vim.fs.joinpath(helper.opt_path, name))
 end
 
 function helper.create_plugin_dir(name, opts)
@@ -66,15 +66,15 @@ function helper.create_plugin_dir(name, opts)
   helper.cleanup_loaded_modules(name)
 
   opts.opt_path = opts.opt_path or helper.opt_path
-  local root_dir = opts.opt_path .. name
+  local root_dir = vim.fs.joinpath(opts.opt_path, name)
 
   local plugin_dir = ("%s/plugin/"):format(root_dir)
   opts.plugin_vim_content = opts.plugin_vim_content or ""
-  helper.test_data:create_file(plugin_dir .. name .. ".vim", opts.plugin_vim_content)
+  helper.test_data:create_file(vim.fs.joinpath(plugin_dir, name .. ".vim"), opts.plugin_vim_content)
 
   local lua_dir = ("%s/lua/%s/"):format(root_dir, name)
-  helper.test_data:create_file(lua_dir .. "init.lua")
-  helper.test_data:create_file(lua_dir .. "sub/init.lua")
+  helper.test_data:create_file(vim.fs.joinpath(lua_dir, "init.lua"))
+  helper.test_data:create_file(vim.fs.joinpath(lua_dir, "sub/init.lua"))
 end
 
 function helper.set_packpath()
