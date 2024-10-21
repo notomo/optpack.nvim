@@ -1,12 +1,10 @@
 local Counter = {}
 Counter.__index = Counter
 
+--- @param all_count integer
+--- @param handler function
+--- @param initial_count integer?
 function Counter.new(all_count, handler, initial_count)
-  vim.validate({
-    all_count = { all_count, "number" },
-    handler = { handler, "function" },
-    initial_count = { initial_count, "number", true },
-  })
   local tbl = { _all_count = all_count, _handler = handler, _initial_count = initial_count or 0 }
   tbl._handler(tbl._initial_count, tbl._all_count)
   return setmetatable(tbl, Counter)

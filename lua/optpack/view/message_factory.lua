@@ -61,8 +61,8 @@ MessageFactory.default_handlers = {
   end,
 }
 
+--- @param handlers table
 function MessageFactory.new(handlers)
-  vim.validate({ handlers = { handlers, "table" } })
   local tbl = { _handlers = vim.tbl_extend("force", MessageFactory.default_handlers, handlers) }
   return setmetatable(tbl, MessageFactory)
 end

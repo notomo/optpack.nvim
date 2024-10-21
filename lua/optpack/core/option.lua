@@ -40,7 +40,6 @@ AddOption.default = {
 --- @return table: option
 --- @return string|nil: error
 function AddOption.new(raw_opts)
-  vim.validate({ raw_opts = { raw_opts, "table", true } })
   raw_opts = raw_opts or {}
   local opts = vim.tbl_deep_extend("force", AddOption.default, M.user_default.add, raw_opts)
   if vim.endswith(opts.fetch.base_url, "/") then
@@ -76,7 +75,6 @@ InstallOrUpdateOption.default = {
 
 --- @return table|string: option
 function InstallOrUpdateOption.new(raw_opts)
-  vim.validate({ raw_opts = { raw_opts, "table", true } })
   raw_opts = raw_opts or {}
   local opts = vim.tbl_deep_extend("force", InstallOrUpdateOption.default, M.user_default.install_or_update, raw_opts)
   local ok, err = pcall(vim.regex, opts.pattern)
@@ -95,7 +93,6 @@ LoadOption.default = {
 
 --- @return table: option
 function LoadOption.new(raw_opts)
-  vim.validate({ raw_opts = { raw_opts, "table", true } })
   raw_opts = raw_opts or {}
   return vim.tbl_deep_extend("force", LoadOption.default, M.user_default.load, raw_opts)
 end

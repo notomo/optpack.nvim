@@ -4,8 +4,8 @@ local vim = vim
 local ParallelLimitter = {}
 ParallelLimitter.__index = ParallelLimitter
 
+--- @param limit integer
 function ParallelLimitter.new(limit)
-  vim.validate({ limit = { limit, "number" } })
   if limit <= 0 then
     error("limit: must be natural number")
   end

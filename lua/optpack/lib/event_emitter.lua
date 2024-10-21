@@ -4,14 +4,15 @@
 local EventEmitter = {}
 EventEmitter.__index = EventEmitter
 
+--- @param handlers table
+--- @param ctx table?
 function EventEmitter.new(handlers, ctx)
-  vim.validate({ handlers = { handlers, "table" }, ctx = { ctx, "table", true } })
   local tbl = { _handlers = handlers, _ctx = ctx or {} }
   return setmetatable(tbl, EventEmitter)
 end
 
+--- @param event_name string
 function EventEmitter.emit(self, event_name, ...)
-  vim.validate({ event_name = { event_name, "string" } })
   for _, handler in ipairs(self._handlers) do
     handler:handle(event_name, self._ctx, ...)
   end

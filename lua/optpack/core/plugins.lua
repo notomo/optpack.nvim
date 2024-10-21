@@ -51,8 +51,8 @@ function Plugins.expose(self)
   return self._plugins:expose()
 end
 
+--- @param plugin_name string
 function Plugins.expose_one(self, plugin_name)
-  vim.validate({ plugin_name = { plugin_name, "string" } })
   local plugin = self._plugins:find_by_name(plugin_name)
   if not plugin then
     return "not found plugin: " .. plugin_name

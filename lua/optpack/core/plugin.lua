@@ -13,10 +13,10 @@ local Plugin = {}
 Plugin.__index = Plugin
 M.Plugin = Plugin
 
+--- @param full_name string
+--- @param opts table
 --- @return OptpackInternalPlugin|string
 function Plugin.new(full_name, opts)
-  vim.validate({ name = { full_name, "string" }, opts = { opts, "table" } })
-
   local name = vim.fs.basename(full_name)
   local packpath = opts.select_packpath()
   if not packpath or packpath == "" then

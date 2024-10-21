@@ -9,8 +9,9 @@ Logger._prefixes = {
   [Logger.levels.ERROR] = "ERROR",
 }
 
+--- @param output fun(string)
+--- @param opts {level:integer?,prefix:string?}?
 function Logger.new(output, opts)
-  vim.validate({ output = { output, "function" }, opts = { opts, "table", true } })
   opts = opts or {}
   opts.level = opts.level or Logger.levels.INFO
   opts.prefix = opts.prefix or ""
@@ -46,8 +47,8 @@ function Logger.log(self, level, msg)
   self._output(self._prefix .. level_prefix .. msg .. "\n")
 end
 
+--- @param prefix string
 function Logger.add_prefix(self, prefix)
-  vim.validate({ prefix = { prefix, "string" } })
   return Logger.new(self._output, { level = self._level, prefix = self._prefix .. prefix })
 end
 

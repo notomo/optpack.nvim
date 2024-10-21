@@ -3,9 +3,9 @@ local modulelib = require("optpack.vendor.misclib.module")
 local Outputters = {}
 Outputters.__index = Outputters
 
+--- @param cmd_type string
+--- @param raw_outputters table
 function Outputters.new(cmd_type, raw_outputters)
-  vim.validate({ raw_outputters = { raw_outputters, "table" } })
-
   local outputters = {}
   local errs = {}
   vim.iter(raw_outputters):each(function(outputter_typ, outputter_opts)
@@ -29,12 +29,10 @@ function Outputters.new(cmd_type, raw_outputters)
   return outputters
 end
 
+--- @param cmd_type string
+--- @param typ string
+--- @param outputter_opts table?
 function Outputters._new_one(cmd_type, typ, outputter_opts)
-  vim.validate({
-    cmd_type = { cmd_type, "string" },
-    typ = { typ, "string" },
-    outputter_opts = { outputter_opts, "table", true },
-  })
   outputter_opts = outputter_opts or {}
   local Outputter = modulelib.find("optpack.view.outputter." .. typ)
   if not Outputter then

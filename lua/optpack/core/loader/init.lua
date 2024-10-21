@@ -12,14 +12,11 @@ local OnKeymaps = require("optpack.core.loader.keymap")
 local Loader = {}
 Loader.__index = Loader
 
+--- @param plugin OptpackInternalPlugin
+--- @param load_on table
+--- @param pre_load_hook function|table
+--- @param post_load_hook function|table
 function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
-  vim.validate({
-    plugin = { plugin, "table" },
-    load_on = { load_on, "table" },
-    pre_load_hook = { pre_load_hook, "callable" },
-    post_load_hook = { post_load_hook, "callable" },
-  })
-
   local plugin_name = plugin.name
 
   local keymap_remover = OnKeymaps.set(plugin_name, load_on.keymaps)
