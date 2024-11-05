@@ -8,7 +8,7 @@ GitServer.__index = GitServer
 
 function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   local port = 8888
-  local job_id = vim.fn.jobstart({ "python", "-m", "http.server", port, "--cgi" }, {
+  local job_id = vim.fn.jobstart({ "python", "-m", "http.server", tostring(port), "--cgi" }, {
     on_stdout = function(_, data)
       local msg = table.concat(data, "")
       if msg ~= "" then
