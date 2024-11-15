@@ -29,8 +29,7 @@ function M.handle(self, event_name, ctx, ...)
 
   local f = io.open(self._path, "a")
   if not f then
-    require("optpack.vendor.misclib.message").error("failed to open: " .. self._path)
-    return
+    error("[optpack] failed to open: " .. self._path)
   end
 
   local time = os.date()

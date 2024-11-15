@@ -8,7 +8,7 @@ function M.add(full_name, raw_opts)
   local plugin = Plugins.state():add(full_name, opts)
   if type(plugin) == "string" then
     local err = plugin
-    error(require("optpack.vendor.misclib.message").wrap(err), 0)
+    error("[optpack] " .. err, 0)
   end
   return plugin
 end
@@ -21,7 +21,7 @@ function M.get(plugin_name)
   local plugin = Plugins.state():expose_one(plugin_name)
   if type(plugin) == "string" then
     local err = plugin
-    error(require("optpack.vendor.misclib.message").wrap(err), 0)
+    error("[optpack] " .. err, 0)
   end
   return plugin
 end
@@ -30,13 +30,13 @@ function M.install_or_update(cmd_type, raw_opts)
   local opts = require("optpack.core.option").InstallOrUpdateOption.new(raw_opts)
   if type(opts) == "string" then
     local err = opts
-    error(require("optpack.vendor.misclib.message").wrap(err), 0)
+    error("[optpack] " .. err, 0)
   end
 
   local outputters = require("optpack.view.outputter").new(cmd_type, opts.outputters)
   if type(outputters) == "string" then
     local err = outputters
-    error(require("optpack.vendor.misclib.message").wrap(err), 0)
+    error("[optpack] " .. err, 0)
   end
   local emitter = require("optpack.lib.event_emitter").new(outputters)
 
@@ -48,7 +48,7 @@ function M.load(plugin_name, raw_opts)
   Plugins.state()
     :load(plugin_name)
     :catch(function(err)
-      require("optpack.vendor.misclib.message").warn(err)
+      vim.notify("[optpack] " .. err, vim.log.levels.WARN)
     end)
     :finally(function()
       opts.on_finished()
@@ -58,7 +58,7 @@ end
 function M.sync_load(plugin_name)
   local err = Plugins.state():sync_load(plugin_name)
   if err then
-    error(require("optpack.vendor.misclib.message").wrap(err), 0)
+    error("[optpack] " .. err, 0)
   end
 end
 
