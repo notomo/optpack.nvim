@@ -66,25 +66,27 @@ function Git._start(cmd, opts)
   end
   local stdout = Output.new()
   local stderr = Output.new()
-  return Promise.new(function(resolve, reject)
-    local _, err = require("optpack.vendor.misclib.job").start(cmd, {
-      on_exit = function(_, code)
-        if code ~= 0 then
-          local err = { table.concat(cmd, " "), unpack(stderr:lines()) }
-          return reject(err)
-        end
-        return resolve(opts.handle_stdout(stdout))
-      end,
-      on_stdout = stdout:collector(),
-      on_stderr = stderr:collector(),
-      stderr_buffered = true,
-      stdout_buffered = true,
-      cwd = opts.cwd,
-    })
-    if err then
-      return reject(err)
-    end
-  end)
+  local promise, resolve, reject = Promise.with_resolvers()
+
+  local _, err = require("optpack.vendor.misclib.job").start(cmd, {
+    on_exit = function(_, code)
+      if code ~= 0 then
+        local err = { table.concat(cmd, " "), unpack(stderr:lines()) }
+        return reject(err)
+      end
+      return resolve(opts.handle_stdout(stdout))
+    end,
+    on_stdout = stdout:collector(),
+    on_stderr = stderr:collector(),
+    stderr_buffered = true,
+    stdout_buffered = true,
+    cwd = opts.cwd,
+  })
+  if err then
+    reject(err)
+  end
+
+  return promise
 end
 
 return Git

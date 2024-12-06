@@ -74,16 +74,18 @@ function Loaders.load(self, plugin)
   end
 
   local loader = self._loaders[plugin.name]
-  return require("optpack.vendor.promise").new(function(resolve, reject)
-    vim.schedule(function()
-      local load_err = loader:load()
-      if load_err then
-        reject(load_err)
-        return
-      end
-      resolve()
-    end)
+  local promise, resolve, reject = require("optpack.vendor.promise").with_resolvers()
+
+  vim.schedule(function()
+    local load_err = loader:load()
+    if load_err then
+      reject(load_err)
+      return
+    end
+    resolve()
   end)
+
+  return promise
 end
 
 function Loaders.load_installed(self, raw_plugins)

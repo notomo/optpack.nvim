@@ -18,9 +18,9 @@ function ParallelLimitter.add(self, f)
 end
 
 function ParallelLimitter.start(self)
-  return Promise.new(function(resolve, reject)
-    self:_start(resolve, reject, self._limit)
-  end)
+  local promise, resolve, reject = Promise.with_resolvers()
+  self:_start(resolve, reject, self._limit)
+  return promise
 end
 
 function ParallelLimitter._start(self, resolve, reject, count)

@@ -31,12 +31,12 @@ describe("ParallelLimitter", function()
     local parallel = ParallelLimitter.new(8)
     for _ = 1, 10 do
       parallel:add(function()
-        return Promise.new(function(_, reject)
-          vim.defer_fn(function()
-            call_count = call_count + 1
-            reject()
-          end, 25)
-        end)
+        local promise, _, reject = Promise.with_resolvers()
+        vim.defer_fn(function()
+          call_count = call_count + 1
+          reject()
+        end, 25)
+        return promise
       end)
     end
 
