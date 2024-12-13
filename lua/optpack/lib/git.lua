@@ -1,6 +1,3 @@
-local Promise = require("optpack.vendor.promise")
-local Output = require("optpack.vendor.misclib.job.output")
-
 local Git = {}
 
 function Git.clone(directory, url, depth)
@@ -29,7 +26,7 @@ function Git.get_revision(directory)
   return Git._start(cmd, {
     cwd = directory,
     handle_stdout = function(stdout)
-      return stdout:str()
+      return stdout
     end,
   })
 end
@@ -62,27 +59,28 @@ end
 function Git._start(cmd, opts)
   opts = opts or {}
   opts.handle_stdout = opts.handle_stdout or function(stdout)
-    return stdout:lines()
+    return vim.split(stdout, "\n", { plain = true })
   end
-  local stdout = Output.new()
-  local stderr = Output.new()
-  local promise, resolve, reject = Promise.with_resolvers()
 
-  local _, err = require("optpack.vendor.misclib.job").start(cmd, {
-    on_exit = function(_, code)
-      if code ~= 0 then
-        local err = { table.concat(cmd, " "), unpack(stderr:lines()) }
+  local promise, resolve, reject = require("optpack.vendor.promise").with_resolvers()
+
+  local ok, err = pcall(function()
+    vim.system(
+      cmd,
+      {
+        text = true,
+        cwd = opts.cwd,
+      },
+      vim.schedule_wrap(function(o)
+        if o.code == 0 then
+          return resolve(opts.handle_stdout(vim.trim(o.stdout)))
+        end
+        local err = { table.concat(cmd, " "), unpack(vim.split(vim.trim(o.stderr), "\n", { plain = true })) }
         return reject(err)
-      end
-      return resolve(opts.handle_stdout(stdout))
-    end,
-    on_stdout = stdout:collector(),
-    on_stderr = stderr:collector(),
-    stderr_buffered = true,
-    stdout_buffered = true,
-    cwd = opts.cwd,
-  })
-  if err then
+      end)
+    )
+  end)
+  if not ok and err then
     reject(err)
   end
 

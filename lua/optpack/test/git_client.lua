@@ -1,4 +1,3 @@
-local Output = require("optpack.vendor.misclib.job.output")
 local logger = require("optpack.test.logger").logger:add_prefix("[git_client]")
 
 local GitClient = {}
@@ -23,37 +22,29 @@ end
 function GitClient.execute(_, args, opts)
   opts = opts or {}
 
-  local stdout = Output.new()
-  local stderr = Output.new()
   local cmd = { "git", unpack(args) }
-  local job_id = vim.fn.jobstart(cmd, {
-    cwd = opts.cwd,
-    on_stdout = stdout:collector(),
-    on_stderr = stderr:collector(),
-  })
+  local job = vim
+    .system(cmd, {
+      text = true,
+      cwd = opts.cwd,
+    })
+    :wait()
 
-  local result = vim.fn.jobwait({ job_id }, 1000)[1]
-  if result == 0 then
+  if job.code == 0 then
     logger:add_prefix("[cmd]"):info(table.concat(cmd, " "))
 
-    local stdout_msg = stdout:str()
-    if stdout_msg ~= "" then
-      logger:info(stdout_msg)
+    if job.stdout ~= "" then
+      logger:info(job.stdout)
     end
 
-    local stderr_msg = stderr:str()
-    if stderr_msg ~= "" then
-      logger:warn(stderr_msg)
+    if job.stderr ~= "" then
+      logger:warn(job.stderr)
     end
 
     return
-  elseif result == -1 then
-    error("timeout: " .. vim.inspect(cmd))
-  elseif result == -3 then
-    error("invalid job-id: " .. job_id)
   end
 
-  error(stderr:str())
+  error(job.stderr)
 end
 
 return GitClient
