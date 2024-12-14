@@ -1,28 +1,31 @@
 local GitClient = require("optpack.test.git_client")
 local log = require("optpack.test.logger")
 local logger = log.logger:add_prefix("[git_server]")
-local log_file_path = log.path
 
 local GitServer = {}
 GitServer.__index = GitServer
 
 function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   local port = 8888
-  local job_id = vim.fn.jobstart({ "python", "-m", "http.server", tostring(port), "--cgi" }, {
-    on_stdout = function(_, data)
-      local msg = table.concat(data, "")
-      if msg ~= "" then
-        logger:info(msg)
-      end
-    end,
-    on_stderr = function(_, data)
-      local msg = table.concat(data, "")
-      if msg ~= "" then
-        logger:warn(msg)
-      end
-    end,
-    env = { GIT_PROJECT_ROOT = git_root_dir, GIT_HTTP_EXPORT_ALL = "true" },
+  local job = vim.system({ "python", "-m", "http.server", tostring(port), "--cgi" }, {
     cwd = cgi_root_dir,
+    env = {
+      GIT_PROJECT_ROOT = git_root_dir,
+      GIT_HTTP_EXPORT_ALL = "true",
+    },
+    text = true,
+    stdout = function(_, data)
+      if not data then
+        return
+      end
+      logger:info(data)
+    end,
+    stderr = function(_, data)
+      if not data then
+        return
+      end
+      logger:warn(data)
+    end,
   })
 
   vim.fn.mkdir(git_root_dir, "p")
@@ -35,7 +38,7 @@ function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
     url = url,
     client = client,
     _cgi_url = cgi_url,
-    _job_id = job_id,
+    _job = job,
     _tmp_dir = tmp_dir,
     _git_root_dir = git_root_dir,
   }
@@ -74,21 +77,13 @@ end
 function GitServer.teardown(self)
   vim.fn.delete(self._tmp_dir, "rf")
   vim.fn.delete(self._git_root_dir, "rf")
-  if vim.fn.jobstop(self._job_id) == 0 then
-    error("git server is something wrong. see: " .. log_file_path)
-  end
+  self._job:kill()
 end
 
 function GitServer._health_check(self)
   local ok = vim.wait(1000, function()
-    local exit_code
-    local job_id = vim.fn.jobstart({ "curl", self._cgi_url .. "/ready.py" }, {
-      on_exit = function(_, code)
-        exit_code = code
-      end,
-    })
-    vim.fn.jobwait({ job_id }, 1000)
-    return exit_code == 0
+    local job = vim.system({ "curl", self._cgi_url .. "/ready.py" }):wait(1000)
+    return job.code == 0
   end, 100)
   if not ok then
     error("cgi server is not health.")
