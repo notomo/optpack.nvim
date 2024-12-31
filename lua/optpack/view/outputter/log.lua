@@ -5,7 +5,7 @@ local M = {}
 M.__index = M
 
 function M.new(_, opts)
-  local dir = vim.fn.fnamemodify(opts.path, ":h")
+  local dir = vim.fs.dirname(opts.path)
   vim.fn.mkdir(dir, "p")
   local tbl = {
     _message_factory = MessageFactory.new(M.handlers),
