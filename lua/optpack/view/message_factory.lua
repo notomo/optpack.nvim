@@ -93,7 +93,7 @@ local setup_highlight_groups = function()
   }
 end
 
-local group = vim.api.nvim_create_augroup("optpack", {})
+local group = vim.api.nvim_create_augroup("optpack.highlight_group", {})
 vim.api.nvim_create_autocmd({ "ColorScheme" }, {
   group = group,
   pattern = { "*" },

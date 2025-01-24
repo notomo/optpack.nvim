@@ -25,7 +25,7 @@ function Loader.new(plugin, load_on, pre_load_hook, post_load_hook)
     return err
   end
 
-  local group_name = "optpack_" .. plugin_name
+  local group_name = "optpack.load_plugin." .. plugin_name
   vim.api.nvim_create_augroup(group_name, {})
 
   OnEvents.set(plugin_name, group_name, load_on.events)
