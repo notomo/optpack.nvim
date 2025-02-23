@@ -67,7 +67,7 @@ InstallOrUpdateOption.default = {
     },
     log = {
       enabled = false,
-      path = vim.fs.joinpath(tostring(vim.fn.stdpath("log")), "optpack-update.log"),
+      path = vim.fs.joinpath(vim.fn.stdpath("log"), "optpack-update.log"),
     },
   },
   parallel = { limit = 8 },
