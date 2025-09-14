@@ -19,6 +19,14 @@ function GitClient.reset_hard(self, revision, directory)
   self:execute({ "reset", "--hard", revision }, { cwd = directory })
 end
 
+function GitClient.switch(self, directory, name)
+  return self:execute({ "switch", name }, { cwd = directory })
+end
+
+function GitClient.branch(self, directory)
+  return self:execute({ "branch", "--show-current" }, { cwd = directory })
+end
+
 function GitClient.execute(_, args, opts)
   opts = opts or {}
 
@@ -41,7 +49,7 @@ function GitClient.execute(_, args, opts)
       logger:warn(job.stderr)
     end
 
-    return
+    return vim.trim(job.stdout)
   end
 
   error(job.stderr)

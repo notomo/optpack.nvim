@@ -3,19 +3,22 @@ local Event = require("optpack.core.event").Event
 local Updater = {}
 
 --- @param emitter OptpackEventEmitter
-function Updater.start(emitter, directory)
+function Updater.start(emitter, directory, version)
   local git = require("optpack.lib.git")
 
   local before_revision
   local revision_range
   return git
-    .get_revision(directory)
+    .get_revision(directory, "HEAD")
     :next(function(revision)
       before_revision = revision
-      return git.pull(directory)
+      return git.fetch(directory)
     end)
     :next(function()
-      return git.get_revision(directory)
+      return git.update(directory, version)
+    end)
+    :next(function()
+      return git.get_revision(directory, "HEAD")
     end)
     :next(function(revision)
       if before_revision == revision then

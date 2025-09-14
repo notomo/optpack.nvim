@@ -47,22 +47,34 @@ function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   return self
 end
 
-function GitServer.create_repository(self, full_name, commits)
+function GitServer.create_repository(self, full_name, raw_opts)
+  local opts = vim.tbl_extend("force", {
+    commits = {
+      main = {},
+    },
+  }, raw_opts or {})
+
   local tmp_path = vim.fs.joinpath(self._tmp_dir, full_name)
   vim.fn.mkdir(tmp_path, "p")
 
   self.client:execute({ "init" }, { cwd = tmp_path })
   self.client:execute({ "config", "--local", "user.email", "notomo@example.com" }, { cwd = tmp_path })
   self.client:execute({ "config", "--local", "user.name", "notomo" }, { cwd = tmp_path })
-
-  self:_add_commit(tmp_path, "init")
-  for _, msg in ipairs(commits or {}) do
-    self:_add_commit(tmp_path, msg)
-  end
+  self.client:execute({ "config", "--local", "init.defaultBranch", "main" }, { cwd = tmp_path })
 
   local account_name = vim.split(full_name, "/", { plain = true })[1]
   local path = vim.fs.joinpath(self._git_root_dir, account_name)
   vim.fn.mkdir(path, "p")
+
+  self:_add_commit(tmp_path, "init")
+  for branch_name, commits in pairs(opts.commits) do
+    for _, msg in ipairs(commits or {}) do
+      self:_add_branch(tmp_path, branch_name)
+      self:_add_commit(tmp_path, msg)
+    end
+  end
+  self.client:execute({ "switch", "main" }, { cwd = tmp_path })
+
   self.client:execute({ "clone", "--bare", "--local", tmp_path }, { cwd = path })
 end
 
@@ -72,6 +84,10 @@ function GitServer._add_commit(self, tmp_path, msg)
   io.open(file, "w"):close()
   self.client:execute({ "add", "." }, { cwd = tmp_path })
   self.client:execute({ "commit", "-m", msg }, { cwd = tmp_path })
+end
+
+function GitServer._add_branch(self, tmp_path, name)
+  self.client:execute({ "switch", "-C", name }, { cwd = tmp_path })
 end
 
 function GitServer.teardown(self)

@@ -7,7 +7,12 @@ describe("optpack.install()", function()
 
   lazy_setup(function()
     git_server = helper.git_server()
-    git_server:create_repository("account1/test1")
+    git_server:create_repository("account1/test1", {
+      commits = {
+        main = {},
+        another = { "commit1" },
+      },
+    })
     git_server:create_repository("account2/test2")
   end)
   lazy_teardown(function()
@@ -67,6 +72,25 @@ describe("optpack.install()", function()
 
     assert.no.exists_pattern([[test1 > Installed.]])
     assert.exists_pattern([[test2 > Installed.]])
+  end)
+
+  it("can install with specified branch", function()
+    helper.set_packpath()
+
+    optpack.add("account1/test1", { fetch = {
+      base_url = git_server.url,
+      version = "another",
+    } })
+
+    local on_finished = helper.on_finished()
+    optpack.install({ on_finished = on_finished })
+    on_finished:wait()
+
+    assert.exists_dir(helper.packpath_name .. "/pack/optpack/opt/test1")
+
+    assert.exists_pattern([[test1 > Installed.]])
+
+    assert.equal("another", git_server.client:branch(helper.plugin_dir("test1")))
   end)
 
   it("does not raise an error event if output buffer already exists", function()

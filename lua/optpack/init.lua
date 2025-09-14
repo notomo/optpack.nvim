@@ -12,6 +12,7 @@ local M = {}
 --- @class OptpackAddOptionFetch
 --- @field base_url string? A git server base url, default: "https://github.com"
 --- @field depth integer? for shallow clone depth. Used full clone if depth < 1. default: 1
+--- @field version string? git branch, tag default: default branch
 
 --- @class OptpackAddOptionHooks
 --- @field post_add (fun(plugin:OptpackPlugin)|table)? called on after |optpack.add()|
@@ -42,6 +43,7 @@ end
 --- @field full_name string {account_name}/{plugin_name} format plugin name
 --- @field name string plugin name
 --- @field url string git repository url
+--- @field version string? git branch, tag
 --- @field opts OptpackAddOption |OptpackAddOption|
 
 --- Returns list of plugins.

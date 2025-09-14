@@ -6,6 +6,7 @@ local M = {}
 --- @field directory string
 --- @field url string
 --- @field private _opts table
+--- @field private _version string
 --- @field private _depth integer
 --- @field private _post_update_hook fun(plugin:OptpackPlugin)
 --- @field private _post_install_hook fun(plugin:OptpackPlugin)
@@ -31,6 +32,7 @@ function Plugin.new(full_name, opts)
     directory = directory,
     url = url,
     depends = opts.depends,
+    _version = opts.fetch.version,
     _post_install_hook = opts.hooks.post_install,
     _post_update_hook = opts.hooks.post_update,
     _depth = opts.fetch.depth,
@@ -45,6 +47,7 @@ function Plugin.expose(self)
     full_name = self.full_name,
     name = self.name,
     directory = self.directory,
+    version = self._version,
     url = self.url,
     opts = self._opts,
   }
@@ -60,7 +63,7 @@ function Plugin.update(self, emitter)
 end
 
 function Plugin._update(self, emitter)
-  return require("optpack.core.updater").start(emitter, self.directory):next(function(updated_now)
+  return require("optpack.core.updater").start(emitter, self.directory, self._version):next(function(updated_now)
     if updated_now then
       ---@diagnostic disable-next-line: invisible
       self._post_update_hook(self:expose())
@@ -71,7 +74,7 @@ end
 
 function Plugin.install(self, emitter)
   return require("optpack.core.installer")
-    .start(emitter, self.directory, self.url, self._depth)
+    .start(emitter, self.directory, self.url, self._depth, self._version)
     :next(function(installed_now)
       if installed_now then
         ---@diagnostic disable-next-line: invisible

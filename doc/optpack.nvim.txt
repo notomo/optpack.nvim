@@ -70,6 +70,7 @@ OptpackAddOptionFetch                                  *OptpackAddOptionFetch*
 
 - {base_url} (string?) A git server base url, default: "https://github.com"
 - {depth} (integer?) for shallow clone depth. Used full clone if depth < 1. default: 1
+- {version} (string?) git branch, tag default: default branch
 
 OptpackAddOptionHooks                                  *OptpackAddOptionHooks*
 
@@ -95,6 +96,7 @@ OptpackPlugin                                                  *OptpackPlugin*
 - {full_name} (string) {account_name}/{plugin_name} format plugin name
 - {name} (string) plugin name
 - {url} (string) git repository url
+- {version} (string?) git branch, tag
 - {opts} (OptpackAddOption) |OptpackAddOption|
 
 OptpackInstallOrUpdateOption                    *OptpackInstallOrUpdateOption*

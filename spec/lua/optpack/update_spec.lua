@@ -7,8 +7,18 @@ describe("optpack.update()", function()
 
   lazy_setup(function()
     git_server = helper.git_server()
-    git_server:create_repository("account1/test1", { "commit1", "commit2" })
-    git_server:create_repository("account2/test2", { "commit3", "commit4" })
+    git_server:create_repository("account1/test1", {
+      commits = {
+        main = { "commit1", "commit2" },
+        another1 = { "commit_a", "commit_b" },
+      },
+    })
+    git_server:create_repository("account2/test2", {
+      commits = {
+        main = { "commit3", "commit4" },
+        another2 = { "commit_c", "commit_d" },
+      },
+    })
   end)
   lazy_teardown(function()
     git_server:teardown()
@@ -83,6 +93,38 @@ describe("optpack.update()", function()
 
     assert.no.exists_pattern([[test1 > Updated.]])
     assert.exists_pattern([[test2 > Updated.]])
+  end)
+
+  it("can update with specified branch", function()
+    git_server.client:clone("account1/test1", helper.plugin_dir("test1"))
+    git_server.client:switch(helper.plugin_dir("test1"), "another1")
+    git_server.client:reset_hard("HEAD~~", helper.plugin_dir("test1"))
+    git_server.client:switch(helper.plugin_dir("test1"), "main")
+
+    git_server.client:clone("account2/test2", helper.plugin_dir("test2"))
+    git_server.client:switch(helper.plugin_dir("test2"), "another2")
+    git_server.client:reset_hard("HEAD~~", helper.plugin_dir("test2"))
+
+    helper.set_packpath()
+
+    optpack.add("account1/test1", { fetch = {
+      base_url = git_server.url,
+      version = "another1",
+    } })
+    optpack.add("account2/test2", { fetch = {
+      base_url = git_server.url,
+      version = "another2",
+    } })
+
+    local on_finished = helper.on_finished()
+    optpack.update({ on_finished = on_finished })
+    on_finished:wait()
+
+    assert.exists_pattern([[test1 > Updated.]])
+    assert.exists_pattern([[test2 > Updated.]])
+
+    assert.equal("another1", git_server.client:branch(helper.plugin_dir("test1")))
+    assert.equal("another2", git_server.client:branch(helper.plugin_dir("test2")))
   end)
 
   it("shows error if non-git repository directory exists", function()
