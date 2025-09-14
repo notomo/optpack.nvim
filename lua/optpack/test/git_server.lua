@@ -57,10 +57,9 @@ function GitServer.create_repository(self, full_name, raw_opts)
   local tmp_path = vim.fs.joinpath(self._tmp_dir, full_name)
   vim.fn.mkdir(tmp_path, "p")
 
-  self.client:execute({ "init" }, { cwd = tmp_path })
+  self.client:execute({ "init", "-b", "main" }, { cwd = tmp_path })
   self.client:execute({ "config", "--local", "user.email", "notomo@example.com" }, { cwd = tmp_path })
   self.client:execute({ "config", "--local", "user.name", "notomo" }, { cwd = tmp_path })
-  self.client:execute({ "config", "--local", "init.defaultBranch", "main" }, { cwd = tmp_path })
 
   local account_name = vim.split(full_name, "/", { plain = true })[1]
   local path = vim.fs.joinpath(self._git_root_dir, account_name)
