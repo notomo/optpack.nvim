@@ -5,7 +5,7 @@ function M.setup(root_path, opts)
   opts = opts or {}
   local base_dir = opts.base_dir or "test_data/"
   local base_path = vim.fs.joinpath(root_path, base_dir)
-  local relative_path = vim.fs.joinpath(base_dir, math.random(1, 2 ^ 30))
+  local relative_path = vim.fs.joinpath(base_dir, tostring(math.random(1, 2 ^ 30)))
   local full_path = vim.fs.joinpath(root_path, relative_path)
   local tbl = {
     full_path = full_path,
