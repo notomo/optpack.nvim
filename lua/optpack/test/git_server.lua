@@ -7,7 +7,8 @@ GitServer.__index = GitServer
 
 function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
   local port = 8888
-  local job = vim.system({ "python", "-m", "http.server", tostring(port), "--cgi" }, {
+  local python = vim.fn.exepath("python") ~= "" and "python" or "python3"
+  local job = vim.system({ python, "-m", "http.server", tostring(port), "--cgi" }, {
     cwd = cgi_root_dir,
     env = {
       GIT_PROJECT_ROOT = git_root_dir,
