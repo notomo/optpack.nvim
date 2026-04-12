@@ -94,7 +94,7 @@ command! MyPluginTest echo ''
     optpack.add(plugin1, {
       load_on = {
         keymaps = function(vim)
-          vim.keymap.set("n", key, [[<Cmd>let b:test = 8888<CR>]], { buffer = true })
+          vim.keymap.set("n", key, [[<Cmd>let b:test = 8888<CR>]], { buf = 0 })
         end,
       },
     })
@@ -114,7 +114,7 @@ command! MyPluginTest echo ''
     optpack.add(plugin1, {
       load_on = {
         keymaps = function(vim)
-          vim.keymap.set("o", key, [["j"]], { buffer = true, expr = true })
+          vim.keymap.set("o", key, [["j"]], { buf = 0, expr = true })
         end,
       },
     })
@@ -131,7 +131,7 @@ command! MyPluginTest echo ''
         keymaps = function(vim)
           vim.keymap.set("n", key, function()
             vim.b.test = 8888
-          end, { buffer = true })
+          end, { buf = 0 })
         end,
       },
     })
@@ -152,7 +152,7 @@ command! MyPluginTest echo ''
         keymaps = function(vim)
           vim.keymap.set("n", key, function()
             return "j"
-          end, { buffer = true, expr = true })
+          end, { buf = 0, expr = true })
         end,
       },
     })
