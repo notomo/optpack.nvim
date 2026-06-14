@@ -63,10 +63,10 @@ function helper.plugin_dir(name)
 end
 
 -- Drop the fixture plugin's loaded modules so a later require reloads it.
-function helper.cleanup_loaded_modules(plugin_name)
-  local dir = plugin_name:gsub("/", ".") .. "."
+function helper.cleanup_loaded_modules(module_name)
+  local dir = module_name:gsub("/", ".") .. "."
   for key in pairs(package.loaded) do
-    if vim.startswith(key:gsub("/", "."), dir) or key == plugin_name then
+    if vim.startswith(key:gsub("/", "."), dir) or key == module_name then
       package.loaded[key] = nil
     end
   end
@@ -113,8 +113,8 @@ assert.register("can_require", function(self)
   end
 end)
 
-function helper.typed_assert(assert)
-  local x = require("assertlib").typed(assert)
+function helper.typed_assert(raw_assert)
+  local x = require("assertlib").typed(raw_assert)
   ---@cast x +{exists_dir:fun(path),can_require:fun(want)}
   ---@cast x +{no:{exists_dir:fun(path),can_require:fun(want)}}
   return x
