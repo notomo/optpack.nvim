@@ -6,18 +6,32 @@ local GitServer = {}
 GitServer.__index = GitServer
 
 function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
-  local port = 8888
   local python = vim.fn.exepath("python") ~= "" and "python" or "python3"
-  local job = vim.system({ python, "-m", "http.server", tostring(port), "--cgi" }, {
+
+  -- Bind an ephemeral port (0) so parallel workers don't collide on a fixed
+  -- port. python prints "Serving HTTP on ... port <N> ..." to stdout; capture
+  -- the actual port from it. `-u`/PYTHONUNBUFFERED keep the line from being
+  -- block-buffered on the pipe.
+  local port
+  local stdout_buffer = ""
+  local job = vim.system({ python, "-u", "-m", "http.server", "0", "--cgi" }, {
     cwd = cgi_root_dir,
     env = {
       GIT_PROJECT_ROOT = git_root_dir,
       GIT_HTTP_EXPORT_ALL = "true",
+      PYTHONUNBUFFERED = "1",
     },
     text = true,
     stdout = function(_, data)
       if not data then
         return
+      end
+      if not port then
+        stdout_buffer = stdout_buffer .. data
+        local matched = stdout_buffer:match("port%s+(%d+)")
+        if matched then
+          port = tonumber(matched)
+        end
       end
       logger:info(data)
     end,
@@ -31,6 +45,13 @@ function GitServer.new(cgi_root_dir, git_root_dir, tmp_dir)
 
   vim.fn.mkdir(git_root_dir, "p")
   vim.fn.mkdir(tmp_dir, "p")
+
+  local ok = vim.wait(5000, function()
+    return port ~= nil
+  end, 10)
+  if not ok then
+    error("git http server did not report a port")
+  end
 
   local cgi_url = ("http://127.0.0.1:%d/cgi-bin"):format(port)
   local url = cgi_url .. "/git-http-backend"
