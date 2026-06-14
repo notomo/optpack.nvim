@@ -1,6 +1,6 @@
 local ntf = require("ntf")
-local describe, it, before_each, after_each, teardown =
-  ntf.describe, ntf.it, ntf.before_each, ntf.after_each, ntf.teardown
+local describe, it, before_each, after_each, setup, teardown =
+  ntf.describe, ntf.it, ntf.before_each, ntf.after_each, ntf.setup, ntf.teardown
 local helper = require("optpack.test.helper")
 local optpack = require("optpack")
 local assert = helper.typed_assert(ntf.assert)
@@ -8,7 +8,7 @@ local assert = helper.typed_assert(ntf.assert)
 describe("optpack.install()", function()
   local git_server
 
-  lazy_setup(function()
+  setup(function()
     git_server = helper.git_server()
     git_server:create_repository("account1/test1", {
       commits = {
@@ -18,7 +18,7 @@ describe("optpack.install()", function()
     })
     git_server:create_repository("account2/test2")
   end)
-  lazy_teardown(function()
+  teardown(function()
     git_server:teardown()
   end)
 
