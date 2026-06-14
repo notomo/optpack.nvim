@@ -1,5 +1,8 @@
+local ntf = require("ntf")
+local describe, it, before_each, after_each, finally =
+  ntf.describe, ntf.it, ntf.before_each, ntf.after_each, ntf.finally
 local helper = require("optpack.test.helper")
-local assert = helper.typed_assert(assert)
+local assert = helper.typed_assert(ntf.assert)
 local ParallelLimitter = require("optpack.lib.parallel_limitter")
 local Promise = require("optpack.vendor.promise")
 

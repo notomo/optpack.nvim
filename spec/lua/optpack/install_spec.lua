@@ -1,6 +1,9 @@
+local ntf = require("ntf")
+local describe, it, before_each, after_each, teardown =
+  ntf.describe, ntf.it, ntf.before_each, ntf.after_each, ntf.teardown
 local helper = require("optpack.test.helper")
-local optpack = helper.require("optpack")
-local assert = helper.typed_assert(assert)
+local optpack = require("optpack")
+local assert = helper.typed_assert(ntf.assert)
 
 describe("optpack.install()", function()
   local git_server

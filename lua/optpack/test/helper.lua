@@ -1,20 +1,21 @@
-local helper = require("vusted.helper")
+local helper = require("ntf.helper")
 local plugin_name = helper.get_module_root(...)
 
 helper.root = helper.find_plugin_root(plugin_name)
 vim.opt.packpath:prepend(vim.fs.joinpath(helper.root, "spec/.shared/packages"))
-require("assertlib").register(require("vusted.assert").register)
+require("assertlib").register(require("ntf.assert").register)
 
 helper.runtimepath = vim.o.runtimepath
 
 function helper.before_each()
   vim.o.runtimepath = helper.runtimepath
-  helper.test_data = require("optpack.vendor.misclib.test.data_dir").setup(helper.root)
+  helper.test_data = require("optpack.vendor.misclib.test.data_dir").setup(
+    helper.root,
+    { base_dir = ("test_data_%d/"):format(vim.fn.getpid()) }
+  )
 end
 
 function helper.after_each()
-  helper.cleanup()
-  helper.cleanup_loaded_modules(plugin_name)
   helper.test_data:teardown()
   collectgarbage("collect") -- for unhandled rejection
 end
@@ -61,6 +62,16 @@ function helper.plugin_dir(name)
   return helper.test_data:path(vim.fs.joinpath(helper.opt_path, name))
 end
 
+-- Drop the fixture plugin's loaded modules so a later require reloads it.
+function helper.cleanup_loaded_modules(plugin_name)
+  local dir = plugin_name:gsub("/", ".") .. "."
+  for key in pairs(package.loaded) do
+    if vim.startswith(key:gsub("/", "."), dir) or key == plugin_name then
+      package.loaded[key] = nil
+    end
+  end
+end
+
 function helper.create_plugin_dir(name, opts)
   opts = opts or {}
   helper.cleanup_loaded_modules(name)
@@ -81,9 +92,9 @@ function helper.set_packpath()
   vim.o.packpath = helper.test_data:path(helper.packpath_name)
 end
 
-local asserts = require("vusted.assert").asserts
+local assert = require("ntf.assert")
 
-asserts.create("exists_dir"):register(function(self)
+assert.register("exists_dir", function(self)
   return function(_, args)
     local path = helper.test_data:path(args[1])
     self:set_positive(("`%s` not found dir"):format(path))
@@ -92,7 +103,7 @@ asserts.create("exists_dir"):register(function(self)
   end
 end)
 
-asserts.create("can_require"):register(function(self)
+assert.register("can_require", function(self)
   return function(_, args)
     local path = args[1]
     local ok, result = pcall(require, path)
