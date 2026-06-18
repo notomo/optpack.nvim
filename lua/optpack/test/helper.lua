@@ -9,10 +9,7 @@ helper.runtimepath = vim.o.runtimepath
 
 function helper.before_each()
   vim.o.runtimepath = helper.runtimepath
-  helper.test_data = require("optpack.vendor.misclib.test.data_dir").setup(
-    helper.root,
-    { base_dir = ("test_data_%d/"):format(vim.fn.getpid()) }
-  )
+  helper.test_data = require("optpack.vendor.misclib.test.data_dir").setup(helper.root, { base_dir = "spec/test_data/" })
 end
 
 function helper.after_each()

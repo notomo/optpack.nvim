@@ -4,13 +4,15 @@ M.__index = M
 function M.setup(root_path, opts)
   opts = opts or {}
   local base_dir = opts.base_dir or "test_data/"
-  local base_path = vim.fs.joinpath(root_path, base_dir)
-  local relative_path = vim.fs.joinpath(base_dir, tostring(math.random(1, 2 ^ 30)))
+  -- Include the pid so concurrent test processes never share a directory even
+  -- though each fresh process produces the same unseeded math.random sequence.
+  local unique = ("%d_%d"):format(vim.fn.getpid(), math.random(1, 2 ^ 30))
+  local relative_path = vim.fs.joinpath(base_dir, unique)
   local full_path = vim.fs.joinpath(root_path, relative_path)
   local tbl = {
     full_path = full_path,
     _relative_path = relative_path,
-    _base_path = base_path,
+    _original_cwd = vim.fn.getcwd(),
   }
   local self = setmetatable(tbl, M)
 
@@ -67,7 +69,10 @@ function M.delete(self, path)
 end
 
 function M.teardown(self)
-  delete(self._base_path)
+  -- A spec may `cd` into the data dir; on Windows a directory cannot be deleted
+  -- while it is the cwd, so restore the original cwd before deleting.
+  vim.api.nvim_set_current_dir(self._original_cwd)
+  delete(self.full_path)
 end
 
 return M
