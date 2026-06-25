@@ -1,6 +1,5 @@
 local ntf = require("ntf")
-local describe, it, before_each, after_each, setup, teardown =
-  ntf.describe, ntf.it, ntf.before_each, ntf.after_each, ntf.setup, ntf.teardown
+local describe, it, before_each, after_each = ntf.describe, ntf.it, ntf.before_each, ntf.after_each
 local helper = require("optpack.test.helper")
 local optpack = require("optpack")
 local assert = helper.typed_assert(ntf.assert)
@@ -8,7 +7,7 @@ local assert = helper.typed_assert(ntf.assert)
 describe("optpack.update()", function()
   local git_server
 
-  setup(function()
+  before_each(function()
     git_server = helper.git_server()
     git_server:create_repository("account1/test1", {
       commits = {
@@ -23,12 +22,11 @@ describe("optpack.update()", function()
       },
     })
   end)
-  teardown(function()
-    git_server:teardown()
-  end)
-
   before_each(helper.before_each)
   after_each(helper.after_each)
+  after_each(function()
+    git_server:teardown()
+  end)
 
   it("installs plugins if directories do not exist", function()
     helper.set_packpath()
