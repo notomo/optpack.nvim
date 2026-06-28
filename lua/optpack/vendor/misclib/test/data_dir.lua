@@ -3,15 +3,17 @@ M.__index = M
 
 function M.setup(root_path, opts)
   opts = opts or {}
-  local base_dir = opts.base_dir or "test_data/"
-  -- Include the pid so concurrent test processes never share a directory even
-  -- though each fresh process produces the same unseeded math.random sequence.
-  local unique = ("%d_%d"):format(vim.fn.getpid(), math.random(1, 2 ^ 30))
-  local relative_path = vim.fs.joinpath(base_dir, unique)
+  -- Suffix the base dir with the pid so concurrent test processes never share a
+  -- parent directory and therefore never race to create one via `mkdir -p`
+  -- (each fresh process otherwise produces the same unseeded math.random
+  -- sequence). e.g. "test_data/" -> "test_data_42/".
+  local base_dir = ("%s_%d"):format((opts.base_dir or "test_data"):gsub("/+$", ""), vim.fn.getpid())
+  local relative_path = vim.fs.joinpath(base_dir, tostring(math.random(1, 2 ^ 30)))
   local full_path = vim.fs.joinpath(root_path, relative_path)
   local tbl = {
     full_path = full_path,
     _relative_path = relative_path,
+    _base_path = vim.fs.joinpath(root_path, base_dir),
     _original_cwd = vim.fn.getcwd(),
   }
   local self = setmetatable(tbl, M)
@@ -70,9 +72,11 @@ end
 
 function M.teardown(self)
   -- A spec may `cd` into the data dir; on Windows a directory cannot be deleted
-  -- while it is the cwd, so restore the original cwd before deleting.
+  -- while it is the cwd, so restore the original cwd before deleting. The base
+  -- dir is per-process (pid-suffixed) and specs within a process run serially,
+  -- so deleting it whole is safe and leaves no empty residue behind.
   vim.api.nvim_set_current_dir(self._original_cwd)
-  delete(self.full_path)
+  delete(self._base_path)
 end
 
 return M
