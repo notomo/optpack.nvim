@@ -5,9 +5,7 @@ function M.setup(root_path, opts)
   opts = opts or {}
   -- Suffix the base dir with the pid so concurrent test processes never share a
   -- parent directory and therefore never race to create one via `mkdir -p`
-  -- (each fresh process otherwise produces the same unseeded math.random
-  -- sequence). e.g. "test_data/" -> "test_data_42/".
-  local base_dir = ("%s_%d"):format((opts.base_dir or "test_data"):gsub("/+$", ""), vim.fn.getpid())
+  local base_dir = ("%s_%d"):format((opts.base_dir or ".test_data"):gsub("/+$", ""), vim.fn.getpid())
   local relative_path = vim.fs.joinpath(base_dir, tostring(math.random(1, 2 ^ 30)))
   local full_path = vim.fs.joinpath(root_path, relative_path)
   local tbl = {
