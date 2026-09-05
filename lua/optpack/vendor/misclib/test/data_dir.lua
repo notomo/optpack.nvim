@@ -70,11 +70,15 @@ end
 
 function M.teardown(self)
   -- A spec may `cd` into the data dir; on Windows a directory cannot be deleted
-  -- while it is the cwd, so restore the original cwd before deleting. The base
-  -- dir is per-process (pid-suffixed) and specs within a process run serially,
-  -- so deleting it whole is safe and leaves no empty residue behind.
+  -- while it is the cwd, so restore the original cwd before deleting. Only this
+  -- spec's own directory goes: a process runs more than one spec where a runner
+  -- shares workers between them, and a directory an earlier spec left locked
+  -- open -- which on Windows is any directory a process it started still has as
+  -- its cwd -- would otherwise fail the teardown of every spec after it rather
+  -- than its own. The base dir goes once it is empty, so no residue is left.
   vim.api.nvim_set_current_dir(self._original_cwd)
-  delete(self._base_path)
+  delete(self.full_path)
+  vim.fn.delete(self._base_path, "d")
 end
 
 return M
