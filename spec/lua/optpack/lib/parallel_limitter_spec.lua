@@ -1,10 +1,21 @@
 local ntf = require("ntf")
-local describe, it, before_each, after_each, finally =
-  ntf.describe, ntf.it, ntf.before_each, ntf.after_each, ntf.finally
+local describe, it, before_each, after_each = ntf.describe, ntf.it, ntf.before_each, ntf.after_each
 local helper = require("optpack.test.helper")
 local assert = helper.typed_assert(ntf.assert)
 local ParallelLimitter = require("optpack.lib.parallel_limitter")
-local Promise = require("optpack.vendor.promise")
+
+local start = function(parallel)
+  local on_finished = helper.on_finished()
+  --- @async
+  --- @return nil
+  local run = function()
+    parallel:start()
+  end
+  vim.async.run(run):on_complete(function()
+    on_finished()
+  end)
+  on_finished:wait()
+end
 
 describe("ParallelLimitter", function()
   before_each(helper.before_each)
@@ -16,49 +27,36 @@ describe("ParallelLimitter", function()
     for _ = 1, 10 do
       parallel:add(function()
         call_count = call_count + 1
-        return Promise.resolve()
       end)
     end
 
-    local on_finished = helper.on_finished()
-    parallel:start():finally(function()
-      on_finished()
-    end)
-    on_finished:wait()
+    start(parallel)
 
     assert.equal(10, call_count)
   end)
 
-  it("finishes even if exists rejected promise", function()
+  it("finishes even if exists failed task", function()
     local call_count = 0
     local parallel = ParallelLimitter.new(8)
     for _ = 1, 10 do
-      parallel:add(function()
-        local promise, _, reject = Promise.with_resolvers()
-        vim.defer_fn(function()
-          call_count = call_count + 1
-          reject()
-        end, 25)
-        return promise
-      end)
+      --- @async
+      --- @return nil
+      local fail = function()
+        vim.async.sleep(25)
+        call_count = call_count + 1
+        error("test error", 0)
+      end
+      parallel:add(fail)
     end
 
-    local on_finished = helper.on_finished()
-    parallel:start():finally(function()
-      on_finished()
-    end)
-    on_finished:wait()
+    start(parallel)
 
     assert.equal(10, call_count)
   end)
 
   it("finishes even if empty", function()
     local parallel = ParallelLimitter.new(1)
-    local on_finished = helper.on_finished()
-    parallel:start():finally(function()
-      on_finished()
-    end)
-    on_finished:wait()
+    start(parallel)
   end)
 
   it("finishes even if a few task", function()
@@ -67,15 +65,10 @@ describe("ParallelLimitter", function()
     for _ = 1, 2 do
       parallel:add(function()
         call_count = call_count + 1
-        return Promise.resolve()
       end)
     end
 
-    local on_finished = helper.on_finished()
-    parallel:start():finally(function()
-      on_finished()
-    end)
-    on_finished:wait()
+    start(parallel)
 
     assert.equal(2, call_count)
   end)

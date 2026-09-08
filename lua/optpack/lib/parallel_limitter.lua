@@ -1,6 +1,3 @@
-local Promise = require("optpack.vendor.promise")
-local vim = vim
-
 local ParallelLimitter = {}
 ParallelLimitter.__index = ParallelLimitter
 
@@ -9,37 +6,38 @@ function ParallelLimitter.new(limit)
   if limit <= 0 then
     error("limit: must be natural number")
   end
-  local tbl = { _limit = limit, _queued = {}, _started = {} }
+  local tbl = { _limit = limit, _queued = {} }
   return setmetatable(tbl, ParallelLimitter)
 end
 
+--- @param f async fun()
 function ParallelLimitter.add(self, f)
   table.insert(self._queued, f)
 end
 
+--- @async
+--- @return nil
 function ParallelLimitter.start(self)
-  local promise, resolve, reject = Promise.with_resolvers()
-  self:_start(resolve, reject, self._limit)
-  return promise
-end
-
-function ParallelLimitter._start(self, resolve, reject, count)
-  local funcs = vim.list_slice(self._queued, 0, count)
-  self._queued = vim.list_slice(self._queued, count + 1)
-
-  local started = {}
-  for _, f in ipairs(funcs) do
-    local promise = f():finally(function()
-      return self:_start(resolve, reject, 1)
+  local semaphore = vim.async.semaphore(self._limit)
+  local tasks = vim
+    .iter(self._queued)
+    :map(function(f)
+      --- @async
+      --- @return nil
+      local run = function()
+        semaphore:with(f)
+      end
+      -- WHY: the failure of an attached child fails this task too, so the first
+      -- one would close the rest instead of letting them settle
+      -- NOT: vim.async.run(run) without detaching it
+      return vim.async.run(run):detach()
     end)
-    table.insert(started, promise)
-  end
-  vim.list_extend(self._started, started)
+    :totable()
+  self._queued = {}
 
-  if #self._queued == 0 then
-    return Promise.all_settled(self._started):next(resolve, reject)
+  for _, task in ipairs(tasks) do
+    vim.async.pawait(task)
   end
-  return Promise.all_settled(started)
 end
 
 return ParallelLimitter

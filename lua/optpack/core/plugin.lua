@@ -53,35 +53,34 @@ function Plugin.expose(self)
   }
 end
 
+--- @async
 function Plugin.update(self, emitter)
   if not self:installed() then
     return self:install(emitter)
   end
-  return self:_update(emitter):next(function()
-    return false
-  end)
+  self:_update(emitter)
+  return false
 end
 
+--- @async
 function Plugin._update(self, emitter)
-  return require("optpack.core.updater").start(emitter, self.directory, self._version):next(function(updated_now)
-    if updated_now then
-      ---@diagnostic disable-next-line: invisible
-      self._post_update_hook(self:expose())
-    end
-    return updated_now
-  end)
+  local updated_now = require("optpack.core.updater").start(emitter, self.directory, self._version)
+  if updated_now then
+    ---@diagnostic disable-next-line: invisible
+    self._post_update_hook(self:expose())
+  end
+  return updated_now
 end
 
+--- @async
 function Plugin.install(self, emitter)
-  return require("optpack.core.installer")
-    .start(emitter, self.directory, self.url, self._depth, self._version)
-    :next(function(installed_now)
-      if installed_now then
-        ---@diagnostic disable-next-line: invisible
-        self._post_install_hook(self:expose())
-      end
-      return installed_now
-    end)
+  local installed_now =
+    require("optpack.core.installer").start(emitter, self.directory, self.url, self._depth, self._version)
+  if installed_now then
+    ---@diagnostic disable-next-line: invisible
+    self._post_install_hook(self:expose())
+  end
+  return installed_now
 end
 
 function Plugin.installed(self)

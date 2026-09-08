@@ -1,5 +1,6 @@
 local Git = {}
 
+--- @async
 function Git.clone(directory, url, depth)
   local cmd = {
     "git",
@@ -15,6 +16,7 @@ function Git.clone(directory, url, depth)
   return Git._start(cmd)
 end
 
+--- @async
 function Git.fetch(directory)
   local cmd = {
     "git",
@@ -29,6 +31,7 @@ function Git.fetch(directory)
   return Git._start(cmd, { cwd = directory })
 end
 
+--- @async
 function Git._pull(directory)
   local cmd = {
     "git",
@@ -41,25 +44,26 @@ function Git._pull(directory)
   return Git._start(cmd, { cwd = directory })
 end
 
+--- @async
 function Git._switch_with_tracking(directory, revision, remote)
-  return Git._exists_local_branch(directory, revision):next(function(exists)
-    if exists then
-      return Git._checkout(directory, revision)
-    end
-    local cmd = {
-      "git",
-      "--git-dir",
-      vim.fs.joinpath(directory, ".git"),
-      "switch",
-      "-c",
-      revision,
-      "--track",
-      remote,
-    }
-    return Git._start(cmd, { cwd = directory })
-  end)
+  if Git._exists_local_branch(directory, revision) then
+    return Git._checkout(directory, revision)
+  end
+
+  local cmd = {
+    "git",
+    "--git-dir",
+    vim.fs.joinpath(directory, ".git"),
+    "switch",
+    "-c",
+    revision,
+    "--track",
+    remote,
+  }
+  return Git._start(cmd, { cwd = directory })
 end
 
+--- @async
 function Git._checkout(directory, revision)
   local cmd = {
     "git",
@@ -72,6 +76,8 @@ function Git._checkout(directory, revision)
   return Git._start(cmd, { cwd = directory })
 end
 
+--- @async
+--- @return boolean
 function Git._exists_local_branch(directory, name)
   local cmd = {
     "git",
@@ -82,32 +88,25 @@ function Git._exists_local_branch(directory, name)
     "--quiet",
     name,
   }
-  return Git._start(cmd, { cwd = directory })
-    :next(function()
-      return true
-    end)
-    :catch(function()
-      return false
-    end)
+  local exists = pcall(Git._start, cmd, { cwd = directory })
+  return exists
 end
 
+--- @async
 function Git.update(directory, version)
   if not version then
-    return Git._get_default_branch(directory)
-      :next(function(remote_branch)
-        local branch = vim.split(remote_branch, "origin/", { plain = true })[2]
-        return Git._switch_with_tracking(directory, branch, remote_branch)
-      end)
-      :next(function()
-        return Git._pull(directory)
-      end)
+    local remote_branch = Git._get_default_branch(directory)
+    local branch = vim.split(remote_branch, "origin/", { plain = true })[2]
+    Git._switch_with_tracking(directory, branch, remote_branch)
+    return Git._pull(directory)
   end
 
-  return Git._switch_with_tracking(directory, version, "origin/" .. version):next(function()
-    return Git._pull(directory)
-  end)
+  Git._switch_with_tracking(directory, version, "origin/" .. version)
+  return Git._pull(directory)
 end
 
+--- @async
+--- @return string
 function Git._get_default_branch(directory)
   local cmd = { "git", "--git-dir", vim.fs.joinpath(directory, ".git"), "rev-parse", "--abbrev-ref", "origin/HEAD" }
   return Git._start(cmd, {
@@ -118,6 +117,8 @@ function Git._get_default_branch(directory)
   })
 end
 
+--- @async
+--- @return string
 function Git.get_revision(directory, version)
   local cmd = { "git", "--git-dir", vim.fs.joinpath(directory, ".git"), "rev-list", "-1", "--abbrev-commit", version }
   return Git._start(cmd, {
@@ -128,6 +129,7 @@ function Git.get_revision(directory, version)
   })
 end
 
+--- @async
 function Git.log(directory, target_revision)
   local cmd = {
     "git",
@@ -137,51 +139,63 @@ function Git.log(directory, target_revision)
     [[--pretty=format:%h %s]],
     target_revision,
   }
-  return Git._start(cmd, { cwd = directory }):next(function(outputs)
-    return vim
-      .iter(outputs)
-      :map(function(output)
-        local index = output:find(" ")
-        local revision = output:sub(1, index)
-        local message = output:sub(index + 1)
-        return {
-          revision = revision,
-          message = message,
-        }
-      end)
-      :totable()
-  end)
+  local outputs = Git._start(cmd, { cwd = directory })
+  return vim
+    .iter(outputs)
+    :map(function(output)
+      local index = output:find(" ")
+      local revision = output:sub(1, index)
+      local message = output:sub(index + 1)
+      return {
+        revision = revision,
+        message = message,
+      }
+    end)
+    :totable()
 end
 
+--- @async
+--- @return any # opts.handle_stdout applied to the stdout
 function Git._start(cmd, opts)
   opts = opts or {}
   opts.handle_stdout = opts.handle_stdout or function(stdout)
     return vim.split(stdout, "\n", { plain = true })
   end
 
-  local promise, resolve, reject = require("optpack.vendor.promise").with_resolvers()
-
-  local ok, err = pcall(function()
-    vim.system(
+  --- @type vim.SystemCompleted?
+  local completed
+  local start_err
+  vim.async.await(function(callback)
+    -- WHY: without schedule_wrap the task resumes in a fast event context and
+    -- any vim.api call after this await fails with E5560
+    -- NOT: passing the callback to vim.system as it is
+    local ok, err = pcall(
+      vim.system,
       cmd,
       {
         text = true,
         cwd = opts.cwd,
       },
       vim.schedule_wrap(function(o)
-        if o.code == 0 then
-          return resolve(opts.handle_stdout(vim.trim(o.stdout)))
-        end
-        local err = { table.concat(cmd, " "), unpack(vim.split(vim.trim(o.stderr), "\n", { plain = true })) }
-        return reject(err)
+        completed = o
+        callback()
       end)
     )
+    if not ok then
+      start_err = err
+      callback()
+    end
   end)
-  if not ok and err then
-    reject(err)
+
+  if start_err then
+    error(start_err, 0)
   end
 
-  return promise
+  local o = assert(completed)
+  if o.code ~= 0 then
+    error({ table.concat(cmd, " "), unpack(vim.split(vim.trim(o.stderr or ""), "\n", { plain = true })) }, 0)
+  end
+  return opts.handle_stdout(vim.trim(o.stdout or ""))
 end
 
 return Git

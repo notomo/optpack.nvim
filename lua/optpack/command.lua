@@ -45,14 +45,22 @@ end
 
 function M.load(plugin_name, raw_opts)
   local opts = require("optpack.core.option").LoadOption.new(raw_opts)
-  Plugins.state()
-    :load(plugin_name)
-    :catch(function(err)
-      vim.notify("[optpack] " .. err, vim.log.levels.WARN)
-    end)
-    :finally(function()
-      opts.on_finished()
-    end)
+
+  --- @async
+  --- @return nil
+  local load = function()
+    --- @async
+    --- @return nil
+    local load_plugin = function()
+      Plugins.state():load(plugin_name)
+    end
+    local ok, err = pcall(load_plugin)
+    if not ok then
+      vim.notify("[optpack] " .. tostring(err), vim.log.levels.WARN)
+    end
+    opts.on_finished()
+  end
+  vim.async.run(load)
 end
 
 function M.sync_load(plugin_name)

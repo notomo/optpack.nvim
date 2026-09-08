@@ -74,39 +74,46 @@ function Plugins.install_or_update(self, cmd_type, emitter, pattern, parallel_op
   local parallel = require("optpack.lib.parallel_limitter").new(parallel_opts.limit)
   local names = {}
   for _, plugin in ipairs(raw_plugins) do
-    parallel:add(function()
+    --- @async
+    --- @return nil
+    local run_one = function()
       local plugin_emitter = emitter:with({
         name = plugin.name,
         directory = plugin.directory,
       })
-      return plugin
-        [cmd_type](plugin, plugin_emitter)
-        :next(function(installed_now)
-          if installed_now then
-            table.insert(names, plugin.name)
-          end
-        end)
-        :catch(function(err)
-          plugin_emitter:emit(Event.Error, err)
-        end)
-        :finally(function()
-          counter = counter:increment()
-        end)
-    end)
+
+      local ok, installed_now = pcall(plugin[cmd_type], plugin, plugin_emitter)
+      if not ok then
+        local err = installed_now
+        plugin_emitter:emit(Event.Error, err)
+      elseif installed_now then
+        table.insert(names, plugin.name)
+      end
+
+      counter = counter:increment()
+    end
+    parallel:add(run_one)
   end
 
-  parallel
-    :start()
-    :next(function()
-      return self._loaders:load_installed(self._plugins:from(names))
-    end)
-    :finally(function()
-      emitter:emit(Event.Finished)
-      on_finished()
-    end)
-    :catch(function(err)
+  --- @async
+  --- @return nil
+  local run = function()
+    --- @async
+    --- @return nil
+    local run_all = function()
+      parallel:start()
+      self._loaders:load_installed(self._plugins:from(names))
+    end
+    local ok, err = pcall(run_all)
+
+    emitter:emit(Event.Finished)
+    on_finished()
+
+    if not ok then
       emitter:emit(Event.Error, err)
-    end)
+    end
+  end
+  vim.async.run(run)
 end
 
 function Plugins.sync_load(self, plugin_name)
@@ -125,23 +132,30 @@ function Plugins.sync_load(self, plugin_name)
   return self._loaders:sync_load(plugin)
 end
 
+--- @async
+--- @return nil
 function Plugins.load(self, plugin_name)
   local plugin = self._plugins:find_by_name(plugin_name)
   if not plugin then
-    return require("optpack.vendor.promise").reject("not found plugin: " .. plugin_name)
+    error("not found plugin: " .. plugin_name, 0)
   end
 
-  local promises = vim
+  local fs = vim
     .iter(plugin.depends)
     :map(function(depend)
-      return self:load(depend):catch(function(err)
-        return require("optpack.vendor.promise").reject(plugin_name .. " depends: " .. err)
-      end)
+      --- @async
+      --- @return nil
+      return function()
+        local ok, err = pcall(self.load, self, depend)
+        if not ok then
+          error(plugin_name .. " depends: " .. tostring(err), 0)
+        end
+      end
     end)
     :totable()
-  return require("optpack.vendor.promise").all(promises):next(function()
-    return self._loaders:load(plugin)
-  end)
+  require("optpack.lib.async").all(fs)
+
+  self._loaders:load(plugin)
 end
 
 return Plugins

@@ -60,45 +60,52 @@ function Loaders.sync_load(self, plugin)
   end
 
   -- fallback
-  self:load(plugin)
+  --- @async
+  --- @return nil
+  local load = function()
+    self:load(plugin)
+  end
+  vim.async.run(load)
   return nil
 end
 
+--- @async
+--- @return nil
 function Loaders.load(self, plugin)
   local err, async = self:_load(plugin)
   if err then
-    return require("optpack.vendor.promise").reject(err)
+    error(err, 0)
   end
   if not async then
-    return require("optpack.vendor.promise").resolve()
+    return
   end
 
   local loader = self._loaders[plugin.name]
-  local promise, resolve, reject = require("optpack.vendor.promise").with_resolvers()
+  vim.async.await(1, vim.schedule)
 
-  vim.schedule(function()
-    local load_err = loader:load()
-    if load_err then
-      reject(load_err)
-      return
-    end
-    resolve()
-  end)
-
-  return promise
+  local load_err = loader:load()
+  if load_err then
+    error(load_err, 0)
+  end
 end
 
+--- @async
+--- @return nil
 function Loaders.load_installed(self, raw_plugins)
-  local promises = vim
+  local fs = vim
     .iter(raw_plugins)
     :filter(function(plugin)
       return self._load_on_installed[plugin.name]
     end)
     :map(function(plugin)
-      return self:load(plugin)
+      --- @async
+      --- @return nil
+      return function()
+        self:load(plugin)
+      end
     end)
     :totable()
-  return require("optpack.vendor.promise").all(promises)
+  require("optpack.lib.async").all(fs)
 end
 
 return Loaders

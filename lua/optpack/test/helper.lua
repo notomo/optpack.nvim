@@ -14,7 +14,6 @@ end
 
 function helper.after_each()
   helper.test_data:teardown()
-  collectgarbage("collect") -- for unhandled rejection
 end
 
 function helper.set_lines(lines)
