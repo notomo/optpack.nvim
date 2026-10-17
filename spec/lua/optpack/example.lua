@@ -1,5 +1,5 @@
 local pack_dir = vim.fn.stdpath("data") .. "/optpack.nvim"
-vim.opt.packpath:prepend(pack_dir)
+vim.api.nvim_set_option_value("packpath", pack_dir, { operation = "prepend" })
 local manager_dir = pack_dir .. "/pack/optpack/opt/optpack.nvim"
 local initializing = vim.fn.isdirectory(manager_dir) ~= 1
 if initializing then

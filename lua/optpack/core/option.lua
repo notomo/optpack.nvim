@@ -36,7 +36,7 @@ AddOption.default = {
   },
   package_name = "optpack",
   select_packpath = function()
-    return vim.opt.packpath:get()[1]
+    return vim.split(vim.o.packpath, ",", { plain = true })[1]
   end,
   enabled = true,
 }
